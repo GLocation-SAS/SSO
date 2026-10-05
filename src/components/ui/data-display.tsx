@@ -216,8 +216,7 @@ export function InteractiveCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type KpiTrend = "up" | "down" | "neutral" | "warning"
-export type KpiColor = "primary" | "neutral" | "secondary-300" | "warning" | "success-400"
-
+export type KpiColor = "primary" | "neutral" | "secondary-300" | "warning" | "success-400" | "info"
 const KPI_COLORS: Record<KpiColor, { container: string; iconBg: string; valueText: string }> = {
   primary: {
     container: "bg-primary/5 border-primary/20 hover:border-primary/40",
@@ -233,6 +232,11 @@ const KPI_COLORS: Record<KpiColor, { container: string; iconBg: string; valueTex
     container: "bg-secondary-50/50 dark:bg-secondary-900/10 border-secondary-300/30 hover:border-secondary-300/60",
     iconBg: "bg-secondary-100 dark:bg-secondary-900/40 text-secondary-600 dark:text-secondary-300",
     valueText: "text-secondary-600 dark:text-secondary-300",
+  },
+  info: {
+    container: "bg-info-50/50 dark:bg-info-900/10 border-info/30 hover:border-info/60",
+    iconBg: "bg-info/10 text-info-600 dark:text-info-400",
+    valueText: "text-info-600 dark:text-info-400",
   },
   warning: {
     container: "bg-warning-50/50 dark:bg-warning-900/10 border-warning/30 hover:border-warning/60",

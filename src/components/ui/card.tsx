@@ -4,11 +4,15 @@ import { cn } from "@/lib/utils"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type CardSize = "default" | "sm"
-type CardVariant = "default" | "featured" | "primary"
+type CardVariant = "default" | "featured" | "primary" | "panel"
 
 /**
  * `featured` — Colorful horizontal card with a decorative icon in the corner.
  * Inspired by the course/category card pattern (pastel bg + badge + large icon).
+ *
+ * `primary` — High-contrast branded banner.
+ *
+ * `panel` — Clean dashboard/modular container with edge-to-edge support for headers, contents, and footers.
  *
  * `default` — Standard glassmorphism card (existing behavior).
  */
@@ -58,10 +62,15 @@ function Card({ className, innerClassName, size = "default", variant = "default"
           "shadow-lg",
           !disableHover && "hover:shadow-xl hover:-translate-y-0.5",
         ],
-        // --- Primary variant (Solid primary fill + primary-foreground text) ---
+        // --- Primary variant (Solid primary fill + high contrast white text) ---
         variant === "primary" && [
-          "bg-primary text-primary-foreground border border-primary/40 shadow-md",
+          "bg-primary dark:bg-primary-900 text-white border border-primary/40 dark:border-primary-700/60 shadow-md",
           !disableHover && "hover:shadow-xl hover:brightness-[1.03] transition-all duration-300",
+        ],
+        // --- Panel variant (Standard dashboard/modular containers) ---
+        variant === "panel" && [
+          "border border-border bg-surface shadow-2xs",
+          !disableHover && "hover:border-border/80 transition-colors",
         ],
         className
       )}
@@ -91,6 +100,10 @@ function Card({ className, innerClassName, size = "default", variant = "default"
         variant === "primary" && [
           "items-start text-left gap-3 p-6 md:p-8"
         ],
+        // --- Panel Layout ---
+        variant === "panel" && [
+          "items-stretch text-left p-0 gap-0"
+        ],
         innerClassName
       )}>
         {children}
@@ -111,6 +124,8 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
         "group-data-[variant=featured]/card:items-start group-data-[variant=featured]/card:gap-2",
         // When inside primary card, align left
         "group-data-[variant=primary]/card:items-start group-data-[variant=primary]/card:gap-2 group-data-[variant=primary]/card:p-0",
+        // When inside panel card, align left
+        "group-data-[variant=panel]/card:items-start group-data-[variant=panel]/card:gap-1.5",
         className
       )}
       {...props}
@@ -129,8 +144,10 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
         "group-data-[size=sm]/card:text-base",
         // Featured: slightly smaller title, allow wrapping
         "group-data-[variant=featured]/card:text-base group-data-[variant=featured]/card:leading-snug",
-        // Primary: text-primary-foreground, allow wrapping
-        "group-data-[variant=primary]/card:text-primary-foreground group-data-[variant=primary]/card:h-auto",
+        // Primary: text-white, allow wrapping
+        "group-data-[variant=primary]/card:text-white group-data-[variant=primary]/card:h-auto",
+        // Panel: allow wrapping, auto height
+        "group-data-[variant=panel]/card:h-auto group-data-[variant=panel]/card:text-lg",
         className
       )}
       {...props}
@@ -146,8 +163,8 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="card-description"
       className={cn(
         "text-sm leading-relaxed text-muted-foreground font-medium",
-        // Primary: text-primary-foreground/80
-        "group-data-[variant=primary]/card:text-primary-foreground/85",
+        // Primary: text-white/90
+        "group-data-[variant=primary]/card:text-white/90",
         className
       )}
       {...props}
@@ -198,6 +215,7 @@ function CardDecorativeIcon({ className, ...props }: React.ComponentProps<"div">
         // Negative margins/offsets to make it look like it's "coming out"
         "absolute -bottom-10 -right-10 pointer-events-none select-none transition-transform duration-500 group-hover/card:scale-110",
         "opacity-15",
+        "group-data-[variant=primary]/card:text-white",
         className
       )}
       {...props}
@@ -227,6 +245,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
         "flex items-center justify-center pt-2",
         "group-data-[variant=featured]/card:justify-start group-data-[variant=featured]/card:pt-1",
         "group-data-[variant=primary]/card:justify-start group-data-[variant=primary]/card:pt-2 group-data-[variant=primary]/card:p-0",
+        "group-data-[variant=panel]/card:justify-center",
         className
       )}
       {...props}
@@ -243,6 +262,7 @@ function CardBadge({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold",
         "bg-background/40 text-foreground backdrop-blur-sm",
+        "group-data-[variant=primary]/card:bg-white/15 group-data-[variant=primary]/card:text-white group-data-[variant=primary]/card:border group-data-[variant=primary]/card:border-white/20",
         className
       )}
       {...props}

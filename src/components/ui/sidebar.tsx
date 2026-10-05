@@ -244,31 +244,10 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-sidebar backdrop-blur-xl group-data-[variant=floating]:rounded-xl group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className="flex size-full flex-col bg-surface border border-border group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:shadow-xs overflow-hidden"
         >
           {children}
         </div>
-
-        {/* Global Floating Pill chevron trigger — floats on the absolute edge to prevent graphics backdrop clipping */}
-        {collapsible === "icon" && (
-          <Button
-            onClick={toggleSidebar}
-            aria-label="Toggle Sidebar"
-            variant="ghost"
-            className={cn(
-              "absolute top-8 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-sidebar border border-sidebar-border shadow-md text-sidebar-foreground/70 hover:text-sidebar-foreground hover:shadow-lg transition-all duration-200 hover:scale-110 p-0 border",
-              variant === "floating" || variant === "inset"
-                ? "right-[-4px]"
-                : "right-[-12px]"
-            )}
-          >
-            {state === "expanded" ? (
-              <ChevronLeft className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronRight className="h-3.5 w-3.5" />
-            )}
-          </Button>
-        )}
       </div>
     </div>
   )
@@ -492,13 +471,13 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-all duration-200 ease-out group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate",
+  "peer/menu-button group/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-3 py-2 text-left text-sm font-medium ring-sidebar-ring outline-hidden transition-all duration-150 ease-out group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate",
   {
     variants: {
       variant: {
-        default: "hover:bg-muted/40 hover:translate-x-[1px] text-sidebar-foreground",
+        default: "text-foreground/70 hover:bg-muted/60 hover:text-foreground",
         outline:
-          "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-muted/40 hover:translate-x-[1px]",
+          "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-muted/60 hover:text-foreground",
       },
       size: {
         default: "h-9 text-sm",
@@ -538,9 +517,8 @@ function SidebarMenuButton({
       className={cn(
         sidebarMenuButtonVariants({ variant, size }),
         isActive && [
-          "bg-primary/8 text-primary-300 dark:text-primary-100 font-medium",
-          "shadow-[inset_3px_0_0_0_var(--color-primary-300)] dark:shadow-[inset_3px_0_0_0_var(--color-primary-200)]",
-          "rounded-l-none",
+          "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary",
+          "dark:bg-primary/20 dark:text-primary-300 dark:hover:bg-primary/25",
         ],
         className
       )}
@@ -662,7 +640,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden",
+        "ml-6 flex flex-col gap-0.5 border-l border-border pl-3 mt-1 space-y-0.5 group-data-[collapsible=icon]:hidden",
         className
       )}
       {...props}
@@ -704,7 +682,11 @@ function SidebarMenuSubButton({
       data-size={size}
       data-active={isActive}
       className={cn(
-        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground dark:hover:text-white focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground dark:data-active:text-white [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground dark:[&>svg]:hover:text-white dark:[&>svg]:data-active:text-white",
+        "flex h-7 min-w-0 items-center gap-2 overflow-hidden rounded-md px-2 text-xs font-medium text-foreground/60 ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-muted/50 hover:text-foreground transition-all duration-200 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-3.5 [&>svg]:shrink-0",
+        isActive && [
+          "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary",
+          "dark:bg-primary/20 dark:text-primary-300 dark:hover:bg-primary/25",
+        ],
         className
       )}
       {...props}

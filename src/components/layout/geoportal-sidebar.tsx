@@ -2,152 +2,269 @@
 
 /**
  * @component GeoportalSidebar
- * @description Menú de navegación lateral (Sidebar) del Design System MINEDEC.
- * 
- * Variantes y Comportamiento:
- * - **Desktop Expanded**: Muestra íconos y textos. Las subsecciones (ej. Trámites, Recursos) mantienen jerarquía y se separan con un Divider al finalizar el grupo.
- * - **Desktop Collapsed**: Muestra únicamente íconos. Se apoya en el componente Tooltip oficial del UI Kit para mostrar el nombre de la opción (incluyendo menú flotante para subsecciones).
- * - **Mobile (Drawer)**: Se transforma en un panel lateral (Sheet) superpuesto (overlay). Su cabecera replica la barra institucional (azul) y la barra blanca del Header, con botón de cierre (X).
+ * @description Menú de navegación lateral flotante (Sidebar) del Design System MINEDEC.
+ * Basado al 100% en las especificaciones del UI Kit (sidebar-showcase).
  */
 
 import * as React from "react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarFooter,
-  SidebarSeparator,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import {
-  LogOut,
-  Sun,
-  Moon,
-  Globe2,
-  Home,
-  FileText,
-  Building2,
-  FolderOpen,
-  LogIn,
-  Shield,
+  LayoutDashboard,
   BarChart3,
-  Layers,
   Users,
   ChevronRight,
-  X
+  PanelLeft,
+  X,
+  Sun,
+  Moon,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/routing";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
 
-// ── Nav item definition ────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────
+interface NavItemChild {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+}
+
 interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  children?: NavItem[];
+  children?: NavItemChild[];
 }
 
-const navItems: NavItem[] = [
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
-    label: "Inicio",
-    href: "/",
-    icon: Home,
-  },
-  {
-    label: "Trámites",
-    href: "/tramites",
-    icon: FileText,
-    children: [
+    title: "Inicio",
+    items: [
       {
-        label: "Concesiones Mineras",
-        href: "/tramites/concesiones",
-        icon: Shield,
-      },
-      {
-        label: "Permisos Ambientales",
-        href: "/tramites/permisos",
-        icon: FileText,
-      },
-      {
-        label: "Consulta de Estado",
-        href: "/tramites/consulta",
-        icon: BarChart3,
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
       },
     ],
   },
   {
-    label: "Instituciones",
-    href: "/instituciones",
-    icon: Building2,
-  },
-  {
-    label: "Geoportal",
-    href: "/geoportal",
-    icon: Globe2,
-  },
-  {
-    label: "Recursos",
-    href: "/recursos",
-    icon: FolderOpen,
-    children: [
+    title: "Gestión de usuarios",
+    items: [
       {
-        label: "Capas Geográficas",
-        href: "/recursos/capas",
-        icon: Layers,
-      },
-      {
-        label: "Datos Abiertos",
-        href: "/recursos/datos",
-        icon: BarChart3,
-      },
-      {
-        label: "Directorio",
-        href: "/recursos/directorio",
+        label: "Usuarios",
+        href: "/gestion-usuarios/usuarios",
         icon: Users,
       },
     ],
   },
-  {
-    label: "Acceso",
-    href: "/acceso",
-    icon: LogIn,
-  },
 ];
 
+// ── Subcomponent: SidebarNavItem ───────────────────────────────────────────
+function SidebarNavItem({
+  item,
+  collapsed,
+  onNavigate,
+}: {
+  item: NavItem;
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
+  const pathname = usePathname();
+  const Icon = item.icon;
+  const hasChildren = !!item.children?.length;
 
-// ── Component ──────────────────────────────────────────────────────────────
+  const isChildActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard" || pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
+  const hasActiveChild = React.useMemo(
+    () => item.children?.some((child) => isChildActive(child.href)) ?? false,
+    [item.children, pathname]
+  );
+
+  const isParentActive =
+    (item.href === "/dashboard"
+      ? pathname === "/dashboard" || pathname === "/"
+      : pathname === item.href || pathname.startsWith(item.href + "/")) ||
+    hasActiveChild;
+
+  const [open, setOpen] = React.useState(hasActiveChild || isParentActive);
+
+  React.useEffect(() => {
+    if (hasActiveChild) {
+      setOpen(true);
+    }
+  }, [hasActiveChild]);
+
+  return (
+    <li>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {hasChildren ? (
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className={cn(
+                  "w-full flex items-center transition-all duration-150 outline-none",
+                  collapsed
+                    ? "justify-center p-2 rounded-lg size-8 mx-auto"
+                    : "gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-left",
+                  isParentActive
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground/70 hover:bg-muted/60 hover:text-foreground"
+                )}
+              >
+                <div className="relative flex items-center justify-center shrink-0">
+                  <Icon className="size-4 shrink-0" />
+                </div>
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 truncate">{item.label}</span>
+                    <ChevronRight
+                      className={cn(
+                        "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ml-auto",
+                        open && "rotate-90"
+                      )}
+                    />
+                  </>
+                )}
+              </button>
+            ) : (
+              <Link
+                href={item.href}
+                onClick={onNavigate}
+                className={cn(
+                  "w-full flex items-center transition-all duration-150 outline-none",
+                  collapsed
+                    ? "justify-center p-2 rounded-lg size-8 mx-auto"
+                    : "gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-left",
+                  isParentActive
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground/70 hover:bg-muted/60 hover:text-foreground"
+                )}
+              >
+                <div className="relative flex items-center justify-center shrink-0">
+                  <Icon className="size-4 shrink-0" />
+                </div>
+                {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+              </Link>
+            )}
+          </TooltipTrigger>
+          {collapsed && (
+            <TooltipContent side="right" align="center" className="z-[100]">
+              {item.label}
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Sub-items */}
+      {hasChildren && (open || collapsed) && (
+        <ul
+          className={cn(
+            "mt-1 space-y-0.5",
+            collapsed
+              ? "flex flex-col items-center gap-1 w-full border-y border-border/50 py-1.5 my-1"
+              : "ml-6 border-l border-border pl-3"
+          )}
+        >
+          {item.children!.map((child) => {
+            const ChildIcon = child.icon;
+            const childActive = isChildActive(child.href);
+            return (
+              <li
+                key={child.label}
+                className={collapsed ? "w-full flex justify-center" : "w-full"}
+              >
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={child.href}
+                        onClick={onNavigate}
+                        className={cn(
+                          "flex items-center rounded-lg transition-all duration-200 outline-none",
+                          collapsed
+                            ? "justify-center p-2 size-8 opacity-60 hover:opacity-100 hover:bg-muted/50 hover:text-foreground"
+                            : "w-full gap-2 px-2.5 py-1.5 text-xs font-medium text-left",
+                          childActive && collapsed
+                            ? "bg-primary/10 text-primary opacity-100 font-semibold"
+                            : "",
+                          childActive && !collapsed
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "",
+                          !childActive && !collapsed
+                            ? "text-foreground/60 hover:text-foreground hover:bg-muted/50"
+                            : ""
+                        )}
+                      >
+                        <ChildIcon
+                          className={cn(
+                            "shrink-0",
+                            collapsed ? "size-4" : "size-3.5"
+                          )}
+                        />
+                        {!collapsed && (
+                          <span className="truncate">{child.label}</span>
+                        )}
+                      </Link>
+                    </TooltipTrigger>
+                    {collapsed && (
+                      <TooltipContent side="right" align="center" className="z-[100]">
+                        {child.label}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────
 export function GeoportalSidebar({
-  variant = "full",
+  variant = "navigation",
 }: {
   variant?: "full" | "navigation";
 }) {
-  const { setOpenMobile, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
+  const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
-  const showNav = true; // Always true for both full and navigation
   const showUser = variant === "full";
   const showBranding = variant === "full";
 
-  // Derived user display values
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
-  const displayEmail = user?.email || "";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Paula Rozo";
   const initials = displayName
     .split(" ")
     .map((n: string) => n[0])
@@ -160,14 +277,10 @@ export function GeoportalSidebar({
     router.push("/login");
   };
 
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
-
-  // Local theme state (same pattern as intranet-sidebar)
+  // Theme state
   const [theme, setTheme] = React.useState<Theme>("light");
   const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => {
     setMounted(true);
     const stored = getStoredTheme();
@@ -180,275 +293,270 @@ export function GeoportalSidebar({
     applyTheme(next);
   };
 
-  const handleClick = () => {
-    setOpenMobile(false);
+  const handleNavigate = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
-      {/* ── Header: Branding ── */}
-      <SidebarHeader className="p-0">
+    <Sidebar variant="floating" collapsible="icon">
+      {/* ── Header ── */}
+      <SidebarHeader className="p-0 shrink-0">
         {showBranding ? (
           <>
-            {/* Top bar azul (institucional) */}
-            <div className="bg-primary w-full px-3 py-2 flex items-center justify-end min-h-10 lg:min-h-12 overflow-hidden">
-              <SidebarTrigger className="hidden lg:flex text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" />
+            {/* Top bar azul institucional */}
+            <div className="bg-primary w-full px-3 py-2 flex items-center justify-end min-h-9 lg:min-h-10 overflow-hidden">
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={toggleSidebar}
+                      className="hidden md:flex p-1 rounded-md text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors shrink-0"
+                      aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+                    >
+                      <PanelLeft className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="center" className="z-[100]">
+                    {collapsed ? "Expandir menú" : "Colapsar menú"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             {/* Logo del GEOportal */}
-            <div className="flex items-center justify-between px-4 py-3 lg:px-4 lg:py-4 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-4 border-b-2 border-primary-300 lg:border-b-0 lg:border-none">
-              <Link href="/" className="flex items-center gap-3 shrink-0 group focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md overflow-hidden w-full justify-start">
-                {/* Expanded logos */}
-                <img
-                  src="/horizontal-light.svg"
-                  alt="Logo MINEDEC GEOportal"
-                  className="h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden dark:hidden"
-                />
-                <img
-                  src="/horizontal-dark.svg"
-                  alt="Logo MINEDEC GEOportal"
-                  className="h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden hidden dark:block"
-                />
-                {/* Collapsed logos (symbol) */}
-                <img
-                  src="/escudo-light.svg"
-                  alt="Símbolo Icon"
-                  className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto dark:hidden"
-                />
-                <img
-                  src="/escudo-dark.svg"
-                  alt="Símbolo Icon"
-                  className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto hidden dark:block"
-                />
+            <div
+              className={cn(
+                "flex items-center px-4 py-2.5 lg:px-4 lg:py-3 border-b border-border shrink-0",
+                collapsed ? "justify-center" : "justify-between"
+              )}
+            >
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-3 shrink-0 group focus-visible:outline-none"
+              >
+                {collapsed ? (
+                  <>
+                    <img
+                      src="/escudo-light.svg"
+                      alt="Símbolo Icon"
+                      className="h-6 w-auto object-contain mx-auto dark:hidden"
+                    />
+                    <img
+                      src="/escudo-dark.svg"
+                      alt="Símbolo Icon"
+                      className="h-6 w-auto object-contain mx-auto hidden dark:block"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src="/horizontal-light.svg"
+                      alt="Logo MINEDEC GEOportal"
+                      className="h-5.5 w-auto object-contain dark:hidden"
+                    />
+                    <img
+                      src="/horizontal-dark.svg"
+                      alt="Logo MINEDEC GEOportal"
+                      className="h-5.5 w-auto object-contain hidden dark:block"
+                    />
+                  </>
+                )}
               </Link>
               {isMobile && (
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="icon-sm"
                   onClick={() => setOpenMobile(false)}
                   aria-label="Cerrar menú"
                 >
-                  <X className="size-6" strokeWidth={1.75} />
+                  <X className="size-4" />
                 </Button>
               )}
             </div>
-            <SidebarSeparator className="hidden lg:block" />
           </>
         ) : (
-          <div className="flex items-center justify-between p-3 border-b border-border min-h-12">
-            <span className="text-body-sm font-bold text-sidebar-foreground group-data-[collapsible=icon]:hidden ml-1">
-              Menú de navegación
-            </span>
-            <SidebarTrigger className="hidden lg:flex shrink-0" />
+          <div
+            className={cn(
+              "flex items-center p-3 border-b border-border min-h-12 shrink-0",
+              collapsed ? "justify-center" : "justify-between"
+            )}
+          >
+            {!collapsed && (
+              <Link
+                href="/dashboard"
+                className="flex items-center shrink-0 focus-visible:outline-none"
+                onClick={handleNavigate}
+              >
+                <img
+                  src="/horizontal-light.svg"
+                  alt="Logo MINEDEC"
+                  className="h-5.5 w-auto object-contain dark:hidden"
+                />
+                <img
+                  src="/horizontal-dark.svg"
+                  alt="Logo MINEDEC"
+                  className="h-5.5 w-auto object-contain hidden dark:block"
+                />
+              </Link>
+            )}
+
+            {isMobile ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setOpenMobile(false)}
+                aria-label="Cerrar menú"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </Button>
+            ) : (
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={toggleSidebar}
+                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 outline-none"
+                      aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
+                    >
+                      <PanelLeft className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side={collapsed ? "right" : "bottom"} align="center" className="z-[100]">
+                    {collapsed ? "Expandir menú" : "Colapsar menú"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         )}
       </SidebarHeader>
 
       {/* ── Navigation ── */}
-      <SidebarContent className="px-2">
-        {showNav && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-caption uppercase tracking-widest font-bold text-sidebar-foreground/90">
-              Navegación
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-
-                  if (item.children) {
-                    return (
-                      <React.Fragment key={item.label}>
-                        <NavCollapsible item={item} isActive={active} onClick={handleClick} />
-                        {index < navItems.length - 1 && (
-                          <SidebarSeparator className="my-1 border-border/50 w-auto mx-2" />
-                        )}
-                      </React.Fragment>
-                    );
-                  }
-
-                  return (
-                    <SidebarMenuItem key={item.label}>
-                      <SidebarMenuButton asChild isActive={active} tooltip={item.label} onClick={handleClick}>
-                        <Link href={item.href} className="flex items-center gap-2.5 w-full">
-                          <Icon className="shrink-0" />
-                          <span className="truncate">{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+      <SidebarContent className="px-2 py-3 overflow-y-auto space-y-4">
+        {navSections.map((section, idx) => (
+          <div key={section.title} className="space-y-0.5">
+            {!collapsed && (
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2 mb-2">
+                {section.title}
+              </p>
+            )}
+            {collapsed && idx > 0 && (
+              <div className="my-2 border-t border-border/60 mx-1" />
+            )}
+            <ul className="space-y-0.5">
+              {section.items.map((item) => (
+                <SidebarNavItem
+                  key={item.label}
+                  item={item}
+                  collapsed={collapsed}
+                  onNavigate={handleNavigate}
+                />
+              ))}
+            </ul>
+          </div>
+        ))}
       </SidebarContent>
 
-      {/* ── Footer: Theme toggle + User info ── */}
-      <SidebarFooter className="px-3 py-3">
-        <SidebarSeparator className="mb-3" />
-
+      {/* ── Footer ── */}
+      <SidebarFooter className="p-2 shrink-0 border-t border-border">
         {/* Theme toggle */}
-        <div className="flex flex-col gap-1 px-1 mb-3">
-          {mounted && (
-            <>
-              {/* Expanded */}
-              <div className="group-data-[collapsible=icon]:hidden px-3 py-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => handleTheme(theme === "dark" ? "light" : "dark")}
-                  className={cn(
-                    "relative flex w-full h-auto items-center p-1 rounded-full border border-sidebar-border/50",
-                    "bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors duration-300"
-                  )}
-                  aria-label="Alternar tema"
-                >
-                  <div
-                    className={cn(
-                      "absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                      theme === "dark" ? "bg-sidebar translate-x-full" : "bg-sidebar translate-x-0"
-                    )}
-                  />
-                  <div
-                    className={cn(
-                      "relative z-10 flex flex-1 items-center justify-center gap-2 py-1.5 text-xs font-bold transition-colors duration-300",
-                      theme !== "dark" ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
-                    )}
-                  >
-                    <Sun className="size-4" />
-                    Claro
-                  </div>
-                  <div
-                    className={cn(
-                      "relative z-10 flex flex-1 items-center justify-center gap-2 py-1.5 text-xs font-bold transition-colors duration-300",
-                      theme === "dark" ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
-                    )}
-                  >
-                    <Moon className="size-4" />
-                    Oscuro
-                  </div>
-                </Button>
-              </div>
-
-              {/* Collapsed */}
-              <div className="hidden group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-                <ThemeToggle />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* User section */}
-        {showUser && (
-          user ? (
-            <div className="flex items-center gap-3 px-1 group-data-[collapsible=icon]:justify-center">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="size-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-heading font-bold text-caption group-data-[collapsible=icon]:size-8 transition-all duration-200">
-                  {initials}
-                </div>
-                <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-success border-2 border-background group-data-[collapsible=icon]:size-2" />
-              </div>
-
-              <div className="flex flex-1 items-center justify-between gap-2 min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-bottom-1 duration-300">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-body-sm font-heading font-semibold text-sidebar-foreground truncate">
-                    {displayName}
-                  </span>
-                  <span className="text-caption text-sidebar-foreground/60 truncate">
-                    {displayEmail}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Cerrar sesión"
-                  onClick={handleLogout}
-                  className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors duration-200"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
+        {mounted && (
+          collapsed ? (
+            <div className="flex justify-center py-1 w-full">
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => handleTheme(theme === "dark" ? "light" : "dark")}
+                      className="size-8 flex items-center justify-center rounded-lg text-foreground/70 hover:bg-muted/60 hover:text-foreground transition-colors outline-none"
+                      aria-label="Alternar tema"
+                    >
+                      {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center" className="z-[100]">
+                    {theme === "dark" ? "Modo claro" : "Modo oscuro"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 px-1 group-data-[collapsible=icon]:hidden">
-              <Button asChild className="w-full text-caption h-8">
-                <Link href="/login">Iniciar Sesión</Link>
-              </Button>
+            <div className="px-2 py-1 w-full">
+              <div
+                className={cn(
+                  "relative flex w-full items-center p-1 rounded-full border border-border/60",
+                  "bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors duration-300"
+                )}
+              >
+                <div
+                  className={cn(
+                    "absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-background shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+                    theme === "dark" ? "translate-x-full" : "translate-x-0"
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleTheme("light")}
+                  className={cn(
+                    "relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 text-xs font-semibold transition-colors duration-200 outline-none",
+                    theme !== "dark"
+                      ? "text-foreground font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Sun className="size-3.5" />
+                  Claro
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTheme("dark")}
+                  className={cn(
+                    "relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 text-xs font-semibold transition-colors duration-200 outline-none",
+                    theme === "dark"
+                      ? "text-foreground font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Moon className="size-3.5" />
+                  Oscuro
+                </button>
+              </div>
             </div>
           )
         )}
+
+        {/* User profile (only when variant === "full") */}
+        {showUser && (
+          <div className="flex items-center gap-2 px-2 py-2 mt-1 rounded-xl bg-muted/50">
+            <div className="size-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+              {initials}
+            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate">{displayName}</p>
+                <p className="text-[10px] text-muted-foreground truncate">Administradora</p>
+              </div>
+            )}
+            {!collapsed && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Cerrar sesión"
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-danger hover:bg-danger/10 shrink-0"
+              >
+                <LogOut className="size-3.5" />
+              </Button>
+            )}
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
-  );
-}
-
-function NavCollapsible({ item, isActive, onClick }: { item: NavItem, isActive: boolean, onClick: () => void }) {
-  const [open, setOpen] = React.useState(isActive);
-  const { state } = useSidebar();
-  const Icon = item.icon;
-  const pathname = usePathname();
-
-  const isChildActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
-
-  if (state === "collapsed") {
-    return (
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={isActive} 
-          onClick={() => setOpen(!open)}
-          tooltip={{
-            children: (
-              <div className="flex flex-col gap-0.5 max-w-[200px]">
-                <span className="font-semibold">{item.label}</span>
-                {item.children && (
-                  <span className="text-[10px] text-muted-foreground leading-tight">
-                    {item.children.map(sub => sub.label).join(" - ")}
-                  </span>
-                )}
-              </div>
-            )
-          }}
-        >
-          <Icon className="shrink-0" />
-          <span className="flex-1 truncate">{item.label}</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    );
-  }
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton tooltip={item.label} isActive={isActive && !open} onClick={() => setOpen(!open)}>
-        <Icon className="shrink-0" />
-        <span className="flex-1 truncate">{item.label}</span>
-        <ChevronRight className={cn("ml-auto transition-transform duration-200 size-4 shrink-0", open && "rotate-90")} />
-      </SidebarMenuButton>
-      {open && (
-        <div className="overflow-hidden">
-          <SidebarMenuSub>
-            {item.children?.map((child) => {
-              const childActive = isChildActive(child.href);
-              const ChildIcon = child.icon;
-              return (
-                <SidebarMenuSubItem key={child.label}>
-                  <SidebarMenuSubButton asChild isActive={childActive} onClick={onClick}>
-                    <Link href={child.href} className="flex items-center gap-2">
-                      <ChildIcon className="size-3.5 shrink-0" />
-                      <span className="truncate">{child.label}</span>
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              );
-            })}
-          </SidebarMenuSub>
-        </div>
-      )}
-    </SidebarMenuItem>
   );
 }

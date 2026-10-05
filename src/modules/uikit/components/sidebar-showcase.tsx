@@ -188,18 +188,18 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
           </div>
 
           {/* ── Logo row ── */}
-          <div className={cn("flex items-center gap-2.5 px-3 py-3 border-b border-border shrink-0", collapsed ? "justify-center" : "justify-start")}>
+          <div className={cn("flex items-center gap-2.5 px-3 py-2.5 border-b border-border shrink-0", collapsed ? "justify-center" : "justify-start")}>
             {collapsed ? (
               <>
                 <img
                   src="/escudo-light.svg"
                   alt="Símbolo Icon"
-                  className="h-7 w-auto object-contain mx-auto dark:hidden"
+                  className="h-6 w-auto object-contain mx-auto dark:hidden"
                 />
                 <img
                   src="/escudo-dark.svg"
                   alt="Símbolo Icon"
-                  className="h-7 w-auto object-contain mx-auto hidden dark:block"
+                  className="h-6 w-auto object-contain mx-auto hidden dark:block"
                 />
               </>
             ) : (
@@ -207,12 +207,12 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
                 <img
                   src="/horizontal-light.svg"
                   alt="Logo MINEDEC GEOportal"
-                  className="h-9 w-auto object-contain dark:hidden"
+                  className="h-7 w-auto object-contain dark:hidden"
                 />
                 <img
                   src="/horizontal-dark.svg"
                   alt="Logo MINEDEC GEOportal"
-                  className="h-9 w-auto object-contain hidden dark:block"
+                  className="h-7 w-auto object-contain hidden dark:block"
                 />
               </>
             )}
@@ -225,9 +225,18 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
               Menú de navegación
             </span>
           )}
-          <button type="button" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors shrink-0">
-            <PanelLeft className="size-4" />
-          </button>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button type="button" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors shrink-0">
+                  <PanelLeft className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side={collapsed ? "right" : "bottom"} align="center" className="z-[100]">
+                {collapsed ? "Expandir menú" : "Colapsar menú"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
 
@@ -237,7 +246,7 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
           <>
             {!collapsed && (
               <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50 px-2 mb-2">
-                Principal
+                Inicio
               </p>
             )}
             <ul className="space-y-0.5">

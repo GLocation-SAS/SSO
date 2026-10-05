@@ -87,13 +87,14 @@ const buttonVariants = cva(
 
         warning: [
           "border-warning",
-          "text-white",
+          "text-neutral-950 dark:text-neutral-950",
           "bg-warning",
+          "font-bold",
 
-          "[--radial-bg:var(--primitive-warning-600)]",
-          "[--glow:var(--primitive-warning-600)]",
+          "[--radial-bg:var(--primitive-warning-400)] dark:[--radial-bg:var(--primitive-warning-300)]",
+          "[--glow:var(--primitive-warning-500)]",
 
-          "hover:text-white/90",
+          "hover:bg-warning/90 hover:text-neutral-950",
         ].join(" "),
 
         danger: [
@@ -128,10 +129,12 @@ const buttonVariants = cva(
           "bg-transparent",
 
           // Radial
-          "[--radial-bg:hsl(var(--foreground)/0.10)]",
+          "[--radial-bg:var(--primitive-neutral-200)]",
+          "dark:[--radial-bg:var(--primitive-neutral-800)]",
 
           // Glow
-          "[--glow:hsl(var(--foreground)/0.20)]",
+          "[--glow:var(--primitive-neutral-300)]",
+          "dark:[--glow:var(--primitive-neutral-700)]",
 
           // Hover
           "hover:text-foreground",
@@ -144,15 +147,18 @@ const buttonVariants = cva(
           "border-border",
           "bg-muted",
           "text-foreground",
+          "font-semibold",
 
           // Radial
-          "[--radial-bg:hsl(var(--muted-foreground)/0.25)]",
-          "dark:[--radial-bg:hsl(var(--muted-foreground)/0.30)]",
+          "[--radial-bg:var(--primitive-neutral-200)]",
+          "dark:[--radial-bg:var(--primitive-neutral-700)]",
 
           // Glow
-          "[--glow:hsl(var(--muted-foreground)/0.15)]",
+          "[--glow:var(--primitive-neutral-300)]",
+          "dark:[--glow:var(--primitive-neutral-600)]",
 
           // Hover
+          "hover:bg-muted/80",
           "hover:text-foreground",
           "hover:border-border/80",
 
@@ -165,16 +171,18 @@ const buttonVariants = cva(
           "text-foreground",
 
           // Radial
-          "[--radial-bg:hsl(var(--muted-foreground)/0.25)]",
+          "[--radial-bg:var(--primitive-neutral-200)]",
+          "dark:[--radial-bg:var(--primitive-neutral-700)]",
 
           // Glow
-          "[--glow:hsl(var(--muted-foreground)/0.20)]",
+          "[--glow:var(--primitive-neutral-300)]",
+          "dark:[--glow:var(--primitive-neutral-600)]",
 
           // Hover
           "hover:border-foreground/20",
           "hover:bg-muted/60",
           "hover:text-foreground",
-          "hover:shadow-[0_0_20px_-10px_hsl(var(--foreground)/0.25)]",
+          "hover:shadow-xs",
         ].join(" "),
       },
 
@@ -309,7 +317,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         {innerContent}
         {/* CONTENT */}
-        <span className="pointer-events-none relative z-[4] flex w-full items-center justify-center gap-2">
+        <span
+          className={cn(
+            "pointer-events-none relative z-[4] flex w-full items-center gap-2",
+            className?.includes("justify-between")
+              ? "justify-between"
+              : className?.includes("justify-start")
+                ? "justify-start"
+                : "justify-center"
+          )}
+        >
           {leftIcon}
           {childNode}
           {rightIcon}

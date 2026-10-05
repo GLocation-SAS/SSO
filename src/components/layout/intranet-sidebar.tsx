@@ -42,16 +42,17 @@ export interface IntranetNavItem {
   label: string;
   icon: React.ElementType;
   href: string;
-  group: "principal" | "cuenta" | "inicio";
+  group: "inicio" | "principal" | "cuenta" | "gestion-usuarios";
   disabled?: boolean;
   badge?: number;
 }
 
 /** Intranet navigation items */
 export const INTRANET_NAV_ITEMS: IntranetNavItem[] = [
-  // Principal
-  { id: "home", label: "Home", icon: LayoutDashboard, href: "/intranet/home", group: "principal" },
-  { id: "gestion-usuarios", label: "Gestión de Usuarios", icon: UserCog, href: "/intranet/usuarios", group: "principal" },
+  // Inicio
+  { id: "home", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", group: "inicio" },
+  // Gestión de usuarios
+  { id: "gestion-usuarios", label: "Usuarios", icon: Users, href: "/usuarios", group: "gestion-usuarios" },
   { id: "sgc", label: "Gestión de Calidad", icon: FileCheck, href: "/intranet/sgc", group: "principal" },
   { id: "glocation", label: "GLocation", icon: Building2, href: "/intranet/glocation", group: "principal" },
   { id: "innovacion", label: "Innovación", icon: Lightbulb, href: "/intranet/innovacion", group: "principal" },
@@ -65,9 +66,10 @@ export const INTRANET_NAV_ITEMS: IntranetNavItem[] = [
 ];
 
 const GROUP_LABELS: Record<IntranetNavItem["group"], string> = {
+  inicio: "Inicio",
+  "gestion-usuarios": "Gestión de usuarios",
   principal: "Principal",
   cuenta: "Cuenta",
-  inicio: "Inicio",
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -139,32 +141,32 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
             <Image
               src="/horizontal-light.svg"
               alt="MINEDEC Logo"
-              width={150}
-              height={35}
-              className="h-[35px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
+              width={110}
+              height={26}
+              className="h-[26px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
             <Image
               src="/horizontal-dark.svg"
               alt="MINEDEC Logo"
-              width={150}
-              height={35}
-              className="h-[35px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
+              width={110}
+              height={26}
+              className="h-[26px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
 
             {/* Collapsed Icons */}
             <Image
               src="/escudo-light.svg"
               alt="MINEDEC Icon"
-              width={27}
-              height={27}
-              className="h-[27px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
+              width={22}
+              height={22}
+              className="h-[22px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
             <Image
               src="/escudo-dark.svg"
               alt="MINEDEC Icon"
-              width={27}
-              height={27}
-              className="h-[27px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
+              width={22}
+              height={22}
+              className="h-[22px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
           </div>
         </div>

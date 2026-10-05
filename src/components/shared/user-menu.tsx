@@ -8,14 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  User, 
-  Diamond, 
-  Sparkles, 
-  Settings, 
-  Bell, 
+import {
+  User,
   LogOut,
   ChevronDown,
   ChevronLeft
@@ -35,14 +30,19 @@ export function UserMenu() {
         <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
         <AvatarFallback>PR</AvatarFallback>
       </Avatar>
-      <div className="hidden sm:flex items-center gap-1 text-foreground/80 transition-colors group-hover:text-foreground">
-        <span className="text-sm font-semibold">Paula Rozo</span>
-        <ChevronDown 
+      <div className="hidden sm:flex items-center gap-2 text-foreground/80 transition-colors group-hover:text-foreground">
+        <div className="flex flex-col text-left leading-tight">
+          <span className="text-sm font-semibold text-foreground">Paula Rozo</span>
+          <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+            <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+          </span>
+        </div>
+        <ChevronDown
           className={cn(
-            "size-4 transition-transform duration-200",
+            "size-4 transition-transform duration-200 text-muted-foreground",
             open && "rotate-180"
-          )} 
-          strokeWidth={2.5} 
+          )}
+          strokeWidth={2.5}
         />
       </div>
     </button>
@@ -52,13 +52,13 @@ export function UserMenu() {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <div onClick={() => setOpen(true)}>{TriggerButton}</div>
-        <SheetContent 
-          side="bottom" 
+        <SheetContent
+          side="bottom"
           showCloseButton={false}
           className="rounded-t-[32px] p-0 border-none bg-background flex flex-col focus-visible:outline-none focus:outline-none"
         >
           <SheetTitle className="sr-only">Menú de usuario</SheetTitle>
-          
+
           {/* Header Móvil */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-border/40 shrink-0 mt-4">
             <Button
@@ -72,7 +72,7 @@ export function UserMenu() {
             </Button>
             <div className="size-10" />
           </div>
-          
+
           <div className="px-6 pb-8 pt-6 overflow-y-auto max-h-[85vh]">
             {/* User Info Header */}
             <div className="flex items-center gap-4 mb-6 px-2">
@@ -82,21 +82,18 @@ export function UserMenu() {
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-body font-bold text-foreground">Paula Rozo</span>
-                <span className="text-body-sm text-muted-foreground mt-0.5">paula.rozo@geoportal.gob.ec</span>
+                <span className="text-caption text-muted-foreground mt-0.5 flex items-center gap-1">
+                  <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+                </span>
+                <span className="text-caption text-muted-foreground/80 mt-0.5">paula.rozo@geoportal.gob.ec</span>
               </div>
             </div>
-            
+
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
               <MobileMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-              <MobileMenuItem icon={Diamond} label="Suscripción" onClick={() => setOpen(false)} />
-              <MobileMenuItem icon={Sparkles} label="Inspiraciones" isActive onClick={() => setOpen(false)} />
-              <MobileMenuItem icon={Settings} label="Ajustes" onClick={() => setOpen(false)} />
-              
-              <div className="h-px bg-border my-2 mx-2" />
-              
-              <MobileMenuItem icon={Bell} label="Actualizaciones" badge="Nuevo" onClick={() => setOpen(false)} />
+              <div className="h-px bg-border my-1 mx-2" />
               <MobileMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
             </div>
           </div>
@@ -110,9 +107,9 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         {TriggerButton}
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
+      <DropdownMenuContent
         side="bottom"
-        align="end" 
+        align="end"
         sideOffset={12}
         className={cn(
           "w-[270px] rounded-[24px] border border-border bg-surface p-3 shadow-md",
@@ -123,18 +120,23 @@ export function UserMenu() {
           "duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
         )}
       >
-        
+        <div className="flex items-center gap-3 px-3 py-2 mb-1.5 bg-surface-subtle/50 rounded-xl border border-border/40">
+          <Avatar className="size-9">
+            <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
+            <AvatarFallback>PR</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0">
+            <span className="text-body-sm font-bold text-foreground truncate">Paula Rozo</span>
+            <span className="text-caption text-muted-foreground flex items-center gap-1 truncate">
+              <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+            </span>
+          </div>
+        </div>
+        <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
-        
         <div className="flex flex-col gap-1 px-1">
           <DesktopMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-          <DesktopMenuItem icon={Diamond} label="Suscripción" onClick={() => setOpen(false)} />
-          <DesktopMenuItem icon={Sparkles} label="Inspiraciones" isActive onClick={() => setOpen(false)} />
-          <DesktopMenuItem icon={Settings} label="Ajustes" onClick={() => setOpen(false)} />
-          
-          <DropdownMenuSeparator className="my-2 bg-border/50" />
-          
-          <DesktopMenuItem icon={Bell} label="Actualizaciones" badge="Nuevo" onClick={() => setOpen(false)} />
+          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
           <DesktopMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
         </div>
       </DropdownMenuContent>
@@ -153,10 +155,10 @@ interface MenuItemProps {
 
 // ── Componentes Internos para Mobile/Desktop ──
 
-function MobileMenuItem({ 
-  icon: Icon, 
-  label, 
-  isActive, 
+function MobileMenuItem({
+  icon: Icon,
+  label,
+  isActive,
   isWarning,
   badge,
   onClick
@@ -167,8 +169,8 @@ function MobileMenuItem({
       onClick={onClick}
       className={cn(
         "group relative flex w-full select-none items-center justify-start gap-4 rounded-xl px-4 py-4 h-auto text-body font-semibold outline-none transition-all duration-200",
-        isActive 
-          ? "bg-primary-400/10 text-primary-400 hover:bg-primary-400/20 hover:text-primary-400" 
+        isActive
+          ? "bg-primary-400/10 text-primary-400 hover:bg-primary-400/20 hover:text-primary-400"
           : isWarning
             ? "text-danger hover:bg-danger/10 hover:text-danger"
             : "text-foreground hover:bg-surface-subtle"
@@ -177,18 +179,18 @@ function MobileMenuItem({
       {isActive && (
         <div className="absolute -left-3 top-1/2 h-1/2 w-1 -translate-y-1/2 rounded-r-full bg-primary-400" />
       )}
-      
+
       <Icon className={cn(
-        "size-[22px] transition-colors duration-200", 
-        isActive 
-          ? "text-primary-400" 
-          : isWarning 
-            ? "text-danger" 
+        "size-[22px] transition-colors duration-200",
+        isActive
+          ? "text-primary-400"
+          : isWarning
+            ? "text-danger"
             : "text-muted-foreground group-hover:text-foreground"
       )} strokeWidth={isActive ? 2.5 : 1.75} />
-      
+
       <span className="flex-1 text-left">{label}</span>
-      
+
       {badge && (
         <span className="rounded-full bg-primary-400/15 px-2.5 py-0.5 text-xs font-bold text-primary-400">
           {badge}
@@ -198,10 +200,10 @@ function MobileMenuItem({
   );
 }
 
-function DesktopMenuItem({ 
-  icon: Icon, 
-  label, 
-  isActive, 
+function DesktopMenuItem({
+  icon: Icon,
+  label,
+  isActive,
   isWarning,
   badge,
   onClick
@@ -211,8 +213,8 @@ function DesktopMenuItem({
       onClick={onClick}
       className={cn(
         "group relative flex cursor-pointer select-none items-center gap-3 rounded-r-lg pl-5 pr-3 py-2.5 text-sm font-medium outline-none transition-all duration-200",
-        isActive 
-          ? "bg-primary-400/10 text-primary-400" 
+        isActive
+          ? "bg-primary-400/10 text-primary-400"
           : isWarning
             ? "text-danger data-[highlighted]:bg-danger/10 data-[highlighted]:text-danger"
             : "text-foreground data-[highlighted]:bg-surface-subtle data-[highlighted]:text-foreground"
@@ -221,18 +223,18 @@ function DesktopMenuItem({
       {isActive && (
         <div className="absolute left-0 top-1/2 h-1/2 w-1 -translate-y-1/2 rounded-r-full bg-primary-400" />
       )}
-      
+
       <Icon className={cn(
-        "size-[18px] transition-colors duration-200", 
-        isActive 
-          ? "text-primary-400" 
-          : isWarning 
-            ? "text-danger" 
+        "size-[18px] transition-colors duration-200",
+        isActive
+          ? "text-primary-400"
+          : isWarning
+            ? "text-danger"
             : "text-muted-foreground group-data-[highlighted]:text-foreground"
       )} />
-      
+
       <span className="flex-1 text-left">{label}</span>
-      
+
       {badge && (
         <span className="shrink-0 whitespace-nowrap rounded-full bg-primary-400/15 px-2 py-0.5 text-[10px] font-bold text-primary-400">
           {badge}

@@ -14,7 +14,7 @@ export default function PortalLayout({
         <PortalSidebar />
 
         {/* Contenido principal */}
-        <div className="flex w-full flex-1 flex-col min-w-0 h-svh overflow-hidden p-2 md:pl-0 gap-2">
+        <div className="flex w-full flex-1 flex-col min-w-0 h-svh overflow-hidden p-2 md:pl-0 gap-4">
           {/* Header */}
           <div className="w-full shrink-0">
             <GeoportalHeader
@@ -24,7 +24,7 @@ export default function PortalLayout({
               }
             />
           </div>
-          
+
           {/* Main content wrapper */}
           <main className="flex-1 overflow-y-auto w-full">
             <div className="w-full">
