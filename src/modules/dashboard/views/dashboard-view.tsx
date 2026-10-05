@@ -260,12 +260,28 @@ export function DashboardView() {
         {/* 2. Operación y Gestión: Requiere atención y Últimos cambios */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 2.1 Requiere atención */}
-          <Card variant="panel" className="relative flex flex-col h-full bg-surface border border-warning/50 hover:border-warning/70 shadow-[0_0_15px_rgba(234,179,8,0.15)] transition-colors overflow-hidden">
+          <Card variant="panel" className="relative flex flex-col h-full bg-surface shadow-none transition-colors overflow-hidden border-0">
 
             {/* Relleno sutil animado de alerta */}
             <div className="absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden">
-              <div className="absolute inset-0 bg-warning/[0.06] animate-[pulse_3s_ease-in-out_infinite]" />
-              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(234,179,8,0.12)] animate-[pulse_2s_ease-in-out_infinite]" />
+              <div className="absolute inset-0 bg-warning/[0.08] animate-[pulse_3s_ease-in-out_infinite]" />
+            </div>
+
+            {/* Borde dinámico rotatorio con máscara perfecta (más lento: 8s) */}
+            <div 
+              className="absolute inset-0 pointer-events-none rounded-[inherit]"
+              style={{
+                padding: "2px",
+                mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude"
+              }}
+            >
+              <div 
+                className="absolute left-1/2 top-1/2 aspect-square w-[200%] -translate-x-1/2 -translate-y-1/2 animate-[spin_8s_linear_infinite]"
+                style={{ background: 'conic-gradient(from 0deg, transparent 0 250deg, var(--warning) 360deg)' }}
+              />
             </div>
 
             <CardHeader className="relative z-10 items-start text-left gap-1 p-6 pb-3 border-b border-warning/20">
