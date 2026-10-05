@@ -1,0 +1,133 @@
+import { Montserrat, Barlow } from "next/font/google";
+import Script from "next/script";
+import "./globals.css";
+
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+
+import { cookies } from "next/headers";
+import { NextIntlClientProvider } from "next-intl";
+import messages from "../../messages/es.json";
+
+/*
+  TIPOGRAFÍAS
+  ------------------------------------------------------------
+
+  Montserrat:
+  Se utiliza como tipografía principal para textos, formularios,
+  tablas, botones, menús y navegación.
+
+  Barlow:
+  Se utiliza para títulos, subtítulos y encabezados institucionales.
+
+  Las variables creadas aquí se conectan con las variables
+  configuradas en globals.css:
+
+  --font-heading: var(--font-barlow);
+  --font-sans: var(--font-montserrat);
+*/
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+const barlow = Barlow({
+  subsets: ["latin"],
+  variable: "--font-barlow",
+
+  /*
+    Barlow no funciona como fuente variable en next/font,
+    por eso debemos declarar los pesos que utilizaremos.
+
+    500: títulos pequeños o destacados.
+    600: subtítulos y encabezados.
+    700: títulos principales.
+  */
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+export const metadata = {
+  title: "MINEDEC KIT UX / UI",
+  description: "Base frontend y sistema de diseño de MINEDEC.",
+  icons: [
+    {
+      url: "/favicon-light.svg",
+      href: "/favicon-light.svg",
+    }
+  ],
+};
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({
+  children,
+}: RootLayoutProps) {
+  /*
+    Obtener el tema desde las cookies en el servidor evita que Next.js
+    elimine el atributo data-theme de la etiqueta html durante las
+    transiciones entre rutas.
+  */
+  const cookieStore = await cookies();
+
+  const theme =
+    cookieStore.get("glocation-theme")?.value || "light";
+
+  return (
+    <html
+      lang="es"
+      data-theme={theme}
+      className={cn(
+        /*
+          Se registran las dos variables tipográficas en el documento.
+        */
+        montserrat.variable,
+        barlow.variable,
+
+        /*
+          Montserrat será la fuente predeterminada del proyecto.
+        */
+        "font-sans"
+      )}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          id="theme-script"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const storedTheme = localStorage.getItem("glocation-theme");
+                  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                  const theme = storedTheme || systemTheme;
+                  document.documentElement.setAttribute("data-theme", theme);
+                  if (!document.cookie.includes("glocation-theme=")) {
+                    document.cookie = "glocation-theme=" + theme + "; path=/; max-age=31536000; SameSite=Lax";
+                  }
+                } catch (error) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+
+      <body>
+        <NextIntlClientProvider
+          locale="es"
+          messages={messages}
+        >
+          <TooltipProvider>
+            {children}
+            <Toaster />
+          </TooltipProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}

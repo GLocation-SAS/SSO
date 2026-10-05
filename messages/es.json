@@ -1,0 +1,354 @@
+{
+  "Navbar": {
+    "home": "Inicio",
+    "arsenal": "Arsenal",
+    "funcionamiento": "Funcionamiento",
+    "habilidades": "Habilidades",
+    "escalabilidad": "Escalabilidad",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "menu": "Menú",
+    "theme": "Tema",
+    "language": "Idioma"
+  },
+  "Video": {
+    "playButton": "Reproducir video",
+    "badge": "TRABAJADOR DIGITAL EN ACCIÓN"
+  },
+  "Footer": {
+    "tagline": "Soluciones Inteligentes de Localización",
+    "description": "GLocation ofrece soluciones inteligentes de geolocalización para transformar la manera en que las empresas operan y toman decisiones basadas en datos espaciales.",
+    "followUs": "Síguenos",
+    "navigation": "Navegación",
+    "contact": "Contacto",
+    "rights": "© {year} GLocation S.A.S. Todos los derechos reservados."
+  },
+  "Contact": {
+    "title1": "Hablemos sobre su",
+    "title2": "operación.",
+    "subtitle": "Cuéntenos qué proceso o rol desea escalar. Nuestro equipo analizará su caso y se pondrá en contacto para coordinar una sesión estratégica.",
+    "form": {
+      "name": "Nombre",
+      "company": "Nombre de la empresa",
+      "email": "Correo electrónico",
+      "message": "Mensaje",
+      "namePlaceholder": "Ej. Mi nombre",
+      "companyPlaceholder": "Ej. Mi Empresa S.A.",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "messagePlaceholder": "¿Cómo podemos ayudarle?",
+      "submit": "Enviar",
+      "submitting": "Enviando...",
+      "success": "Correo de contacto enviado y guardado exitosamente.",
+      "error": "Error al enviar el mensaje",
+      "unexpectedError": "Ocurrió un error inesperado. Inténtelo de nuevo.",
+      "modal": {
+        "title": "¡Mensaje Enviado!",
+        "description": "Hemos recibido su solicitud correctamente. Nuestro equipo analizará su caso y se pondrá en contacto muy pronto para coordinar una sesión estratégica.",
+        "close": "Entendido"
+      },
+      "errors": {
+        "nameRequired": "El nombre es requerido",
+        "nameMin": "El nombre es muy corto",
+        "nameMax": "El nombre es muy largo",
+        "nameNoNumbers": "No se permiten números en este campo",
+        "companyMax": "El nombre de la empresa es muy largo",
+        "emailRequired": "El correo electrónico es requerido",
+        "emailInvalid": "Ingrese un correo electrónico válido",
+        "msgRequired": "El mensaje es requerido",
+        "msgMin": "El mensaje debe tener al menos 10 caracteres",
+        "msgMax": "El mensaje no puede superar los 500 caracteres"
+      }
+    },
+    "info": {
+      "executive": "Contacto Ejecutivo",
+      "commercial": "Información Comercial",
+      "callUs": "Llámenos",
+      "writeUs": "Escríbanos",
+      "location": "Ubicación",
+      "addressFull": "CL 84 #24 - 78, Bogotá Colombia"
+    }
+  },
+  "Hero": {
+    "badge": "Nuevo paradigma empresarial",
+    "title1": "El primer",
+    "title2": "Trabajador",
+    "title3": "Digital",
+    "title4": "para",
+    "title5": "empresas.",
+    "description": "En GLocation creamos trabajadores digitales que operan 24/7, entienden los procesos de su organización, ejecutan tareas, aprenden continuamente y se integran con sus sistemas para aumentar la capacidad operativa.",
+    "benefits": {
+      "0": "Trabaja 24/7",
+      "1": "Aprende de su organización",
+      "2": "Ejecuta procesos completos",
+      "3": "Se integra con cualquier sistema"
+    },
+    "actions": {
+      "info": "Solicitar información",
+      "howItWorks": "Conozca cómo funciona"
+    },
+    "status": {
+      "working": "Trabajando ahora mismo…",
+      "tasks": {
+        "0": "Generando reportes...",
+        "1": "Clasificando correos...",
+        "2": "Consultando documentos...",
+        "3": "Actualizando información...",
+        "4": "Optimizando flujos..."
+      },
+      "progress": "PROGRESO"
+    },
+    "modules": {
+      "erp": "ERP",
+      "erpTooltip": "Conexión a base de datos principal",
+      "crm": "CRM",
+      "crmTooltip": "Gestión de clientes y leads",
+      "docs": "Documentos",
+      "docsTooltip": "Procesamiento de facturas y contratos",
+      "mail": "Correos",
+      "mailTooltip": "Clasificación automática de emails",
+      "whatsapp": "WhatsApp",
+      "whatsappTooltip": "Integración de mensajería",
+      "apis": "APIs / CLI",
+      "apisTooltip": "Conexión a plataformas existentes",
+      "db": "Bases de datos",
+      "dbTooltip": "Conexión a base de datos principal"
+    }
+  },
+  "Arsenal": {
+    "title1": "Evolucionamos el análisis",
+    "title2": "hacia un ecosistema de",
+    "title3": "capacidades inteligentes.",
+    "desc1": "Nuestra experiencia desarrollando soluciones robustas entorno a Fábricas de Datos nos permite dar el siguiente paso evolutivo. Transformamos toda esa capacidad analítica y operativa en",
+    "descHighlight": "Habilidades",
+    "desc2": "especializadas.",
+    "items": {
+      "ecosistema": {
+        "title": "Ecosistema Cognitivo",
+        "desc": "Capacidades de inteligencia artificial que fortalecen a nuestros agentes y evolucionan con las necesidades de su negocio."
+      },
+      "conectividad": {
+        "title": "Conectividad Total",
+        "desc": "Capacidad de conexión con cualquier plataforma del mercado mediante API o interfaz de línea de comandos (CLI)."
+      },
+      "canales": {
+        "title": "Canales de Uso Diario",
+        "desc": "Interactúa fluidamente por correo electrónico o WhatsApp, reportando avances y solicitando validaciones humanas."
+      }
+    },
+    "badge": "ARSENAL COGNITIVO"
+  },
+  "Capacidades": {
+    "title1": "¿Qué puede hacer un",
+    "title2": "Trabajador Digital?",
+    "subtitle": "Un ecosistema de habilidades elásticas diseñadas para asumir la carga operativa de su organización.",
+    "badge": "HABILIDADES Y CAPACIDADES",
+    "items": {
+      "gsuite-agenda": {
+        "title": "GSuite\n& Agenda",
+        "features": {
+          "0": "Lee correos, redacta borradores y gestiona hilos",
+          "1": "Verifica disponibilidad y agendamiento automático",
+          "2": "Requiere confirmación humana previa (Human-in-the-loop)"
+        }
+      },
+      "gestion-documental": {
+        "title": "Gestión Documental\n& RAG",
+        "features": {
+          "0": "Búsqueda semántica en Google Drive por contenido",
+          "1": "Extracción de datos ocultos y resúmenes de PDFs",
+          "2": "Generación automática de presentaciones y formato OKF"
+        }
+      },
+      "datos-bigquery": {
+        "title": "Datos, BigQuery\n& SDD",
+        "features": {
+          "0": "Consultas a bases de datos en lenguaje natural",
+          "1": "Generación de gráficos dinámicos y reportes SQL",
+          "2": "Integración con GitHub Spec-Kit para arquitectura de software"
+        }
+      },
+      "territorio-widgets": {
+        "title": "Territorio\n& Widgets",
+        "features": {
+          "0": "Simulación de antenas y mapas de cobertura RF",
+          "1": "Rutas en vivo y búsqueda de lugares con Google Maps",
+          "2": "Clima en tiempo real y análisis geoespacial"
+        }
+      }
+    }
+  },
+  "Comparativa": {
+    "title": "chatbot.",
+    "description": "Un Trabajador Digital no se limita a responder consultas o automatizar tareas aisladas. Se entrena a partir de las funciones de un rol, ejecuta procesos, se conecta con los sistemas de la organización y trabaja bajo aprobación humana.",
+    "other": "Otras soluciones",
+    "worker": "Trabajador Digital",
+    "eyebrow": "¿Por qué un Trabajador Digital es diferente?",
+    "titlePrefix": "Un Trabajador Digital va mucho más allá de un ",
+    "items": {
+      "item0": {
+        "trad": "Automatizan tareas aisladas",
+        "dw": "Ejecuta procesos completos"
+      },
+      "item1": {
+        "trad": "Funcionan como herramientas",
+        "dw": "Se comporta como un Trabajador Digital"
+      },
+      "item2": {
+        "trad": "Responden consultas",
+        "dw": "Aprende las funciones específicas de un rol"
+      },
+      "item3": {
+        "trad": "Disponibilidad limitada",
+        "dw": "Opera 24/7 con total autonomía"
+      },
+      "item4": {
+        "trad": "Integraciones limitadas",
+        "dw": "Se conecta vía API, CLI, correo y WhatsApp"
+      },
+      "item5": {
+        "trad": "Poca o ninguna supervisión",
+        "dw": "El trabajador digital ejecuta la operación y el humano aprueba el resultado"
+      }
+    }
+  },
+  "Escalabilidad": {
+    "title1": "Escale su operación,",
+    "title2": "no su nómina.",
+    "volume": "Volumen",
+    "time": "Tiempo",
+    "capacity": "CAPACIDAD",
+    "data": {
+      "tradSub": "MODELO TRADICIONAL",
+      "tradHead": "Más personal",
+      "tradB1": "Más costo",
+      "tradB2": "Crecimiento lineal",
+      "tradB3": "Capacidad limitada",
+      "tradChart": "Crecimiento lineal de costo y personal",
+      "agentSub": "CON EL TRABAJADOR DIGITAL",
+      "agentHead": "Más capacidad",
+      "agentB1": "Mayor eficiencia",
+      "agentB2": "Operación 24/7",
+      "agentB3": "Escalabilidad operativa",
+      "agentChart": "Crecimiento exponencial de capacidad sin crecer en nómina"
+    },
+    "badge": "Escalabilidad"
+  },
+  "Funcionamiento": {
+    "title1": "Así opera un",
+    "title2": "Trabajador Digital.",
+    "subtitle": "Tomamos las funciones operativas del cargo que su organización necesita escalar y preparamos a nuestro Trabajador Digital para asumirlas.",
+    "agentTitle": "El agente",
+    "agentSubtitle": "ejecuta el trabajo",
+    "agentDesc": "Analiza, procesa información y ejecuta las tareas asignadas.",
+    "humanTitle": "El humano",
+    "humanSubtitle": "aprueba el resultado",
+    "humanDesc": "Revisa, valida y aprueba cada resultado antes de completar el proceso.",
+    "cycleTitle": "CICLO CONTINUO DE MEJORA",
+    "approval": "APROBACIÓN",
+    "execution": "EJECUCIÓN",
+    "validation": "VALIDACIÓN",
+    "agentLoop": "AGENT IN THE LOOP",
+    "humanLoop": "HUMAN ON THE APPROVE",
+    "cycle": "Cycle",
+    "badge": "EL AGENTE TRABAJA",
+    "items": {
+      "analisis": {
+        "title": "Análisis del\nmanual de funciones",
+        "desc": "Procesa el manual de funciones del rol que el cliente necesita escalar."
+      },
+      "entrenamiento": {
+        "title": "Entrenamiento del\ntrabajador digital",
+        "desc": "A partir del documento, se entrena para que asuma responsabilidades operativas."
+      },
+      "ejecucion": {
+        "title": "Ejecución del\ntrabajo",
+        "desc": "El trabajador digital ejecuta el trabajo y se conecta a plataformas existentes mediante API o CLI."
+      },
+      "aprobacion": {
+        "title": "Aprobación\nhumana",
+        "desc": "El trabajador digital ejecuta el trabajo y el humano aprueba el resultado."
+      }
+    },
+    "humanInTheLoop": {
+      "agentTitle1": "El agente",
+      "agentTitle2": "ejecuta el trabajo",
+      "agentDesc": "Analiza, procesa información y ejecuta las tareas asignadas.",
+      "humanTitle1": "El humano",
+      "humanTitle2": "aprueba el resultado",
+      "humanDesc": "Revisa, valida y aprueba cada resultado antes de completar el proceso.",
+      "cycle": "CICLO CONTINUO DE MEJORA",
+      "stageApproval": "APROBACIÓN",
+      "stageExecution": "EJECUCIÓN",
+      "stageValidation": "VALIDACIÓN",
+      "descApproval": "El humano aprueba y verifica la operación",
+      "descExecution": "El agente opera de manera autónoma",
+      "descValidation": "El humano valida las decisiones críticas",
+      "agentLoop": "AGENT IN THE LOOP",
+      "humanApprove": "HUMAN ON THE APPROVE"
+    }
+  },
+  "GemeloDigital": {
+    "title1": "Gemelos Digitales: El",
+    "title2": "contexto vivo",
+    "title3": "que impulsa a los Trabajadores Digitales.",
+    "geoTitle": "Dimensión Geoespacial",
+    "geoDesc": "Integración de telemetría, Big Data espacial y Google Earth Engine para entender el comportamiento y variables del mundo físico y el territorio en tiempo real.",
+    "empTitle": "Dimensión Empresarial",
+    "empDesc": "Conexión directa a sus KPIs, alertas tempranas e información transaccional. La IA evalúa el rendimiento del negocio antes de ejecutar cada acción.",
+    "normTitle": "Dimensión Normativa",
+    "normDesc": "Abstracción de reglas de negocio, políticas internas y marcos legales. Garantizamos que la autonomía de la IA opere siempre bajo estricto cumplimiento.",
+    "badge": "FUENTE DE DATOS VIVA"
+  },
+  "Cta": {
+    "title1": "¿Listo para habilitar",
+    "title2": "transformación cognitiva?",
+    "button": "Solicitar información"
+  },
+  "Porque": {
+    "badge": "¿POR QUÉ GLOCATION?",
+    "title1": "Evolucionando de la Transformación Digital a la ",
+    "title2": "Transformación Cognitiva.",
+    "desc1": "Somos una spin-off de Servinformación.",
+    "desc2": "En GLocation, combinamos modernización, datos y automatización con un enfoque estratégico para preparar a las organizaciones para la era cognitiva, ampliar su capacidad operativa y generar impacto medible.",
+    "items": {
+      "card1": {
+        "title": "Fábrica de Software y Modernización Arquitectónica",
+        "desc": "Construimos y evolucionamos plataformas robustas para preparar los sistemas del cliente para la era cognitiva.",
+        "i1": "Desarrollo Ágil Potenciado por IA",
+        "d1": "(velocidad, consistencia y escalabilidad)",
+        "i2": "Ingeniería Inversa y Modernización de Legados",
+        "d2": "(migraciones seguras y preservación del conocimiento)",
+        "i3": "Arquitecturas de Vanguardia",
+        "d3": "(microservicios, monolitos modulares y arquitectura hexagonal)"
+      },
+      "card2": {
+        "title": "Consultoría en Transformación Digital y Cognitiva",
+        "desc": "Estructuramos los cimientos necesarios antes de dar el salto hacia la automatización autónoma.",
+        "i1": "Diagnóstico de Madurez de Datos",
+        "d1": "(procesos, sistemas y calidad de datos)",
+        "i2": "Gobernanza y Organización de Activos",
+        "d2": "(integración de información)",
+        "i3": "Diseño de la Fuerza Laboral Digital",
+        "d3": "(roles clave y manuales de funciones)",
+        "i4": "Gestión del Cambio Tecnológico",
+        "d4": "(beneficios tangibles y retornos claros)"
+      }
+    },
+    "vision": "Nuestra Visión",
+    "visionDesc": "Democratizar el conocimiento y convertir los datos de cada organización en inteligencia que impulse decisiones y operaciones más autónomas.",
+    "v11": "Trabajadores",
+    "v12": "Digitales",
+    "v21": "Información",
+    "v22": "accesible",
+    "v31": "Decisiones",
+    "v32": "Inteligentes",
+    "v41": "Tecnológicamente",
+    "v42": "agnósticos"
+  },
+  "SiguientePaso": {
+    "title": "EL SIGUIENTE PASO EN SU MATRIZ DE DATOS",
+    "gemelo": "Gemelo Digital",
+    "desc": ": el entorno vivo que conecte su información territorial, operativa y normativa.”",
+    "prefix": "“La modernización de sistemas y la gobernanza de datos no son el destino final, sino la base. Sobre estos cimientos construimos su "
+  }
+}

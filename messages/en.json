@@ -1,0 +1,354 @@
+{
+  "Navbar": {
+    "home": "Home",
+    "arsenal": "Arsenal",
+    "funcionamiento": "How it Works",
+    "habilidades": "Skills",
+    "escalabilidad": "Scalability",
+    "contact": "Contact",
+    "login": "Login",
+    "menu": "Menu",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "Video": {
+    "playButton": "Play video",
+    "badge": "DIGITAL WORKER IN ACTION"
+  },
+  "Footer": {
+    "tagline": "Smart Location Solutions",
+    "description": "GLocation offers intelligent geolocation solutions to transform how companies operate and make decisions based on spatial data.",
+    "followUs": "Follow Us",
+    "navigation": "Navigation",
+    "contact": "Contact",
+    "rights": "© {year} GLocation S.A.S. All rights reserved."
+  },
+  "Contact": {
+    "title1": "Let's talk about",
+    "title2": "operation.",
+    "subtitle": "Tell us which process or role you want to scale. Our team will analyze your case and get in touch to coordinate a strategic session.",
+    "form": {
+      "name": "Name",
+      "company": "Company Name",
+      "email": "Email address",
+      "message": "Message",
+      "namePlaceholder": "e.g. John Doe",
+      "companyPlaceholder": "e.g. Acme Corp.",
+      "emailPlaceholder": "email@example.com",
+      "messagePlaceholder": "How can we help you?",
+      "submit": "Send",
+      "submitting": "Sending...",
+      "success": "Contact email sent and saved successfully.",
+      "error": "Failed to send message",
+      "unexpectedError": "An unexpected error occurred. Please try again.",
+      "modal": {
+        "title": "Message Sent!",
+        "description": "We have received your request successfully. Our team will review your case and get in touch very soon to schedule a strategic session.",
+        "close": "Got it"
+      },
+      "errors": {
+        "nameRequired": "Name is required",
+        "nameMin": "Name is too short",
+        "nameMax": "Name is too long",
+        "nameNoNumbers": "Numbers are not allowed in this field",
+        "companyMax": "Company name is too long",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "msgRequired": "Message is required",
+        "msgMin": "Message must be at least 10 characters",
+        "msgMax": "Message cannot exceed 500 characters"
+      }
+    },
+    "info": {
+      "executive": "Executive Contact",
+      "commercial": "Commercial Information",
+      "callUs": "Call Us",
+      "writeUs": "Write Us",
+      "location": "Location",
+      "addressFull": "CL 84 #24 - 78, Bogotá Colombia"
+    }
+  },
+  "Hero": {
+    "badge": "New business paradigm",
+    "title1": "The first",
+    "title2": "Digital",
+    "title3": "Worker",
+    "title4": "for",
+    "title5": "businesses.",
+    "description": "At GLocation we create digital workers that operate 24/7, understand your organization's processes, execute tasks, continuously learn, and integrate with your systems to increase operational capacity.",
+    "benefits": {
+      "0": "Works 24/7",
+      "1": "Learns from your organization",
+      "2": "Executes complete processes",
+      "3": "Integrates with any system"
+    },
+    "actions": {
+      "info": "Request information",
+      "howItWorks": "Learn how it works"
+    },
+    "status": {
+      "working": "Working right now...",
+      "tasks": {
+        "0": "Generating reports...",
+        "1": "Classifying emails...",
+        "2": "Querying documents...",
+        "3": "Updating information...",
+        "4": "Optimizing flows..."
+      },
+      "progress": "PROGRESS"
+    },
+    "modules": {
+      "erp": "ERP",
+      "erpTooltip": "Main database connection",
+      "crm": "CRM",
+      "crmTooltip": "Client and lead management",
+      "docs": "Documents",
+      "docsTooltip": "Invoice and contract processing",
+      "mail": "Emails",
+      "mailTooltip": "Automatic email classification",
+      "whatsapp": "WhatsApp",
+      "whatsappTooltip": "Messaging integration",
+      "apis": "APIs / CLI",
+      "apisTooltip": "Connection to existing platforms",
+      "db": "Databases",
+      "dbTooltip": "Main database connection"
+    }
+  },
+  "Arsenal": {
+    "title1": "We evolve analysis",
+    "title2": "towards an ecosystem of",
+    "title3": "intelligent capabilities.",
+    "desc1": "Our experience developing robust solutions around Data Factories allows us to take the next evolutionary step. We transform all that analytical and operational capacity into specialized",
+    "descHighlight": "Skills",
+    "desc2": ".",
+    "items": {
+      "ecosistema": {
+        "title": "Cognitive Ecosystem",
+        "desc": "Artificial intelligence capabilities that empower our agents and evolve with your business needs."
+      },
+      "conectividad": {
+        "title": "Total Connectivity",
+        "desc": "Ability to connect with any market platform via API or Command Line Interface (CLI)."
+      },
+      "canales": {
+        "title": "Daily Use Channels",
+        "desc": "Interact fluidly via email or WhatsApp, reporting progress and requesting human validations."
+      }
+    },
+    "badge": "COGNITIVE ARSENAL"
+  },
+  "Capacidades": {
+    "title1": "What can a",
+    "title2": "Digital Worker do?",
+    "subtitle": "An ecosystem of elastic skills designed to take on the operational load of your organization.",
+    "badge": "SKILLS AND CAPABILITIES",
+    "items": {
+      "gsuite-agenda": {
+        "title": "GSuite\n& Calendar",
+        "features": {
+          "0": "Reads emails, drafts responses and manages threads",
+          "1": "Checks availability and automatic scheduling",
+          "2": "Requires prior human confirmation (Human-in-the-loop)"
+        }
+      },
+      "gestion-documental": {
+        "title": "Document\nManagement & RAG",
+        "features": {
+          "0": "Semantic search in Google Drive by content",
+          "1": "Hidden data extraction and PDF summaries",
+          "2": "Automatic generation of presentations and OKF format"
+        }
+      },
+      "datos-bigquery": {
+        "title": "Data, BigQuery\n& SDD",
+        "features": {
+          "0": "Natural language database queries",
+          "1": "Dynamic chart generation and SQL reports",
+          "2": "GitHub Spec-Kit integration for software architecture"
+        }
+      },
+      "territorio-widgets": {
+        "title": "Territory\n& Widgets",
+        "features": {
+          "0": "Antenna simulation and RF coverage maps",
+          "1": "Live routes and place search with Google Maps",
+          "2": "Real-time weather and geospatial analysis"
+        }
+      }
+    }
+  },
+  "Comparativa": {
+    "title": "chatbot.",
+    "description": "A Digital Worker isn't limited to answering queries or automating isolated tasks. It is trained on the functions of a role, executes processes, connects to organizational systems, and works under human approval.",
+    "other": "Other solutions",
+    "worker": "Digital Worker",
+    "eyebrow": "Why is a Digital Worker different?",
+    "titlePrefix": "A Digital Worker goes far beyond a ",
+    "items": {
+      "item0": {
+        "trad": "Automate isolated tasks",
+        "dw": "Executes complete processes"
+      },
+      "item1": {
+        "trad": "Function as tools",
+        "dw": "Behaves like a Digital Worker"
+      },
+      "item2": {
+        "trad": "Answer queries",
+        "dw": "Learns the specific functions of a role"
+      },
+      "item3": {
+        "trad": "Limited availability",
+        "dw": "Operates 24/7 with total autonomy"
+      },
+      "item4": {
+        "trad": "Limited integrations",
+        "dw": "Connects via API, CLI, email and WhatsApp"
+      },
+      "item5": {
+        "trad": "Little or no supervision",
+        "dw": "The digital worker executes the operation and the human approves the result"
+      }
+    }
+  },
+  "Escalabilidad": {
+    "title1": "Scale your operation,",
+    "title2": "not your payroll.",
+    "volume": "Volume",
+    "time": "Time",
+    "capacity": "CAPACITY",
+    "data": {
+      "tradSub": "TRADITIONAL MODEL",
+      "tradHead": "More staff",
+      "tradB1": "Higher cost",
+      "tradB2": "Linear growth",
+      "tradB3": "Limited capacity",
+      "tradChart": "Linear growth in cost and staff",
+      "agentSub": "WITH THE DIGITAL WORKER",
+      "agentHead": "More capacity",
+      "agentB1": "Higher efficiency",
+      "agentB2": "24/7 Operation",
+      "agentB3": "Operational scalability",
+      "agentChart": "Exponential capacity growth without payroll increase"
+    },
+    "badge": "Scalability"
+  },
+  "Funcionamiento": {
+    "title1": "This is how a",
+    "title2": "Digital Worker operates.",
+    "subtitle": "We take the operational functions of the role your organization needs to scale and prepare our Digital Worker to take them on.",
+    "agentTitle": "The agent",
+    "agentSubtitle": "executes the work",
+    "agentDesc": "Analyzes, processes information, and executes assigned tasks.",
+    "humanTitle": "The human",
+    "humanSubtitle": "approves the result",
+    "humanDesc": "Reviews, validates, and approves each result before completing the process.",
+    "cycleTitle": "CONTINUOUS IMPROVEMENT CYCLE",
+    "approval": "APPROVAL",
+    "execution": "EXECUTION",
+    "validation": "VALIDATION",
+    "agentLoop": "AGENT IN THE LOOP",
+    "humanLoop": "HUMAN ON THE APPROVE",
+    "cycle": "Cycle",
+    "badge": "THE AGENT AT WORK",
+    "items": {
+      "analisis": {
+        "title": "Analysis of the\nfunctions manual",
+        "desc": "Processes the functions manual of the role the client needs to scale."
+      },
+      "entrenamiento": {
+        "title": "Digital worker\ntraining",
+        "desc": "From the document, it is trained to take on operational responsibilities."
+      },
+      "ejecucion": {
+        "title": "Work\nexecution",
+        "desc": "The digital worker executes the work and connects to existing platforms via API or CLI."
+      },
+      "aprobacion": {
+        "title": "Human\napproval",
+        "desc": "The digital worker executes the work and the human approves the result."
+      }
+    },
+    "humanInTheLoop": {
+      "agentTitle1": "The agent",
+      "agentTitle2": "executes the work",
+      "agentDesc": "Analyzes, processes information and executes the assigned tasks.",
+      "humanTitle1": "The human",
+      "humanTitle2": "approves the result",
+      "humanDesc": "Reviews, validates and approves each result before completing the process.",
+      "cycle": "CONTINUOUS IMPROVEMENT CYCLE",
+      "stageApproval": "APPROVAL",
+      "stageExecution": "EXECUTION",
+      "stageValidation": "VALIDATION",
+      "descApproval": "The human approves and verifies the operation",
+      "descExecution": "The agent operates autonomously",
+      "descValidation": "The human validates critical decisions",
+      "agentLoop": "AGENT IN THE LOOP",
+      "humanApprove": "HUMAN ON THE APPROVE"
+    }
+  },
+  "GemeloDigital": {
+    "title1": "Digital Twins: The",
+    "title2": "living context",
+    "title3": "that drives Digital Workers.",
+    "geoTitle": "Geospatial Dimension",
+    "geoDesc": "Integration of telemetry, spatial Big Data, and Google Earth Engine to understand the behavior and variables of the physical world and territory in real time.",
+    "empTitle": "Business Dimension",
+    "empDesc": "Direct connection to your KPIs, early warnings, and transactional information. AI evaluates business performance before executing each action.",
+    "normTitle": "Regulatory Dimension",
+    "normDesc": "Abstraction of business rules, internal policies, and legal frameworks. We ensure that AI autonomy always operates under strict compliance.",
+    "badge": "LIVING DATA SOURCE"
+  },
+  "Cta": {
+    "title1": "Ready to enable",
+    "title2": "cognitive transformation?",
+    "button": "Request information"
+  },
+  "Porque": {
+    "badge": "WHY GLOCATION?",
+    "title1": "Evolving from Digital Transformation to ",
+    "title2": "Cognitive Transformation.",
+    "desc1": "We are a spin-off of Servinformación.",
+    "desc2": "At GLocation, we combine modernization, data, and automation with a strategic approach to prepare organizations for the cognitive era, expand their operational capacity, and generate measurable impact.",
+    "items": {
+      "card1": {
+        "title": "Software Factory & Architectural Modernization",
+        "desc": "We build and evolve robust platforms to prepare client systems for the cognitive era.",
+        "i1": "AI-Powered Agile Development",
+        "d1": "(speed, consistency, and scalability)",
+        "i2": "Reverse Engineering & Legacy Modernization",
+        "d2": "(secure migrations and knowledge preservation)",
+        "i3": "Cutting-edge Architectures",
+        "d3": "(microservices, modular monoliths, and hexagonal architecture)"
+      },
+      "card2": {
+        "title": "Digital and Cognitive Transformation Consulting",
+        "desc": "We structure the necessary foundations before taking the leap towards autonomous automation.",
+        "i1": "Data Maturity Diagnosis",
+        "d1": "(processes, systems, and data quality)",
+        "i2": "Asset Governance and Organization",
+        "d2": "(information integration)",
+        "i3": "Digital Workforce Design",
+        "d3": "(key roles and function manuals)",
+        "i4": "Technological Change Management",
+        "d4": "(tangible benefits and clear returns)"
+      }
+    },
+    "vision": "Our Vision",
+    "visionDesc": "Democratize knowledge and turn every organization's data into intelligence that drives more autonomous decisions and operations.",
+    "v11": "Digital",
+    "v12": "Workers",
+    "v21": "Accessible",
+    "v22": "Information",
+    "v31": "Intelligent",
+    "v32": "Decisions",
+    "v41": "Technologically",
+    "v42": "Agnostic"
+  },
+  "SiguientePaso": {
+    "title": "THE NEXT STEP IN YOUR DATA MATRIX",
+    "gemelo": "Digital Twin",
+    "desc": ": the living environment that connects your territorial, operational, and regulatory information.”",
+    "prefix": "“System modernization and data governance are not the final destination, but the foundation. Upon these foundations we build your "
+  }
+}
