@@ -414,19 +414,21 @@ function SearchOverlay({
    Componente principal: GeoportalHeader
    ───────────────────────────────────────────── */
 
-export function GeoportalHeader({
-  customNavItems,
-  hideUserActions,
-  variant = "full",
-  extraActions,
-  startAction,
-}: {
+export interface GeoportalHeaderProps {
   customNavItems?: NavItem[];
   hideUserActions?: boolean;
   variant?: "full" | "navigation" | "user-actions";
   extraActions?: React.ReactNode;
   startAction?: React.ReactNode;
-}) {
+}
+
+function GeoportalHeaderContent({
+  customNavItems,
+  hideUserActions,
+  variant = "full",
+  extraActions,
+  startAction,
+}: GeoportalHeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [displayNavItems, setDisplayNavItems] = React.useState(customNavItems || defaultNavItems);
@@ -755,6 +757,14 @@ export function GeoportalHeader({
       {/* ── Search overlay ── */}
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} navItems={displayNavItems} />
     </>
+  );
+}
+
+export function GeoportalHeader(props: GeoportalHeaderProps) {
+  return (
+    <React.Suspense fallback={<header className="sticky top-0 z-40 w-full h-16 bg-surface border-b border-border" />}>
+      <GeoportalHeaderContent {...props} />
+    </React.Suspense>
   );
 }
 
