@@ -44,14 +44,8 @@ export function LogoManagerCard({
   maxHeightClass = "max-h-16",
   allowedFormats = "SVG o PNG",
 }: LogoManagerCardProps) {
-  // Arranca optimistamente pidiendo lo que haya en el bucket de borrador
-  // (extensión adivinada, el proxy resuelve la real si es otra — ver
-  // api/kit-assets/[file]/route.ts) — así un logo ya editado sobrevive un
-  // refresh de página en vez de volver siempre al estático de public/.
-  // Si nunca se ha editado este slot, el proxy 404ea y onError cae al
-  // estático original (ver <img> más abajo).
-  const [lightImg, setLightImg] = React.useState(`/api/kit-assets/${slot}-light.svg`);
-  const [darkImg, setDarkImg] = React.useState(`/api/kit-assets/${slot}-dark.svg`);
+  const [lightImg, setLightImg] = React.useState(defaultLightImg);
+  const [darkImg, setDarkImg] = React.useState(defaultDarkImg);
 
   const [isUploadOpen, setIsUploadOpen] = React.useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);

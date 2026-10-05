@@ -134,15 +134,15 @@ export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
           <div className="flex items-center shrink-0">
             {/* Expanded Logos */}
             <Image
-              src="/Logotipo.svg"
-              alt="GLocation Logo"
+              src="/horizontal-light.svg"
+              alt="MINEDEC Logo"
               width={150}
               height={35}
               className="h-[35px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
             <Image
-              src="/LogotipoVersionNegativo.svg"
-              alt="GLocation Logo"
+              src="/horizontal-dark.svg"
+              alt="MINEDEC Logo"
               width={150}
               height={35}
               className="h-[35px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
@@ -150,15 +150,15 @@ export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
 
             {/* Collapsed Icons */}
             <Image
-              src="/icon.svg"
-              alt="GLocation Icon"
+              src="/escudo-light.svg"
+              alt="MINEDEC Icon"
               width={27}
               height={27}
               className="h-[27px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
             <Image
-              src="/iconBlanco.svg"
-              alt="GLocation Icon"
+              src="/escudo-dark.svg"
+              alt="MINEDEC Icon"
               width={27}
               height={27}
               className="h-[27px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"

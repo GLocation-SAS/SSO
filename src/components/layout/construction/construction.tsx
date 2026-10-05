@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Wrench, Hammer, HardHat, Home, Search } from "lucide-react";
 
-export default function Construccion() {
+export function Construction() {
   return (
     <div className="relative min-h-screen w-full bg-background flex flex-col items-center justify-center p-6 text-center overflow-hidden selection:bg-primary/20">
       {/* Fondo y luz ambiental de fondo */}

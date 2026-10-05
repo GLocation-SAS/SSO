@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Construction } from "@/components/layout/construction/construction";
 import { Hammer, Layout, FileQuestion } from "lucide-react";
 import { SubSection } from "./sub-section";
 import { LoginGeoportalShowcase } from "./login-geoportal-showcase";
@@ -61,11 +62,8 @@ export function SystemPagesShowcase({ registerSection }: { registerSection?: (id
           icon={Hammer}
           registerSection={registerSection}
         >
-          <div className="flex gap-4 items-center flex-wrap">
-            <Button variant="neutral" onClick={() => window.open('/construccion', '_blank')}>
-              <Hammer className="size-4 mr-2" />
-              Probar Pantalla Construcción
-            </Button>
+          <div className="w-full h-[600px] border border-border rounded-xl overflow-hidden bg-background relative">
+            <Construction />
           </div>
         </SubSection>
       </div>

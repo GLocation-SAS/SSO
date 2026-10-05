@@ -136,8 +136,8 @@ export const defaultNavItems: NavItem[] = [
 
 export const defaultHeaderConfig = {
   showLogo: true,
-  logoUrlLight: "/api/kit-assets/horizontal.svg",
-  logoUrlDark: "/api/kit-assets/horizontal.svg",
+  logoUrlLight: "/horizontal-light.svg",
+  logoUrlDark: "/horizontal-dark.svg",
   title: "",
   showSearch: true,
   showThemeToggle: true,

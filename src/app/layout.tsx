@@ -88,9 +88,10 @@ export default async function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <head>
+      <body>
         <script
           id="theme-script"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -107,9 +108,6 @@ export default async function RootLayout({
             `,
           }}
         />
-      </head>
-
-      <body>
         <NextIntlClientProvider
           locale="es"
           messages={messages}

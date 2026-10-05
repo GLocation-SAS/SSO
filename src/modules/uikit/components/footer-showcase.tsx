@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SubSection } from './sub-section';
+import { Footer } from '@/components/layout/footer';
 import { cn } from "@/lib/utils";
 import { Monitor, Tablet, Smartphone, Settings2, User, Share2, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -359,18 +360,16 @@ export function FooterShowcase() {
           )}
           style={{ width: `${viewportWidth}px`, maxWidth: "100%" }}
         >
-          <iframe
-            ref={iframeRef}
-            key={theme}
-            src={`/footer-preview?theme=${theme}`}
-            className="w-full h-[800px] border-none bg-background pointer-events-auto"
-            title="Footer Preview"
-            onLoad={() => {
-              if (iframeRef.current?.contentWindow) {
-                iframeRef.current.contentWindow.postMessage({ type: 'UPDATE_FOOTER', payload: config }, '*');
-              }
-            }}
-          />
+          {/* Footer renderizado directamente */}
+          <div className="w-full h-[800px] border-none bg-background pointer-events-auto flex flex-col justify-end relative [transform:translateZ(0)] overflow-hidden" data-theme={theme}>
+            <Footer />
+          </div>
+          {(() => {
+            if (typeof window !== "undefined") {
+              window.postMessage({ type: 'UPDATE_FOOTER', payload: config }, '*');
+            }
+            return null;
+          })()}
 
           <div
             onMouseDown={handleMouseDown}

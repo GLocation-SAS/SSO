@@ -121,16 +121,16 @@ export function Navbar() {
             <div className="relative h-16 flex items-center justify-center px-2">
               <div className="absolute inset-0 bg-primary/10 rounded-xl blur-lg group-hover:bg-primary/20 transition-colors" />
               <Image
-                src="/LogotipoSL.svg"
-                alt="Glocation Logo Light"
+                src="/horizontal-light.svg"
+                alt="MINEDEC Logo Light"
                 width={240}
                 height={64}
                 className="relative z-10 h-14 w-auto dark:hidden"
                 priority
               />
               <Image
-                src="/LogotipoSLNegativo.svg"
-                alt="Glocation Logo Dark"
+                src="/horizontal-dark.svg"
+                alt="MINEDEC Logo Dark"
                 width={240}
                 height={64}
                 className="relative z-10 h-14 w-auto hidden dark:block"
@@ -193,16 +193,16 @@ export function Navbar() {
                   <div className="flex items-center gap-2">
                     <SheetTitle className="sr-only">Glocation</SheetTitle>
                     <Image
-                      src="/LogotipoSL.svg"
-                      alt="Glocation Logo Light"
+                      src="/horizontal-light.svg"
+                      alt="MINEDEC Logo Light"
                       width={180}
                       height={48}
                       className="relative z-10 h-12 w-auto dark:hidden"
                       priority
                     />
                     <Image
-                      src="/LogotipoSLNegativo.svg"
-                      alt="Glocation Logo Dark"
+                      src="/horizontal-dark.svg"
+                      alt="MINEDEC Logo Dark"
                       width={180}
                       height={48}
                       className="relative z-10 h-12 w-auto hidden dark:block"

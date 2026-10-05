@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, Monitor, Tablet, Smartphone, BellOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NotificationsMenu } from "@/components/shared/notifications-menu";
 
 const PRESETS = [
   { label: "Desktop", icon: Monitor, width: 1280 },
@@ -59,9 +60,7 @@ export function NotificationsMenuShowcase({ registerSection }: { registerSection
     [viewportWidth, maxWidth]
   );
 
-  const iframeSrc = variant === "empty"
-    ? "/notifications-menu-preview?empty=true"
-    : "/notifications-menu-preview";
+  const iframeSrc = undefined;
 
   return (
     <div ref={containerRef}>
@@ -167,13 +166,10 @@ export function NotificationsMenuShowcase({ registerSection }: { registerSection
             )}
             style={{ width: `${viewportWidth}px`, maxWidth: "100%" }}
           >
-            {/* Iframe for viewport forcing */}
-            <iframe
-              key={variant}
-              src={iframeSrc}
-              className="w-full h-[600px] border-none pointer-events-auto"
-              title="Notifications Menu Preview"
-            />
+            {/* Menu renderizado directamente */}
+            <div className="w-full h-[600px] border-none pointer-events-auto flex items-start justify-end p-8" data-theme="light">
+              <NotificationsMenu isEmpty={variant === "empty"} />
+            </div>
 
             {/* ── Drag handle derecho ── */}
             <div

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { UserCircle, Monitor, Tablet, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserMenu } from "@/components/shared/user-menu";
 
 const PRESETS = [
   { label: "Desktop", icon: Monitor, width: 1280 },
@@ -132,12 +133,10 @@ export function UserMenuShowcase({ registerSection }: { registerSection?: (id: s
             )}
             style={{ width: `${viewportWidth}px`, maxWidth: "100%" }}
           >
-            {/* Iframe for viewport forcing */}
-            <iframe
-              src="/user-menu-preview"
-              className="w-full h-[550px] border-none pointer-events-auto"
-              title="User Menu Preview"
-            />
+            {/* Menu renderizado directamente */}
+            <div className="w-full h-[550px] border-none bg-background pointer-events-auto flex items-start justify-end p-8">
+              <UserMenu />
+            </div>
 
             {/* ── Drag handle derecho ── */}
             <div

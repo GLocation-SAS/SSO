@@ -5,7 +5,7 @@ import { SubSection } from './sub-section';
 import { cn } from "@/lib/utils";
 import { Monitor, Tablet, Smartphone, GripVertical, Layers, Menu, User, Settings2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { defaultNavItems, NavItem, defaultHeaderConfig } from "@/components/layout/geoportal-header";
+import { defaultNavItems, NavItem, defaultHeaderConfig, GeoportalHeader } from "@/components/layout/geoportal-header";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
@@ -309,20 +309,17 @@ export function HeaderShowcase() {
           )}
           style={{ width: `${viewportWidth}px`, maxWidth: "100%" }}
         >
-          {/* Header dentro del iframe simulado con la variante correspondiente */}
-          <iframe
-            ref={iframeRef}
-            key={theme}
-            src={`/header-preview?variant=${headerVariant}&theme=${theme}`}
-            className="w-full h-[600px] border-none bg-background pointer-events-auto"
-            title="Header Preview"
-            onLoad={() => {
-              if (iframeRef.current?.contentWindow) {
-                iframeRef.current.contentWindow.postMessage({ type: 'UPDATE_NAV', payload: safePayload }, '*');
-                iframeRef.current.contentWindow.postMessage({ type: 'UPDATE_HEADER_CONFIG', payload: headerConfig }, '*');
-              }
-            }}
-          />
+          {/* Header renderizado directamente en lugar del iframe */}
+          <div className="w-full h-[600px] border-none bg-background pointer-events-auto relative [transform:translateZ(0)] overflow-hidden" data-theme={theme}>
+            <GeoportalHeader variant={headerVariant as "full" | "navigation" | "user-actions"} />
+          </div>
+          {(() => {
+            if (typeof window !== "undefined") {
+              window.postMessage({ type: 'UPDATE_NAV', payload: safePayload }, '*');
+              window.postMessage({ type: 'UPDATE_HEADER_CONFIG', payload: headerConfig }, '*');
+            }
+            return null;
+          })()}
 
           {/* ── Drag handle derecho ── */}
           <div
