@@ -146,18 +146,16 @@ const buttonVariants = cva(
           "text-foreground",
 
           // Radial
-          "[--radial-bg:hsl(var(--muted-foreground)/0.15)]",
+          "[--radial-bg:hsl(var(--muted-foreground)/0.25)]",
+          "dark:[--radial-bg:hsl(var(--muted-foreground)/0.30)]",
 
           // Glow
           "[--glow:hsl(var(--muted-foreground)/0.15)]",
 
           // Hover
-          "hover:bg-neutral-600",
-          "hover:text-white",
-          "dark:hover:bg-muted",
-          "dark:hover:text-foreground",
-          "hover:border-transparent",
-          "dark:hover:border-border",
+          "hover:text-foreground",
+          "hover:border-border/80",
+
         ].join(" "),
 
         outline: [

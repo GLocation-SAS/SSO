@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export function LoginSSOForm({ className }: { className?: string }) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -60,22 +62,36 @@ export function LoginSSOForm({ className }: { className?: string }) {
     }, 2000);
   };
 
+  const showValidationToast = () => {
+    setTouched({ email: true, password: true });
+    let msg = "Por favor, completa los datos solicitados para continuar.";
+    if (isEmailEmpty && isPasswordEmpty) {
+      msg = "Por favor, ingresa tu correo institucional y contraseña para continuar.";
+    } else if (isEmailEmpty) {
+      msg = "Por favor, ingresa tu correo institucional para continuar.";
+    } else if (isPasswordEmpty) {
+      msg = "Por favor, ingresa tu contraseña para continuar.";
+    } else if (hasErrors) {
+      msg = "Por favor, corrige los errores del formulario para continuar.";
+    }
+    toast.warning("Datos incompletos", { description: msg });
+  };
+
   const handleCredentialsLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (hasErrors) return;
+    
+    if (!isFormValid) {
+      showValidationToast();
+      return;
+    }
 
     setIsLoading(true);
     setGlobalError(null);
 
     // Simular validación frontend y backend mock
     setTimeout(() => {
-      if (formData.email === "admin@educacion.gob.ec" && formData.password === "Admin123") {
-        // Éxito simulado
-        setIsLoading(false);
-      } else {
-        setGlobalError("El correo o la contraseña no son correctos.");
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+      router.push('/doble-factor');
     }, 1500);
   };
 
@@ -139,15 +155,12 @@ export function LoginSSOForm({ className }: { className?: string }) {
           {isGoogleLoading ? "Procesando..." : "Continuar con Google"}
         </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-card px-2 text-muted-foreground font-sans">
-              O iniciar sesión con credenciales
-            </span>
-          </div>
+        <div className="flex items-center gap-4 text-xs">
+          <span className="flex-1 border-t border-border" />
+          <span className="text-muted-foreground font-sans">
+            O iniciar sesión con credenciales
+          </span>
+          <span className="flex-1 border-t border-border" />
         </div>
 
         <form onSubmit={handleCredentialsLogin} className="space-y-4" noValidate>
@@ -241,23 +254,26 @@ export function LoginSSOForm({ className }: { className?: string }) {
             )}
           </div>
 
-          {globalError && (
-            <div
-              role="alert"
-              className="rounded-md bg-danger/10 p-3 text-body-sm text-danger-foreground border border-danger/20 font-sans"
-            >
-              {globalError}
-            </div>
-          )}
 
-          <Button
-            type="submit"
-            variant="primary"
+
+          <div
             className="w-full"
-            disabled={!isFormValid || isLoading || isGoogleLoading}
+            onClick={(e) => {
+              if (!isFormValid) {
+                e.preventDefault();
+                showValidationToast();
+              }
+            }}
           >
-            {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
-          </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              disabled={!isFormValid || isLoading || isGoogleLoading}
+            >
+              {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+            </Button>
+          </div>
         </form>
       </div>
     </div>
