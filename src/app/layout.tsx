@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
-import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../messages/es.json";
 
@@ -68,15 +67,8 @@ interface RootLayoutProps {
 export default async function RootLayout({
   children,
 }: RootLayoutProps) {
-  /*
-    Obtener el tema desde las cookies en el servidor evita que Next.js
-    elimine el atributo data-theme de la etiqueta html durante las
-    transiciones entre rutas.
-  */
-  const cookieStore = await cookies();
-
-  const theme =
-    cookieStore.get("glocation-theme")?.value || "light";
+  // Exportación estática no permite cookies(). El script inyectado manejará el tema.
+  const theme = "light";
 
   return (
     <html
