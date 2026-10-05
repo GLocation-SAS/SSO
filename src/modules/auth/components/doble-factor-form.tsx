@@ -121,7 +121,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
         <Separator className="bg-border/60" />
 
         {/* Textos Informativos */}
-        <div className="mb-4 text-left">
+        <div className="mb-4 text-center sm:text-left">
           <button 
             type="button"
             className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-secondary dark:hover:text-secondary-300 transition-colors"

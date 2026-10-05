@@ -124,7 +124,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
 
       <Separator className="mb-6" />
 
-      <div className="mb-8 text-left">
+      <div className="mb-8 text-center sm:text-left">
         <h1 className="sr-only font-heading text-h2 font-bold">Conecta MINEDUC</h1>
         <h2 className="font-heading text-h2 font-semibold mb-2 text-primary-500 dark:text-primary-300">Iniciar sesión</h2>
         <p className="font-sans text-body-sm text-muted-foreground text-balance">

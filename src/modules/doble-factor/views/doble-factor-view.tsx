@@ -31,7 +31,7 @@ export function DobleFactorView() {
     // Mock validation
     setTimeout(() => {
       if (code === "123456") {
-        router.push("/");
+        router.push("/dashboard");
       } else if (code === "000000") {
         setErrorMsg("El código expirado. Solicitar nuevo código.");
         setIsLoading(false);
