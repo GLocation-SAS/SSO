@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type CardSize = "default" | "sm"
-type CardVariant = "default" | "featured"
+type CardVariant = "default" | "featured" | "primary"
 
 /**
  * `featured` — Colorful horizontal card with a decorative icon in the corner.
@@ -58,6 +58,11 @@ function Card({ className, innerClassName, size = "default", variant = "default"
           "shadow-lg",
           !disableHover && "hover:shadow-xl hover:-translate-y-0.5",
         ],
+        // --- Primary variant (Solid primary fill + primary-foreground text) ---
+        variant === "primary" && [
+          "bg-primary text-primary-foreground border border-primary/40 shadow-md",
+          !disableHover && "hover:shadow-xl hover:brightness-[1.03] transition-all duration-300",
+        ],
         className
       )}
       style={glow !== "none" ? {
@@ -82,6 +87,10 @@ function Card({ className, innerClassName, size = "default", variant = "default"
         variant === "featured" && [
           "items-start text-left gap-3 p-8"
         ],
+        // --- Primary Layout ---
+        variant === "primary" && [
+          "items-start text-left gap-3 p-6 md:p-8"
+        ],
         innerClassName
       )}>
         {children}
@@ -100,6 +109,8 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
         "flex flex-col items-center gap-4 w-full",
         // When inside featured card, align left
         "group-data-[variant=featured]/card:items-start group-data-[variant=featured]/card:gap-2",
+        // When inside primary card, align left
+        "group-data-[variant=primary]/card:items-start group-data-[variant=primary]/card:gap-2 group-data-[variant=primary]/card:p-0",
         className
       )}
       {...props}
@@ -118,6 +129,8 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
         "group-data-[size=sm]/card:text-base",
         // Featured: slightly smaller title, allow wrapping
         "group-data-[variant=featured]/card:text-base group-data-[variant=featured]/card:leading-snug",
+        // Primary: text-primary-foreground, allow wrapping
+        "group-data-[variant=primary]/card:text-primary-foreground group-data-[variant=primary]/card:h-auto",
         className
       )}
       {...props}
@@ -133,6 +146,8 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="card-description"
       className={cn(
         "text-sm leading-relaxed text-muted-foreground font-medium",
+        // Primary: text-primary-foreground/80
+        "group-data-[variant=primary]/card:text-primary-foreground/85",
         className
       )}
       {...props}
@@ -181,8 +196,7 @@ function CardDecorativeIcon({ className, ...props }: React.ComponentProps<"div">
       className={cn(
         // Positioned absolute at bottom-right, clipped by card overflow-hidden
         // Negative margins/offsets to make it look like it's "coming out"
-        // Lower z-index to stay behind other content in the same container
-        "absolute -bottom-10 -right-10 -z-10 pointer-events-none select-none transition-transform duration-500 group-hover/card:scale-110",
+        "absolute -bottom-10 -right-10 pointer-events-none select-none transition-transform duration-500 group-hover/card:scale-110",
         "opacity-15",
         className
       )}
@@ -212,6 +226,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         "flex items-center justify-center pt-2",
         "group-data-[variant=featured]/card:justify-start group-data-[variant=featured]/card:pt-1",
+        "group-data-[variant=primary]/card:justify-start group-data-[variant=primary]/card:pt-2 group-data-[variant=primary]/card:p-0",
         className
       )}
       {...props}

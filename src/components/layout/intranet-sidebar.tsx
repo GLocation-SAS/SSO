@@ -42,7 +42,7 @@ export interface IntranetNavItem {
   label: string;
   icon: React.ElementType;
   href: string;
-  group: "principal" | "cuenta";
+  group: "principal" | "cuenta" | "inicio";
   disabled?: boolean;
   badge?: number;
 }
@@ -67,15 +67,18 @@ export const INTRANET_NAV_ITEMS: IntranetNavItem[] = [
 const GROUP_LABELS: Record<IntranetNavItem["group"], string> = {
   principal: "Principal",
   cuenta: "Cuenta",
+  inicio: "Inicio",
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
 interface IntranetSidebarProps {
   activeItem?: string;
+  hideUser?: boolean;
+  navItems?: IntranetNavItem[];
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
-export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
+export function IntranetSidebar({ activeItem = "home", hideUser = false, navItems = INTRANET_NAV_ITEMS }: IntranetSidebarProps) {
   const { setOpenMobile } = useSidebar();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -117,7 +120,7 @@ export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
   // Group sections by category
   const groupedItems = React.useMemo(() => {
     const groups = new Map<IntranetNavItem["group"], IntranetNavItem[]>();
-    for (const item of INTRANET_NAV_ITEMS) {
+    for (const item of navItems) {
       if (!groups.has(item.group)) {
         groups.set(item.group, []);
       }
@@ -130,8 +133,8 @@ export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
     <Sidebar variant="floating" collapsible="icon">
       {/* ── Header: Logo ── */}
       <SidebarHeader className="relative px-3 pt-4 pb-3">
-        <div className="flex items-center justify-between gap-2 overflow-hidden">
-          <div className="flex items-center shrink-0">
+        <div className="flex items-center justify-center w-full overflow-hidden">
+          <div className="flex items-center justify-center shrink-0 w-full">
             {/* Expanded Logos */}
             <Image
               src="/horizontal-light.svg"
@@ -283,37 +286,39 @@ export function IntranetSidebar({ activeItem = "home" }: IntranetSidebarProps) {
         </div>
 
         {/* User section */}
-        <div className="flex items-center gap-3 px-1 group-data-[collapsible=icon]:justify-center">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="size-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-heading font-bold text-caption group-data-[collapsible=icon]:size-8 transition-all duration-200">
-              {initials}
+        {!hideUser && (
+          <div className="flex items-center gap-3 px-1 group-data-[collapsible=icon]:justify-center">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="size-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-heading font-bold text-caption group-data-[collapsible=icon]:size-8 transition-all duration-200">
+                {initials}
+              </div>
+              {/* Online indicator */}
+              <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-success border-2 border-background group-data-[collapsible=icon]:size-2" />
             </div>
-            {/* Online indicator */}
-            <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-success border-2 border-background group-data-[collapsible=icon]:size-2" />
-          </div>
 
-          {/* Name + Email + Logout (hidden when collapsed) */}
-          <div className="flex flex-1 items-center justify-between gap-2 min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-bottom-1 duration-300">
-            <div className="flex flex-col min-w-0">
-              <span className="text-body-sm font-heading font-semibold text-sidebar-foreground truncate">
-                {displayName}
-              </span>
-              <span className="text-caption text-sidebar-foreground/60 truncate">
-                {displayEmail}
-              </span>
+            {/* Name + Email + Logout (hidden when collapsed) */}
+            <div className="flex flex-1 items-center justify-between gap-2 min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-bottom-1 duration-300">
+              <div className="flex flex-col min-w-0">
+                <span className="text-body-sm font-heading font-semibold text-sidebar-foreground truncate">
+                  {displayName}
+                </span>
+                <span className="text-caption text-sidebar-foreground/60 truncate">
+                  {displayEmail}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Cerrar sesión"
+                onClick={handleLogout}
+                className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors duration-200"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Cerrar sesión"
-              onClick={handleLogout}
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors duration-200"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
-        </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

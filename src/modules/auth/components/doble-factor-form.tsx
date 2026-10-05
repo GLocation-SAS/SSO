@@ -84,6 +84,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
         description: "Has ingresado correctamente. Redirigiendo...",
       });
       // Aquí iría la redirección al dashboard
+      router.push('/dashboard');
     }, 1500);
   };
 

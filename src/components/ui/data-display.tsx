@@ -64,7 +64,7 @@ export function BaseCard({
           {cover}
         </div>
       )}
-      
+
       <div className={cn("p-6 flex-1 flex flex-col", centered ? "items-center text-center" : "")}>
         {(title || menu) && (
           <div className={cn("flex w-full mb-1 gap-2", centered ? "justify-center relative items-center" : "items-start justify-between")}>
@@ -72,17 +72,17 @@ export function BaseCard({
             {menu && <div className={cn("shrink-0", centered ? "absolute right-0 top-0" : "")}>{menu}</div>}
           </div>
         )}
-        
+
         {description && (
           <p className={cn("text-xs text-muted-foreground mb-5", centered ? "max-w-[90%]" : "")}>{description}</p>
         )}
-        
+
         {children && <div className="w-full mb-1">{children}</div>}
       </div>
-      
+
       {(footer || action) && (
         <div className={cn(
-          "px-6 py-4 flex items-center", 
+          "px-6 py-4 flex items-center",
           centered ? "justify-center pb-6 pt-0" : "justify-between border-t border-border mt-auto"
         )}>
           {footer && <span className="text-xs text-muted-foreground shrink-0">{footer}</span>}
@@ -167,7 +167,7 @@ export function InteractiveCard({
       {/* Soft Ambient Glow on Hover (Behind inner mask, bleeds through semi-transparent bg) */}
       {!disabled && (
         <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0">
-          <div 
+          <div
             className={cn(
               "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] blur-[40px] opacity-25",
               iconColorClass
@@ -186,7 +186,7 @@ export function InteractiveCard({
           {decorativeIcon}
         </div>
       )}
-      
+
       <div className="relative z-10 p-5 flex items-start gap-4">
         {icon && (
           <div className={cn("shrink-0 size-11 rounded-full bg-surface shadow-sm border border-border/30 flex items-center justify-center transition-colors", iconColorClass)}>
@@ -216,6 +216,35 @@ export function InteractiveCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type KpiTrend = "up" | "down" | "neutral" | "warning"
+export type KpiColor = "primary" | "neutral" | "secondary-300" | "warning" | "success-400"
+
+const KPI_COLORS: Record<KpiColor, { container: string; iconBg: string; valueText: string }> = {
+  primary: {
+    container: "bg-primary/5 border-primary/20 hover:border-primary/40",
+    iconBg: "bg-primary/10 text-primary",
+    valueText: "text-primary dark:text-primary-300",
+  },
+  neutral: {
+    container: "bg-muted/30 border-border hover:border-border/80",
+    iconBg: "bg-muted text-foreground",
+    valueText: "text-foreground",
+  },
+  "secondary-300": {
+    container: "bg-secondary-50/50 dark:bg-secondary-900/10 border-secondary-300/30 hover:border-secondary-300/60",
+    iconBg: "bg-secondary-100 dark:bg-secondary-900/40 text-secondary-600 dark:text-secondary-300",
+    valueText: "text-secondary-600 dark:text-secondary-300",
+  },
+  warning: {
+    container: "bg-warning-50/50 dark:bg-warning-900/10 border-warning/30 hover:border-warning/60",
+    iconBg: "bg-warning/10 text-warning",
+    valueText: "text-warning",
+  },
+  "success-400": {
+    container: "bg-success-50/50 dark:bg-success-900/10 border-success-400/30 hover:border-success-400/60",
+    iconBg: "bg-success/10 text-success-600 dark:text-success-400",
+    valueText: "text-success-600 dark:text-success-400",
+  },
+}
 
 export interface KpiCardProps {
   label: string
@@ -223,8 +252,10 @@ export interface KpiCardProps {
   trend?: KpiTrend
   change?: string
   comparison?: string
+  description?: string
   updatedAt?: string
   icon?: React.ReactNode
+  color?: KpiColor
   prefixText?: string
   highlightedText?: string
   actionLabel?: string
@@ -234,32 +265,34 @@ export interface KpiCardProps {
 }
 
 const TREND_CONFIG: Record<KpiTrend, { icon: React.ReactNode; colorClass: string }> = {
-  up:      { icon: <TrendingUp className="size-3.5" />,   colorClass: "text-success" },
-  down:    { icon: <TrendingDown className="size-3.5" />, colorClass: "text-danger" },
-  neutral: { icon: <Minus className="size-3.5" />,        colorClass: "text-muted-foreground" },
-  warning: { icon: <TrendingUp className="size-3.5" />,   colorClass: "text-warning" },
+  up: { icon: <TrendingUp className="size-3.5" />, colorClass: "text-success" },
+  down: { icon: <TrendingDown className="size-3.5" />, colorClass: "text-danger" },
+  neutral: { icon: <Minus className="size-3.5" />, colorClass: "text-muted-foreground" },
+  warning: { icon: <TrendingUp className="size-3.5" />, colorClass: "text-warning" },
 }
 
-export function KpiCard({ 
-  label, value, trend, change, comparison, updatedAt, icon, 
-  prefixText, highlightedText, actionLabel, onAction, menuActions, className 
+export function KpiCard({
+  label, value, trend, change, comparison, description, updatedAt, icon, color = "primary",
+  prefixText, highlightedText, actionLabel, onAction, menuActions, className
 }: KpiCardProps) {
   const trendCfg = trend ? TREND_CONFIG[trend] : null
   const isNarrative = prefixText || highlightedText
+  const colorCfg = KPI_COLORS[color] || KPI_COLORS.primary
 
   return (
     <div className={cn(
-      "rounded-2xl border border-border/50 bg-gradient-to-br from-primary/5 via-surface to-secondary/10 dark:from-primary/10 dark:via-background dark:to-secondary/15 shadow-sm p-6 flex flex-col justify-between w-full min-h-[160px]", 
+      "rounded-2xl border shadow-xs p-6 flex flex-col justify-between w-full min-h-[160px] transition-all duration-200 hover:shadow-md",
+      colorCfg.container,
       className
     )}>
       <div className="flex items-start justify-between gap-2 mb-4">
         <div className="flex flex-col gap-3">
           {icon && (
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 relative overflow-hidden">
+            <div className={cn("size-10 rounded-full flex items-center justify-center shrink-0 relative overflow-hidden", colorCfg.iconBg)}>
               <div className="relative z-10 [&>svg]:size-5">{icon}</div>
             </div>
           )}
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
         </div>
         {menuActions && (
           <div className="flex items-center gap-1 shrink-0 text-muted-foreground">
@@ -273,13 +306,13 @@ export function KpiCard({
           <div className="mb-4">
             <p className="text-xl md:text-2xl font-medium leading-snug tracking-tight text-muted-foreground">
               {prefixText}{" "}
-              {highlightedText && <span className="font-bold text-primary">{highlightedText}</span>}
+              {highlightedText && <span className={cn("font-bold", colorCfg.valueText)}>{highlightedText}</span>}
             </p>
           </div>
         ) : (
           <div className="mb-2">
             <div className="flex items-end gap-3 mb-1">
-              <span className="text-4xl font-bold font-heading text-primary tabular-nums tracking-tight">{value}</span>
+              <span className={cn("text-4xl font-bold font-heading tabular-nums tracking-tight", colorCfg.valueText)}>{value}</span>
               {trendCfg && change && (
                 <span className={cn("flex items-center gap-0.5 text-sm font-semibold mb-1.5", trendCfg.colorClass)}>
                   {trendCfg.icon}{change}
@@ -287,6 +320,7 @@ export function KpiCard({
               )}
             </div>
             {comparison && <p className="text-xs font-medium text-muted-foreground">{comparison}</p>}
+            {description && <p className="text-xs text-muted-foreground/80 mt-1 leading-relaxed">{description}</p>}
           </div>
         )}
 
@@ -296,8 +330,8 @@ export function KpiCard({
 
         {actionLabel && (
           <div className="mt-2 flex items-center justify-between">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onAction}
               className="h-8 px-4 inline-flex items-center justify-center text-[11px] font-bold bg-surface border border-border shadow-sm rounded-full hover:bg-muted transition-colors text-foreground"
             >
@@ -337,9 +371,9 @@ export interface InstitutionCardProps {
 }
 
 const INST_STATUS: Record<string, { label: string; dotColor: string; bgBorder: string }> = {
-  active:   { label: "ACTIVA",      dotColor: "bg-success",   bgBorder: "bg-success/10 border-success/20 text-success" },
-  inactive: { label: "INACTIVA",    dotColor: "bg-danger",    bgBorder: "bg-danger/10 border-danger/20 text-danger" },
-  review:   { label: "EN REVISIÓN", dotColor: "bg-warning",   bgBorder: "bg-warning/10 border-warning/20 text-warning" },
+  active: { label: "ACTIVA", dotColor: "bg-success", bgBorder: "bg-success/10 border-success/20 text-success" },
+  inactive: { label: "INACTIVA", dotColor: "bg-danger", bgBorder: "bg-danger/10 border-danger/20 text-danger" },
+  review: { label: "EN REVISIÓN", dotColor: "bg-warning", bgBorder: "bg-warning/10 border-warning/20 text-warning" },
 }
 
 export function InstitutionCard({
@@ -381,13 +415,13 @@ export function InstitutionCard({
           </div>
 
           <h3 className="text-base font-bold text-foreground mt-1.5 leading-tight tracking-tight truncate">{name}</h3>
-          
+
           {amie && (
             <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
               <span>Código AMIE: {amie}</span>
-              <button 
-                type="button" 
-                onClick={onCopyAmie} 
+              <button
+                type="button"
+                onClick={onCopyAmie}
                 className="hover:text-foreground transition-colors p-0.5"
                 title="Copiar Código AMIE"
               >
@@ -486,7 +520,7 @@ export function InstitutionCard({
             )}
 
             {onViewProfile && (
-              <Button 
+              <Button
                 onClick={onViewProfile}
                 variant="primary"
                 className="shrink-0 rounded-xl px-5 h-10 text-xs"
@@ -521,8 +555,8 @@ export interface LayerCardProps {
 
 const LAYER_STATUS: Record<string, { label: string; bgBorder: string }> = {
   published: { label: "PUBLICADA", bgBorder: "bg-success/10 border-success/20 text-success" },
-  draft:     { label: "BORRADOR",  bgBorder: "bg-warning/10 border-warning/20 text-warning" },
-  archived:  { label: "ARCHIVADA", bgBorder: "bg-neutral/10 border-neutral/20 text-muted-foreground" },
+  draft: { label: "BORRADOR", bgBorder: "bg-warning/10 border-warning/20 text-warning" },
+  archived: { label: "ARCHIVADA", bgBorder: "bg-neutral/10 border-neutral/20 text-muted-foreground" },
 }
 
 export function LayerCard({
@@ -640,21 +674,21 @@ export interface DocumentCardProps {
 function getDocIcon(filename: string): { icon: React.ReactNode; variant: "error" | "success" | "info" | "warning" | "primary" | "neutral"; label: string } {
   const ext = filename.split(".").pop()?.toLowerCase() ?? ""
   const map: Record<string, { icon: React.ReactNode; variant: "error" | "success" | "info" | "warning" | "primary" | "neutral"; label: string }> = {
-    pdf:     { icon: <FileText className="size-6" />,       variant: "error",   label: "PDF" },
-    doc:     { icon: <FileText className="size-6" />,       variant: "info",    label: "Word" },
-    docx:    { icon: <FileText className="size-6" />,       variant: "info",    label: "Word" },
-    xls:     { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "Excel" },
-    xlsx:    { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "Excel" },
-    csv:     { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "CSV" },
-    ppt:     { icon: <FileText className="size-6" />,        variant: "warning", label: "PPT" },
-    pptx:    { icon: <FileText className="size-6" />,        variant: "warning", label: "PPT" },
-    zip:     { icon: <FileArchive className="size-6" />,     variant: "warning", label: "ZIP" },
-    geojson: { icon: <Globe className="size-6" />,           variant: "success", label: "GeoJSON" },
-    shp:     { icon: <Map className="size-6" />,             variant: "success", label: "SHP" },
-    kml:     { icon: <Map className="size-6" />,             variant: "info",    label: "KML" },
-    kmz:     { icon: <Map className="size-6" />,             variant: "info",    label: "KMZ" },
-    json:    { icon: <FileCode className="size-6" />,        variant: "primary", label: "JSON" },
-    txt:     { icon: <FileText className="size-6" />,        variant: "neutral", label: "TXT" },
+    pdf: { icon: <FileText className="size-6" />, variant: "error", label: "PDF" },
+    doc: { icon: <FileText className="size-6" />, variant: "info", label: "Word" },
+    docx: { icon: <FileText className="size-6" />, variant: "info", label: "Word" },
+    xls: { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "Excel" },
+    xlsx: { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "Excel" },
+    csv: { icon: <FileSpreadsheet className="size-6" />, variant: "success", label: "CSV" },
+    ppt: { icon: <FileText className="size-6" />, variant: "warning", label: "PPT" },
+    pptx: { icon: <FileText className="size-6" />, variant: "warning", label: "PPT" },
+    zip: { icon: <FileArchive className="size-6" />, variant: "warning", label: "ZIP" },
+    geojson: { icon: <Globe className="size-6" />, variant: "success", label: "GeoJSON" },
+    shp: { icon: <Map className="size-6" />, variant: "success", label: "SHP" },
+    kml: { icon: <Map className="size-6" />, variant: "info", label: "KML" },
+    kmz: { icon: <Map className="size-6" />, variant: "info", label: "KMZ" },
+    json: { icon: <FileCode className="size-6" />, variant: "primary", label: "JSON" },
+    txt: { icon: <FileText className="size-6" />, variant: "neutral", label: "TXT" },
   }
   return map[ext] ?? { icon: <File className="size-6" />, variant: "neutral", label: ext.toUpperCase() || "File" }
 }
@@ -667,9 +701,9 @@ export function DocumentCard({ filename, sizeLabel, uploadedAt, onPreview, onDow
         <div className="flex items-start gap-3 mb-4">
           <div className={cn(
             "size-12 rounded-xl flex items-center justify-center shrink-0",
-            variant === "error"   && "bg-danger/10 text-danger",
+            variant === "error" && "bg-danger/10 text-danger",
             variant === "success" && "bg-success/10 text-success",
-            variant === "info"    && "bg-info/10 text-info",
+            variant === "info" && "bg-info/10 text-info",
             variant === "warning" && "bg-warning/10 text-warning",
             variant === "primary" && "bg-primary/10 text-primary",
             variant === "neutral" && "bg-muted text-muted-foreground",
@@ -743,10 +777,10 @@ export interface ReportCardProps {
 }
 
 const REPORT_STATUS: Record<ReportStatus, { label: string; variant: "success" | "info" | "error" | "neutral" }> = {
-  generated:  { label: "Generado",   variant: "success" },
+  generated: { label: "Generado", variant: "success" },
   processing: { label: "Procesando", variant: "info" },
-  error:      { label: "Error",      variant: "error" },
-  scheduled:  { label: "Programado", variant: "neutral" },
+  error: { label: "Error", variant: "error" },
+  scheduled: { label: "Programado", variant: "neutral" },
 }
 
 export function ReportCard({ title, period, territory, generatedAt, status = "generated", formats = [], onView, onDownload, className }: ReportCardProps) {
@@ -940,13 +974,13 @@ const STATUS_CONFIG: Record<StatusType, {
   icon?: React.ReactNode
   pulse?: boolean
 }> = {
-  online:     { dot: "bg-success",          text: "text-success",  label: "En línea",      pulse: true },
-  processing: { dot: "bg-info",             text: "text-info",     label: "Procesando",    pulse: true,  icon: <Loader2 className="size-3 animate-spin" /> },
-  warning:    { dot: "bg-warning",          text: "text-warning",  label: "Advertencia" },
-  critical:   { dot: "bg-danger",           text: "text-danger",   label: "Crítico",       pulse: true },
-  offline:    { dot: "bg-muted-foreground", text: "text-muted-foreground", label: "Fuera de línea" },
-  inactive:   { dot: "bg-border",          text: "text-muted-foreground", label: "Inactivo" },
-  completed:  { dot: "bg-success",          text: "text-success",  label: "Completado",    icon: <CheckCircle2 className="size-3" /> },
+  online: { dot: "bg-success", text: "text-success", label: "En línea", pulse: true },
+  processing: { dot: "bg-info", text: "text-info", label: "Procesando", pulse: true, icon: <Loader2 className="size-3 animate-spin" /> },
+  warning: { dot: "bg-warning", text: "text-warning", label: "Advertencia" },
+  critical: { dot: "bg-danger", text: "text-danger", label: "Crítico", pulse: true },
+  offline: { dot: "bg-muted-foreground", text: "text-muted-foreground", label: "Fuera de línea" },
+  inactive: { dot: "bg-border", text: "text-muted-foreground", label: "Inactivo" },
+  completed: { dot: "bg-success", text: "text-success", label: "Completado", icon: <CheckCircle2 className="size-3" /> },
 }
 
 export function StatusIndicator({ status, label, description, size = "md", className }: StatusIndicatorProps) {
@@ -1074,14 +1108,14 @@ export function Spinner({
   const sizes = { sm: "size-4", md: "size-6", lg: "size-8" }
   return (
     <div role="status" aria-label={ariaLabel} className="inline-flex items-center justify-center shrink-0">
-      <Loader2 
+      <Loader2
         className={cn(
           "text-primary",
           "animate-[spin_0.9s_linear_infinite]",
           "motion-reduce:animate-none motion-reduce:opacity-70",
-          sizes[size], 
+          sizes[size],
           className
-        )} 
+        )}
       />
     </div>
   )

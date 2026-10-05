@@ -419,11 +419,13 @@ export function GeoportalHeader({
   hideUserActions,
   variant = "full",
   extraActions,
+  startAction,
 }: {
   customNavItems?: NavItem[];
   hideUserActions?: boolean;
   variant?: "full" | "navigation" | "user-actions";
   extraActions?: React.ReactNode;
+  startAction?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -435,11 +437,12 @@ export function GeoportalHeader({
 
   const showNav = variant === "full" || variant === "navigation";
   const showUser = (variant === "full" || variant === "user-actions") && !hideUserActions;
+  const showLogo = headerConfig.showLogo && variant !== "user-actions";
 
   React.useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    
+
     // Escuchar mensajes para actualización en vivo desde el showcase
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'UPDATE_NAV' && e.data.payload) {
@@ -460,7 +463,7 @@ export function GeoportalHeader({
       }
     };
     window.addEventListener('message', handleMessage);
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener('message', handleMessage);
@@ -489,254 +492,265 @@ export function GeoportalHeader({
 
   return (
     <>
-      <div className="h-[98px] lg:h-[106px] w-full shrink-0" aria-hidden="true" />
+      {variant !== "user-actions" && <div className="h-[98px] lg:h-[106px] w-full shrink-0" aria-hidden="true" />}
       <header
         id="geoportal-header"
         className={cn(
-          "fixed top-0 left-0 z-50 w-full flex flex-col transition-shadow duration-300",
-          scrolled && "shadow-md"
+          "z-50 flex flex-col transition-shadow duration-300",
+          variant === "user-actions"
+            ? "w-full rounded-xl overflow-hidden border border-border bg-surface shadow-xs"
+            : "fixed top-0 left-0 w-full"
         )}
       >
-      {/* ══════════════════════════════════════════
+        {/* ══════════════════════════════════════════
           BARRA SUPERIOR — Azul primary institucional
           ══════════════════════════════════════════ */}
-      <div className="bg-primary w-full">
-        <div className="w-full px-4 lg:px-8">
-          <div className="flex items-center justify-between h-10">
-            {/* Branding izquierdo */}
-            <div className="flex items-center gap-3">
-            </div>
+        {variant !== "user-actions" && (
+          <div className="bg-primary w-full">
+            <div className="w-full px-4 lg:px-8">
+              <div className="flex items-center justify-between h-10">
+                {/* Branding izquierdo */}
+                <div className="flex items-center gap-3">
+                </div>
 
-            {/* Acciones derecha */}
-            <div className="flex items-center gap-3">
+                {/* Acciones derecha */}
+                <div className="flex items-center gap-3">
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* ══════════════════════════════════════════
+        {/* ══════════════════════════════════════════
           BARRA INFERIOR — Blanca con secciones
           ══════════════════════════════════════════ */}
-      <div className="w-full bg-surface border-b-2 border-primary-300">
-        <div className="w-full px-4 lg:px-8">
-          <div className="relative flex items-center justify-between h-14 lg:h-16">
-            {/* ── Logo oficial de la marca ── */}
-            <Link
-              href="/"
-              className={cn(
-                "flex items-center gap-3 shrink-0 group",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md"
-              )}
-            >
-              {headerConfig.showLogo && (
-                <>
-                  <img
-                    src={headerConfig.logoUrlLight}
-                    alt="Logo MINEDEC GEOportal"
-                    className="h-10 w-auto object-contain dark:hidden"
-                  />
-                  <img
-                    src={headerConfig.logoUrlDark}
-                    alt="Logo MINEDEC GEOportal"
-                    className="h-10 w-auto object-contain hidden dark:block"
-                  />
-                </>
-              )}
-              {headerConfig.title && (
-                <span className="font-bold text-lg text-foreground ml-2 hidden sm:inline-block">
-                  {headerConfig.title}
-                </span>
-              )}
-            </Link>
-
-            {/* ── Navegación desktop ── */}
-            {showNav && (
-              <nav
-                className="hidden lg:flex items-center gap-0.5 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                aria-label="Navegación principal"
-              >
-                {displayNavItems.map((item) =>
-                  item.children ? (
-                    <DropdownNav
-                      key={item.href}
-                      item={item}
-                      isActive={isActive(item.href) || item.children.some(c => isActive(c.href))}
-                      isChildActive={isActive}
-                    />
-                  ) : (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-1 px-2.5 py-1.5 text-body-sm font-semibold rounded-md whitespace-nowrap",
-                        "transition-colors duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                        "hover:bg-primary/5 hover:text-primary",
-                        isActive(item.href)
-                          ? "text-primary bg-primary/5"
-                          : "text-primary/80 dark:text-foreground/80 bg-transparent"
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                )}
-              </nav>
-            )}
-
-            {/* ── Acciones desktop (buscar + notificaciones + perfil + theme) ── */}
-            <div className="hidden lg:flex items-center gap-1">
-              {extraActions && <div className="mr-1 flex items-center">{extraActions}</div>}
-              {variant !== "user-actions" && headerConfig.showThemeToggle && <ThemeToggle />}
-              
-              {/* Buscar */}
-              {showNav && headerConfig.showSearch && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchOpen(true)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Buscar"
+        <div className={cn(
+          "w-full bg-surface",
+          variant !== "user-actions" && "border-b-2 border-primary-300"
+        )}>
+          <div className={cn("w-full", variant === "user-actions" ? "px-4 md:px-6" : "px-4 lg:px-8")}>
+            <div className={cn("relative flex items-center justify-between", variant === "user-actions" ? "h-14" : "h-14 lg:h-16")}>
+              {/* ── Logo oficial de la marca / acción inicial ── */}
+              <div className="flex items-center gap-3 shrink-0">
+                {startAction}
+                <Link
+                  href="/"
+                  className={cn(
+                    "flex items-center gap-3 shrink-0 group",
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md",
+                    !showLogo && !headerConfig.title && "hidden"
+                  )}
                 >
-                  <Search className="size-5" />
-                </Button>
+                  {showLogo && (
+                    <>
+                      <img
+                        src={headerConfig.logoUrlLight}
+                        alt="Logo MINEDEC GEOportal"
+                        className="h-10 w-auto object-contain dark:hidden"
+                      />
+                      <img
+                        src={headerConfig.logoUrlDark}
+                        alt="Logo MINEDEC GEOportal"
+                        className="h-10 w-auto object-contain hidden dark:block"
+                      />
+                    </>
+                  )}
+                  {headerConfig.title && (
+                    <span className="font-bold text-lg text-foreground ml-2 hidden sm:inline-block">
+                      {headerConfig.title}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              {/* ── Navegación desktop ── */}
+              {showNav && (
+                <nav
+                  className="hidden lg:flex items-center gap-0.5 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  aria-label="Navegación principal"
+                >
+                  {displayNavItems.map((item) =>
+                    item.children ? (
+                      <DropdownNav
+                        key={item.href}
+                        item={item}
+                        isActive={isActive(item.href) || item.children.some(c => isActive(c.href))}
+                        isChildActive={isActive}
+                      />
+                    ) : (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-1 px-2.5 py-1.5 text-body-sm font-semibold rounded-md whitespace-nowrap",
+                          "transition-colors duration-200",
+                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                          "hover:bg-primary/5 hover:text-primary",
+                          isActive(item.href)
+                            ? "text-primary bg-primary/5"
+                            : "text-primary/80 dark:text-foreground/80 bg-transparent"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  )}
+                </nav>
               )}
 
-              {/* Separador */}
-              {showUser && (headerConfig.showNotifications || headerConfig.showUserMenu) && <div className="w-px h-6 bg-border mx-1" aria-hidden="true" />}
+              {/* ── Acciones desktop (buscar + notificaciones + perfil + theme) ── */}
+              <div className="hidden lg:flex items-center gap-1">
+                {extraActions && <div className="mr-1 flex items-center">{extraActions}</div>}
+                {variant !== "user-actions" && headerConfig.showThemeToggle && <ThemeToggle />}
 
-              {/* Notificaciones */}
-              {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
-
-              {/* Separador */}
-              {showUser && headerConfig.showNotifications && headerConfig.showUserMenu && <div className="w-px h-6 bg-border mx-1" aria-hidden="true" />}
-
-              {/* User menu */}
-              {showUser && headerConfig.showUserMenu && <UserMenu />}
-            </div>
-
-            {/* ── Mobile: toggle + burger ── */}
-            <div className="flex lg:hidden items-center gap-1">
-              {extraActions && <div className="mr-1 flex items-center">{extraActions}</div>}
-              {variant !== "user-actions" && headerConfig.showThemeToggle && <ThemeToggle />}
-              
-              {variant === "user-actions" ? (
-                <>
-                  {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
-                  {showUser && headerConfig.showUserMenu && <UserMenu />}
-                </>
-              ) : (
-                <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Menú"
-                    >
-                      <Menu className="size-6" strokeWidth={1.75} />
-                    </Button>
-                  </SheetTrigger>
-
-                  <SheetContent
-                    side="top"
-                    showCloseButton={false}
-                    className="h-[100dvh] max-h-[100dvh] w-full border-none bg-background p-0 flex flex-col"
+                {/* Buscar */}
+                {showNav && headerConfig.showSearch && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSearchOpen(true)}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label="Buscar"
                   >
-                    {/* ── Barra superior del Sheet (replica el header) ── */}
-                    <SheetHeader className="p-0 shrink-0">
-                      {/* Top bar azul */}
-                      <div className="bg-primary w-full px-4 py-2.5">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                    <Search className="size-5" />
+                  </Button>
+                )}
+
+                {/* Separador */}
+                {showUser && (headerConfig.showNotifications || headerConfig.showUserMenu) && <div className="w-px h-6 bg-border mx-1" aria-hidden="true" />}
+
+                {/* Notificaciones */}
+                {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
+
+                {/* Separador */}
+                {showUser && headerConfig.showNotifications && headerConfig.showUserMenu && <div className="w-px h-6 bg-border mx-1" aria-hidden="true" />}
+
+                {/* User menu */}
+                {showUser && headerConfig.showUserMenu && <UserMenu />}
+              </div>
+
+              {/* ── Mobile: toggle + burger ── */}
+              <div className="flex lg:hidden items-center gap-1">
+                {extraActions && <div className="mr-1 flex items-center">{extraActions}</div>}
+                {variant !== "user-actions" && headerConfig.showThemeToggle && <ThemeToggle />}
+
+                {variant === "user-actions" ? (
+                  <>
+                    {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
+                    {showUser && headerConfig.showUserMenu && <UserMenu />}
+                  </>
+                ) : (
+                  <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Menú"
+                      >
+                        <Menu className="size-6" strokeWidth={1.75} />
+                      </Button>
+                    </SheetTrigger>
+
+                    <SheetContent
+                      side="top"
+                      showCloseButton={false}
+                      className="h-[100dvh] max-h-[100dvh] w-full border-none bg-background p-0 flex flex-col"
+                    >
+                      {/* ── Barra superior del Sheet (replica el header) ── */}
+                      <SheetHeader className="p-0 shrink-0">
+                        {/* Top bar azul */}
+                        <div className="bg-primary w-full px-4 py-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Barra blanca con logo + close */}
-                      <div className="flex items-center justify-between px-5 py-3 border-b-2 border-primary-300">
-                        <div className="flex items-center gap-3">
-                          {headerConfig.showLogo && (
-                            <>
-                              <img
-                                src={headerConfig.logoUrlLight}
-                                alt="Logo MINEDEC GEOportal"
-                                className="h-9 w-auto object-contain dark:hidden"
-                              />
-                              <img
-                                src={headerConfig.logoUrlDark}
-                                alt="Logo MINEDEC GEOportal"
-                                className="h-9 w-auto object-contain hidden dark:block"
-                              />
-                            </>
-                          )}
-                          {headerConfig.title && (
-                            <span className="font-bold text-lg text-foreground ml-2">
-                              {headerConfig.title}
-                            </span>
-                          )}
+                        {/* Barra blanca con logo + close */}
+                        <div className="flex items-center justify-between px-5 py-3 border-b-2 border-primary-300">
+                          <div className="flex items-center gap-3">
+                            {showLogo && (
+                              <>
+                                <img
+                                  src={headerConfig.logoUrlLight}
+                                  alt="Logo MINEDEC GEOportal"
+                                  className="h-9 w-auto object-contain dark:hidden"
+                                />
+                                <img
+                                  src={headerConfig.logoUrlDark}
+                                  alt="Logo MINEDEC GEOportal"
+                                  className="h-9 w-auto object-contain hidden dark:block"
+                                />
+                              </>
+                            )}
+                            {headerConfig.title && (
+                              <span className="font-bold text-lg text-foreground ml-2">
+                                {headerConfig.title}
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSheetOpen(false)}
+                            aria-label="Cerrar menú"
+                          >
+                            <X className="size-6" strokeWidth={1.75} />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSheetOpen(false)}
-                          aria-label="Cerrar menú"
-                        >
-                          <X className="size-6" strokeWidth={1.75} />
-                        </Button>
+                      </SheetHeader>
+
+                      {/* ── Links de navegación (estilo referencia) ── */}
+                      <div className="flex-1 overflow-y-auto">
+                        <nav className="flex flex-col py-2">
+                          {displayNavItems.map((item) => (
+                            <MobileNavItem
+                              key={item.href}
+                              item={item}
+                              isActive={isActive(item.href)}
+                              onNavigate={() => setSheetOpen(false)}
+                            />
+                          ))}
+                        </nav>
                       </div>
-                    </SheetHeader>
 
-                    {/* ── Links de navegación (estilo referencia) ── */}
-                    <div className="flex-1 overflow-y-auto">
-                      <nav className="flex flex-col py-2">
-                        {displayNavItems.map((item) => (
-                          <MobileNavItem
-                            key={item.href}
-                            item={item}
-                            isActive={isActive(item.href)}
-                            onNavigate={() => setSheetOpen(false)}
-                          />
-                        ))}
-                      </nav>
-                    </div>
+                      {/* ── Barra inferior: Buscar | Notificaciones | UserMenu ── */}
+                      <div className="shrink-0 border-t border-border px-4 py-3 bg-surface">
+                        <div className="flex items-center justify-between">
+                          {/* Buscar */}
+                          <Button
+                            variant="ghost"
+                            onClick={() => {
+                              setSheetOpen(false);
+                              setTimeout(() => setSearchOpen(true), 200);
+                            }}
+                            className="flex items-center !justify-start gap-2 text-primary font-semibold text-body-sm"
+                          >
+                            <Search className="size-5" />
+                            <span>Buscar</span>
+                          </Button>
 
-                    {/* ── Barra inferior: Buscar | Notificaciones | UserMenu ── */}
-                    <div className="shrink-0 border-t border-border px-4 py-3 bg-surface">
-                      <div className="flex items-center justify-between">
-                        {/* Buscar */}
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            setSheetOpen(false);
-                            setTimeout(() => setSearchOpen(true), 200);
-                          }}
-                          className="flex items-center !justify-start gap-2 text-primary font-semibold text-body-sm"
-                        >
-                          <Search className="size-5" />
-                          <span>Buscar</span>
-                        </Button>
+                          {/* Separador */}
+                          {showUser && (headerConfig.showNotifications || headerConfig.showUserMenu) && <div className="w-px h-8 bg-border" aria-hidden="true" />}
 
-                        {/* Separador */}
-                        {showUser && (headerConfig.showNotifications || headerConfig.showUserMenu) && <div className="w-px h-8 bg-border" aria-hidden="true" />}
+                          {/* Notificaciones */}
+                          {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
 
-                        {/* Notificaciones */}
-                        {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
+                          {/* Separador */}
+                          {showUser && headerConfig.showNotifications && headerConfig.showUserMenu && <div className="w-px h-8 bg-border" aria-hidden="true" />}
 
-                        {/* Separador */}
-                        {showUser && headerConfig.showNotifications && headerConfig.showUserMenu && <div className="w-px h-8 bg-border" aria-hidden="true" />}
-
-                        {/* User menu */}
-                        {showUser && headerConfig.showUserMenu && <UserMenu />}
+                          {/* User menu */}
+                          {showUser && headerConfig.showUserMenu && <UserMenu />}
+                        </div>
                       </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
+                    </SheetContent>
+                  </Sheet>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
       {/* ── Search overlay ── */}
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} navItems={displayNavItems} />
@@ -759,43 +773,43 @@ function MobileNavItem({
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
-    if (item.children) {
-      return (
-        <div>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className={cn(
-              "flex items-center justify-between w-full px-6 py-6 h-auto outline-none",
-              "transition-colors duration-150",
-              isActive ? "bg-accent/30" : "hover:bg-accent/20"
-            )}
-            aria-expanded={expanded}
-          >
-            <div className="flex items-center gap-4">
-              <item.icon
-                className={cn(
-                  "size-5 shrink-0",
-                  isActive ? "text-primary" : "text-primary"
-                )}
-                strokeWidth={1.75}
-              />
-              <span
-                className={cn(
-                  "text-body font-semibold",
-                  isActive ? "text-primary" : "text-foreground"
-                )}
-              >
-                {item.label}
-              </span>
-            </div>
-            <ChevronDown
+  if (item.children) {
+    return (
+      <div>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className={cn(
+            "flex items-center justify-between w-full px-6 py-6 h-auto outline-none",
+            "transition-colors duration-150",
+            isActive ? "bg-accent/30" : "hover:bg-accent/20"
+          )}
+          aria-expanded={expanded}
+        >
+          <div className="flex items-center gap-4">
+            <item.icon
               className={cn(
-                "size-5 text-primary transition-transform duration-200",
-                expanded && "rotate-180"
+                "size-5 shrink-0",
+                isActive ? "text-primary" : "text-primary"
               )}
-              strokeWidth={2}
+              strokeWidth={1.75}
             />
-          </button>
+            <span
+              className={cn(
+                "text-body font-semibold",
+                isActive ? "text-primary" : "text-foreground"
+              )}
+            >
+              {item.label}
+            </span>
+          </div>
+          <ChevronDown
+            className={cn(
+              "size-5 text-primary transition-transform duration-200",
+              expanded && "rotate-180"
+            )}
+            strokeWidth={2}
+          />
+        </button>
 
         {/* Sub-items */}
         <div

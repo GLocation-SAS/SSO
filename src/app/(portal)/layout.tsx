@@ -1,5 +1,5 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { IntranetSidebar } from "@/components/layout/intranet-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { PortalSidebar } from "./portal-sidebar";
 import { GeoportalHeader } from "@/components/layout/geoportal-header";
 
 export default function PortalLayout({
@@ -9,18 +9,25 @@ export default function PortalLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background flex-col lg:flex-row">
+      <div className="flex min-h-screen w-full bg-background flex-col md:flex-row">
         {/* Sidebar */}
-        <IntranetSidebar activeItem="home" />
+        <PortalSidebar />
 
         {/* Contenido principal */}
-        <div className="flex w-full flex-1 flex-col overflow-hidden">
+        <div className="flex w-full flex-1 flex-col min-w-0 h-svh overflow-hidden p-2 md:pl-0 gap-2">
           {/* Header */}
-          <GeoportalHeader />
+          <div className="w-full shrink-0">
+            <GeoportalHeader
+              variant="user-actions"
+              startAction={
+                <SidebarTrigger className="md:hidden text-muted-foreground hover:text-foreground" />
+              }
+            />
+          </div>
           
           {/* Main content wrapper */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-            <div className="mx-auto w-full max-w-7xl">
+          <main className="flex-1 overflow-y-auto w-full">
+            <div className="w-full">
               {children}
             </div>
           </main>

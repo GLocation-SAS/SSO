@@ -30,15 +30,9 @@ export function DobleFactorView() {
 
     // Mock validation
     setTimeout(() => {
-      if (code === "123456") {
-        router.push("/dashboard");
-      } else if (code === "000000") {
-        setErrorMsg("El código expirado. Solicitar nuevo código.");
-        setIsLoading(false);
-      } else {
-        setErrorMsg("Código incorrecto. Volver a intentar.");
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+      toast.success("Código verificado correctamente.");
+      router.push("/dashboard");
     }, 1500);
   };
 
