@@ -121,6 +121,9 @@ export function DashboardView() {
   const [hoveredRoleId, setHoveredRoleId] = React.useState<string | null>(null);
   const [hoveredAppIdx, setHoveredAppIdx] = React.useState<number | null>(null);
   const [hoveredDayIdx, setHoveredDayIdx] = React.useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = React.useState("Hoy");
+
+  const filterMultiplier = activeFilter === "Hoy" ? 1 : activeFilter === "Ayer" ? 0.8 : activeFilter === "Esta semana" ? 4.5 : activeFilter === "Semana anterior" ? 5.2 : 18.4;
 
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
@@ -340,17 +343,27 @@ export function DashboardView() {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full no-scrollbar">
-                <Badge tone="primary" className="cursor-pointer whitespace-nowrap shadow-none">Hoy</Badge>
-                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Ayer</Badge>
-                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Esta semana</Badge>
-                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Semana anterior</Badge>
-                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Último mes</Badge>
+                {["Hoy", "Ayer", "Esta semana", "Semana anterior", "Último mes"].map((filter) => (
+                  <Badge 
+                    key={filter}
+                    tone={activeFilter === filter ? "primary" : "neutral"}
+                    appearance={activeFilter === filter ? "solid" : "soft"} 
+                    className={cn(
+                      "cursor-pointer whitespace-nowrap shadow-none",
+                      activeFilter !== filter && "hover:bg-muted/50 border-transparent"
+                    )}
+                    onClick={() => setActiveFilter(filter)}
+                  >
+                    {filter}
+                  </Badge>
+                ))}
               </div>
             </CardHeader>
             <CardContent className="px-6 py-4 flex-1">
               <div className="flex flex-col gap-3">
                 {RECENT_CHANGES_SUMMARY.map((change) => {
                   const Icon = change.icon;
+                  const displayCount = Math.max(1, Math.floor(change.count * filterMultiplier));
                   return (
                     <div
                       key={change.id}
@@ -366,7 +379,7 @@ export function DashboardView() {
                           </h4>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="text-xs font-semibold text-muted-foreground">
-                              {change.count} cambios
+                              {displayCount} cambios
                             </span>
                             {change.details && (
                               <>
@@ -379,7 +392,7 @@ export function DashboardView() {
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <span className="font-mono text-[11px] font-semibold text-muted-foreground">
-                          Último: {change.lastTime}
+                          {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Actualizado`}
                         </span>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -391,7 +404,7 @@ export function DashboardView() {
                             <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
                               <DialogTitle className="text-xl font-heading text-primary">Cambios en {change.group.toLowerCase()}</DialogTitle>
                               <DialogDescription className="text-sm text-muted-foreground">
-                                {change.details ? `${change.details} · ` : ""}Hoy · {change.count} cambios registrados
+                                {change.details ? `${change.details} · ` : ""}{activeFilter} · {displayCount} cambios registrados
                               </DialogDescription>
                             </DialogHeader>
                             <div className="flex flex-col p-6 max-h-[60vh] overflow-y-auto">
