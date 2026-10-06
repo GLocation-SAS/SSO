@@ -31,6 +31,8 @@ interface UsuariosFilterBarProps {
   onAppChange: (value: string) => void;
   selectedRol: string;
   onRolChange: (value: string) => void;
+  filterSinAccesos?: boolean;
+  onFilterSinAccesosChange?: (value: boolean) => void;
 }
 
 export function UsuariosFilterBar({
@@ -44,13 +46,16 @@ export function UsuariosFilterBar({
   onAppChange,
   selectedRol,
   onRolChange,
+  filterSinAccesos = false,
+  onFilterSinAccesosChange,
 }: UsuariosFilterBarProps) {
   const hasActiveFilters =
     searchTerm !== "" ||
     selectedEstado !== "Todos" ||
     selectedApp !== "Todas" ||
     selectedSede !== "Todas" ||
-    selectedRol !== "Todos";
+    selectedRol !== "Todos" ||
+    filterSinAccesos;
 
   const handleReset = () => {
     onSearchChange("");
@@ -58,6 +63,7 @@ export function UsuariosFilterBar({
     onAppChange("Todas");
     onSedeChange("Todas");
     onRolChange("Todos");
+    onFilterSinAccesosChange?.(false);
   };
 
   // Roles dependientes de Aplicación y contextualizados por ROL_APLICACION_SEDE
@@ -244,7 +250,7 @@ export function UsuariosFilterBar({
           )}
           {selectedApp !== "Todas" && (
             <DataChip
-              label={`App: ${selectedApp}`}
+              label={`Aplicación: ${selectedApp}`}
               removable
               onRemove={() => {
                 onAppChange("Todas");
@@ -259,6 +265,14 @@ export function UsuariosFilterBar({
               removable
               onRemove={() => onRolChange("Todos")}
               className="bg-secondary-50 border-secondary-300 text-secondary-600 dark:bg-secondary-900/40 dark:text-secondary-300 hover:bg-secondary-100"
+            />
+          )}
+          {filterSinAccesos && (
+            <DataChip
+              label="Accesos: Sin accesos"
+              removable
+              onRemove={() => onFilterSinAccesosChange?.(false)}
+              className="bg-warning/10 border-warning/30 text-warning-700 dark:text-warning-400 hover:bg-warning/20"
             />
           )}
 

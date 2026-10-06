@@ -6,35 +6,36 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
-  User,
-  MapPin,
-  ShieldCheck,
-  Mail,
-  AppWindow,
-  FileText,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  getAvatarInitials,
+} from "@/components/ui/avatar";
+import {
+  Building2,
   Calendar,
+  Clock,
   Edit,
-  Phone,
-  Briefcase,
-  Layers,
+  Mail,
+  ShieldCheck,
+  User,
 } from "lucide-react";
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxContent,
-  ComboboxList,
-  ComboboxItem,
-} from "@/components/ui/combobox";
-import { UsuarioItem, UsuarioSedeRolAplicacion } from "../data/usuarios-data";
-import { cn } from "@/lib/utils";
+import { UsuarioItem } from "../data/usuarios-data";
 
 interface UsuarioModalDetailProps {
   open: boolean;
@@ -49,410 +50,334 @@ export function UsuarioModalDetail({
   usuario,
   onEdit,
 }: UsuarioModalDetailProps) {
-  const [selectedAsignacionId, setSelectedAsignacionId] = React.useState<string>("");
-
-  React.useEffect(() => {
-    if (open && usuario) {
-      const firstAsig = usuario.sedes[0]?.asignaciones[0];
-      setSelectedAsignacionId(firstAsig?.id || "");
-    }
-  }, [open, usuario]);
-
   if (!usuario) return null;
 
-  const allAsignaciones: UsuarioSedeRolAplicacion[] = usuario.sedes.flatMap(
-    (s) => s.asignaciones
+  const totalAsignaciones = usuario.sedes.reduce(
+    (acc, s) => acc + s.asignaciones.length,
+    0
   );
 
-  const selectedAsig = allAsignaciones.find((a) => a.id === selectedAsignacionId);
+  const aplicacionesUnicas = Array.from(
+    new Set(
+      usuario.sedes.flatMap((s) => s.asignaciones.map((a) => a.aplicacionNombre))
+    )
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-3xl max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col [&>div.relative]:w-full [&>div.relative]:items-stretch [&>div.relative]:text-left [&>div.relative]:gap-0"
-        showCloseButton={true}
+        size="xl"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
       >
-        {/* Cabecera del Modal */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left pr-14">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
-                <User className="size-6" />
-              </div>
-              <div className="space-y-0.5">
-                <DialogTitle className="text-left text-xl font-heading font-bold text-foreground">
-                  {usuario.nombre} {usuario.apellidos}
-                </DialogTitle>
-                <DialogDescription className="text-left text-xs text-muted-foreground max-w-none flex flex-wrap items-center gap-2">
-                  <span>{usuario.tipoDocumento || "Cédula"}: <strong>{usuario.documentoIdentificacion || usuario.identificacion || "—"}</strong></span>
-                  <span>&bull;</span>
-                  <span>{usuario.email || usuario.correo || "—"}</span>
-                </DialogDescription>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <Badge
-                tone={
-                  usuario.estado === "Activo"
-                    ? "success"
-                    : usuario.estado === "Inactivo"
-                      ? "neutral"
-                      : "warning"
-                }
-                appearance="soft"
-                className={cn(
-                  "font-semibold text-xs px-2.5 py-0.5 border",
-                  usuario.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                  usuario.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
-                  usuario.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
-                )}
-              >
-                {usuario.estado}
-              </Badge>
-            </div>
-          </div>
+        {/* HEADER */}
+        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
+          <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+            Detalle del usuario
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Cuerpo del Modal con Pestañas */}
-        <div className="flex-1 overflow-y-auto bg-background min-h-0">
-          <Tabs defaultValue="info" className="w-full flex flex-col h-full">
-            {/* Barra de pestañas */}
-            <div className="px-6 pt-3 border-b border-border bg-surface shrink-0">
-              <TabsList className="w-full grid grid-cols-3 bg-transparent p-0 gap-3">
-                <TabsTrigger
-                  value="info"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none shadow-none pb-2.5 bg-transparent text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
+        {/* CONTENT WITH INNER SCROLL */}
+        <div className="overflow-y-auto flex-1 p-6 space-y-6">
+          {/* Header de resumen */}
+          <div className="flex items-start gap-4 p-4 rounded-xl border border-border/80 bg-surface/70">
+            <Avatar size="lg" className="size-14 border border-border/60 shrink-0">
+              <AvatarImage
+                src={usuario.avatar || `https://i.pravatar.cc/150?u=${usuario.id}`}
+                alt={`${usuario.nombre} ${usuario.apellidos}`}
+              />
+              <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
+                {getAvatarInitials(`${usuario.nombre} ${usuario.apellidos}`)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <Badge
+                  tone={
+                    usuario.estado === "Activo"
+                      ? "success"
+                      : usuario.estado === "Inactivo"
+                        ? "neutral"
+                        : "warning"
+                  }
+                  appearance="soft"
+                  className="font-semibold text-xs px-2.5 py-0.5"
                 >
-                  <FileText className="size-3.5" />
-                  <span>Información</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="accesos"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none shadow-none pb-2.5 bg-transparent text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <MapPin className="size-3.5" />
-                  <span>Asignaciones ({allAsignaciones.length})</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="permisos"
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary rounded-none shadow-none pb-2.5 bg-transparent text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <ShieldCheck className="size-3.5" />
-                  <span>Matriz de Permisos</span>
-                </TabsTrigger>
-              </TabsList>
+                  {usuario.estado}
+                </Badge>
+              </div>
+              <h2 className="text-lg font-bold text-foreground truncate">
+                {usuario.nombre} {usuario.apellidos}
+              </h2>
+              <p className="text-xs text-muted-foreground truncate">
+                {usuario.email || usuario.correo || "—"}
+              </p>
             </div>
+          </div>
 
-            <div className="p-6 overflow-y-auto flex-1">
-              {/* TAB 1: Información General */}
-              <TabsContent value="info" className="mt-0 space-y-5">
-                {/* Bloque Identificación y Contacto */}
-                <Card variant="panel" className="overflow-hidden">
-                  <div className="bg-muted/40 px-4 py-2.5 border-b border-border/60 flex items-center gap-2">
-                    <User className="size-4 text-primary" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                      Datos de Identificación y Contacto
-                    </h3>
-                  </div>
-                  <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Nombre completo</span>
-                      <p className="text-sm font-medium text-foreground">{usuario.nombre} {usuario.apellidos}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Documento de identidad</span>
-                      <p className="text-sm font-medium text-foreground">{usuario.tipoDocumento || "Cédula"} &bull; {usuario.documentoIdentificacion || usuario.identificacion || "—"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Correo institucional</span>
-                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                        <Mail className="size-3.5 text-muted-foreground" />
-                        <span>{usuario.email || usuario.correo || "—"}</span>
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Teléfono de contacto</span>
-                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                        <Phone className="size-3.5 text-muted-foreground" />
-                        <span>{usuario.telefono || "No registrado"}</span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Tabs Navigation */}
+          <Tabs defaultValue="info" className="w-full flex flex-col">
+            <TabsList variant="line" className="w-full justify-start border-b border-border mb-4">
+              <TabsTrigger value="info" className="px-6 py-2.5">
+                Información
+              </TabsTrigger>
+              <TabsTrigger value="accesos" className="px-6 py-2.5">
+                Accesos
+              </TabsTrigger>
+              <TabsTrigger value="actividad" className="px-6 py-2.5">
+                Actividad
+              </TabsTrigger>
+            </TabsList>
 
-                {/* Bloque Institucional */}
-                <Card variant="panel" className="overflow-hidden">
-                  <div className="bg-muted/40 px-4 py-2.5 border-b border-border/60 flex items-center gap-2">
-                    <Briefcase className="size-4 text-primary" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                      Adscripción Institucional
-                    </h3>
-                  </div>
-                  <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Función institucional / Cargo</span>
-                      <p className="text-sm font-medium text-foreground">{usuario.cargo || "Funcionario institucional"}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Estado general en el SSO</span>
-                      <div>
-                        <Badge
-                          tone={
-                            usuario.estado === "Activo"
-                              ? "success"
-                              : usuario.estado === "Inactivo"
-                                ? "neutral"
-                                : "warning"
-                          }
-                          appearance="soft"
-                          className={cn(
-                            "font-semibold text-xs border",
-                            usuario.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                            usuario.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
-                            usuario.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
-                          )}
-                        >
-                          {usuario.estado}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Fecha de registro en el sistema</span>
-                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                        <Calendar className="size-3.5 text-muted-foreground" />
-                        <span>{usuario.fechaCreacion || "15/09/2026"}</span>
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase">Sedes asignadas</span>
-                      <p className="text-sm font-medium text-foreground">
-                        {usuario.sedes.length > 0
-                          ? usuario.sedes.map((s) => s.sedeNombre).join(", ")
-                          : "Sin sedes asignadas"}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+            {/* TAB 1: INFORMACIÓN */}
+            <TabsContent value="info" className="mt-0 space-y-4 outline-none">
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Información general
+                </h3>
 
-              {/* TAB 2: Asignaciones Jerárquicas */}
-              <TabsContent value="accesos" className="mt-0 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-border">
-                  <div className="space-y-0.5">
-                    <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Layers className="size-4 text-primary" />
-                      Jerarquía de Asignaciones
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Sede institucional &rarr; Aplicación habilitada &rarr; Rol de acceso institucional
-                    </p>
+                <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
+                  <div className="flex items-center justify-between py-2.5 first:pt-0">
+                    <span className="text-xs text-muted-foreground">Tipo de documento</span>
+                    <span className="font-semibold text-foreground">
+                      {usuario.tipoDocumento || "Cédula"}
+                    </span>
                   </div>
-                  <Badge tone="primary" appearance="soft" size="sm" className="font-semibold text-[11px]">
-                    {allAsignaciones.length} asignaci{allAsignaciones.length === 1 ? "ón" : "ones"}
-                  </Badge>
+
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-xs text-muted-foreground">N.º de documento</span>
+                    <span className="font-semibold text-foreground font-mono">
+                      {usuario.documentoIdentificacion ||
+                        usuario.identificacion ||
+                        "—"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-xs text-muted-foreground">Correo</span>
+                    <span className="font-semibold text-foreground">
+                      {usuario.email || usuario.correo || "—"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5">
+                    <span className="text-xs text-muted-foreground">Estado</span>
+                    <Badge
+                      tone={
+                        usuario.estado === "Activo"
+                          ? "success"
+                          : usuario.estado === "Inactivo"
+                            ? "neutral"
+                            : "warning"
+                      }
+                      appearance="soft"
+                      className="font-semibold text-xs"
+                    >
+                      {usuario.estado}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5 last:pb-0">
+                    <span className="text-xs text-muted-foreground">Fecha de creación</span>
+                    <span className="font-semibold text-foreground">
+                      {usuario.fechaCreacion || "—"}
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                {usuario.sedes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    No tiene asignaciones registradas.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {usuario.sedes.map((sede) => (
-                      <Card key={sede.sedeId || sede.sedeNombre} variant="panel" className="overflow-hidden">
-                        {/* Nivel 1: Sede */}
-                        <div className="bg-muted/50 px-4 py-2.5 border-b border-border flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                            <MapPin className="size-4 text-primary shrink-0" />
-                            <span>{sede.sedeNombre}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground font-medium">
-                            {sede.asignaciones.length} rol{sede.asignaciones.length === 1 ? "" : "es"}
-                          </span>
-                        </div>
-
-                        {/* Nivel 2 y 3: Aplicaciones y Roles dentro de la Sede */}
-                        <div className="p-4 space-y-3">
-                          {sede.asignaciones.length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic">
-                              Sin aplicaciones vinculadas a esta sede.
-                            </p>
-                          ) : (
-                            sede.asignaciones.map((asig) => (
-                              <div
-                                key={asig.id}
-                                className="bg-surface border border-border/80 rounded-xl p-3.5 space-y-2.5 shadow-xs"
-                              >
-                                <div className="flex items-center justify-between gap-3">
-                                  {/* Aplicación */}
-                                  <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                                    <AppWindow className="size-4 text-primary/80 shrink-0" />
-                                    <span>{asig.aplicacionNombre}</span>
-                                  </div>
-
-                                  {/* Estado del Acceso */}
-                                  <Badge
-                                    tone={asig.estado === "Activo" ? "success" : "neutral"}
-                                    appearance="soft"
-                                    className={cn(
-                                      "py-0.5 text-[10px] font-semibold border",
-                                      asig.estado === "Activo"
-                                        ? "bg-success/15 text-success-800 dark:text-success-300 border-success/30"
-                                        : "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700"
-                                    )}
-                                  >
-                                    {asig.estado}
-                                  </Badge>
-                                </div>
-
-                                {/* Rol y Fechas */}
-                                <div className="pl-6 border-l-2 border-primary/30 space-y-1">
-                                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                                    <ShieldCheck className="size-3.5 text-primary shrink-0" />
-                                    <span>Rol: {asig.rolNombre}</span>
-                                  </div>
-                                  {asig.fechaAsignacion && (
-                                    <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 pl-5">
-                                      <Calendar className="size-3 shrink-0" />
-                                      <span>Asignado el: {asig.fechaAsignacion}</span>
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* TAB 3: Permisos Contextuales */}
-              <TabsContent value="permisos" className="mt-0 space-y-5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <ShieldCheck className="size-4 text-primary" />
-                    Seleccionar asignación para ver permisos
-                  </label>
-                  <Combobox
-                    value={selectedAsignacionId}
-                    onValueChange={(val) => {
-                      if (val) setSelectedAsignacionId(val);
-                    }}
-                  >
-                    <ComboboxInput placeholder="Seleccionar asignación..." showClear={false} className="w-full text-xs" />
-                    <ComboboxContent className="min-w-full">
-                      <ComboboxList>
-                        {allAsignaciones.map((a) => (
-                          <ComboboxItem key={a.id} value={a.id}>
-                            {a.sedeNombre} &bull; {a.aplicacionNombre} ({a.rolNombre})
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                </div>
-
-                {selectedAsig ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between pb-2 border-b border-border">
-                      <div className="space-y-0.5">
-                        <h4 className="text-xs font-bold text-foreground">
-                          Recursos y permisos asignados a: {selectedAsig.rolNombre}
-                        </h4>
-                        <p className="text-[11px] text-muted-foreground">
-                          {selectedAsig.sedeNombre} &bull; {selectedAsig.aplicacionNombre}
-                        </p>
+              {/* Información complementaria */}
+              {(usuario.cargo || usuario.telefono) && (
+                <div className="space-y-3 pt-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Datos institucionales
+                  </h3>
+                  <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
+                    {usuario.cargo && (
+                      <div className="flex items-center justify-between py-2 first:pt-0">
+                        <span className="text-xs text-muted-foreground">Cargo / Función</span>
+                        <span className="font-medium text-foreground">{usuario.cargo}</span>
                       </div>
-                    </div>
-
-                    {selectedAsig.permisos.length === 0 ? (
-                      <p className="text-xs text-muted-foreground text-center py-6">
-                        No hay matriz de permisos granulares detallada para este rol.
-                      </p>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {selectedAsig.permisos.map((perm) => (
-                          <Card key={perm.recursoCodigo} variant="panel" className="p-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border/40">
-                              <span className="text-xs font-bold text-foreground">{perm.recursoNombre}</span>
-                              <span className="text-[10px] text-muted-foreground font-mono">{perm.recursoCodigo}</span>
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <div className="flex items-center space-x-1.5">
-                                <Checkbox id={`modal-ver-${perm.recursoCodigo}`} checked={perm.puedeVer} disabled />
-                                <label htmlFor={`modal-ver-${perm.recursoCodigo}`} className="text-xs text-muted-foreground cursor-not-allowed">
-                                  Ver
-                                </label>
-                              </div>
-                              <div className="flex items-center space-x-1.5">
-                                <Checkbox id={`modal-crear-${perm.recursoCodigo}`} checked={perm.puedeCrear} disabled />
-                                <label htmlFor={`modal-crear-${perm.recursoCodigo}`} className="text-xs text-muted-foreground cursor-not-allowed">
-                                  Crear
-                                </label>
-                              </div>
-                              <div className="flex items-center space-x-1.5">
-                                <Checkbox id={`modal-edit-${perm.recursoCodigo}`} checked={perm.puedeEditar} disabled />
-                                <label htmlFor={`modal-edit-${perm.recursoCodigo}`} className="text-xs text-muted-foreground cursor-not-allowed">
-                                  Editar
-                                </label>
-                              </div>
-                              <div className="flex items-center space-x-1.5">
-                                <Checkbox id={`modal-del-${perm.recursoCodigo}`} checked={perm.puedeEliminar} disabled />
-                                <label htmlFor={`modal-del-${perm.recursoCodigo}`} className="text-xs text-muted-foreground cursor-not-allowed">
-                                  Eliminar
-                                </label>
-                              </div>
-                            </div>
-                          </Card>
-                        ))}
+                    )}
+                    {usuario.telefono && (
+                      <div className="flex items-center justify-between py-2 last:pb-0">
+                        <span className="text-xs text-muted-foreground">Teléfono</span>
+                        <span className="font-medium text-foreground">{usuario.telefono}</span>
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* TAB 2: ACCESOS */}
+            <TabsContent value="accesos" className="mt-0 space-y-4 outline-none">
+              {/* Resumen de contadores */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                  <span className="text-xs text-muted-foreground block mb-0.5">Sedes</span>
+                  <span className="text-xl font-heading font-bold text-foreground">
+                    {usuario.sedes.length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                  <span className="text-xs text-muted-foreground block mb-0.5">Aplicaciones</span>
+                  <span className="text-xl font-heading font-bold text-foreground">
+                    {aplicacionesUnicas.length}
+                  </span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                  <span className="text-xs text-muted-foreground block mb-0.5">Roles asignados</span>
+                  <span className="text-xl font-heading font-bold text-foreground">
+                    {totalAsignaciones}
+                  </span>
+                </div>
+              </div>
+
+              {/* Lista por Sedes */}
+              <div className="space-y-4 pt-1">
+                {usuario.sedes.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+                    No tiene accesos registrados actualmente.
+                  </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground text-center py-8">
-                    Seleccione una asignación en el selector superior para ver sus permisos.
-                  </p>
+                  usuario.sedes.map((sede) => (
+                    <div
+                      key={sede.sedeId || sede.sedeNombre}
+                      className="rounded-xl border border-border overflow-hidden bg-surface"
+                    >
+                      {/* Cabecera Sede */}
+                      <div className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                          <Building2 className="size-4 text-primary shrink-0" />
+                          <span>{sede.sedeNombre}</span>
+                        </div>
+                        <Badge tone="neutral" appearance="soft" className="text-xs font-semibold">
+                          {sede.asignaciones.length}{" "}
+                          {sede.asignaciones.length === 1
+                            ? "asignación"
+                            : "asignaciones"}
+                        </Badge>
+                      </div>
+
+                      {/* Tabla Aplicación | Rol | Estado */}
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-b border-border/60 bg-muted/20">
+                            <TableHead className="text-xs font-semibold h-9 text-foreground pl-4">
+                              Aplicación
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold h-9 text-foreground">
+                              Rol
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold h-9 text-right pr-4 text-foreground">
+                              Estado
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sede.asignaciones.map((asig) => (
+                            <TableRow
+                              key={asig.id}
+                              className="border-b border-border/40 hover:bg-muted/10 last:border-b-0"
+                            >
+                              <TableCell className="py-2.5 pl-4 text-xs font-semibold text-foreground">
+                                {asig.aplicacionNombre}
+                              </TableCell>
+                              <TableCell className="py-2.5 text-xs text-muted-foreground font-medium">
+                                {asig.rolNombre}
+                              </TableCell>
+                              <TableCell className="py-2.5 pr-4 text-right">
+                                <Badge
+                                  tone={
+                                    asig.estado === "Activo"
+                                      ? "success"
+                                      : "neutral"
+                                  }
+                                  appearance="soft"
+                                  className="text-xs font-semibold"
+                                >
+                                  {asig.estado}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ))
                 )}
-              </TabsContent>
-            </div>
+              </div>
+            </TabsContent>
+
+            {/* TAB 3: ACTIVIDAD */}
+            <TabsContent value="actividad" className="mt-0 space-y-4 outline-none">
+              <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Registro reciente de actividad
+                </h3>
+                <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 size-2 rounded-full bg-primary" />
+                    <p className="text-xs font-semibold text-foreground">
+                      Último inicio de sesión exitoso
+                    </p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Clock className="size-3" /> Hoy a las 08:42
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 size-2 rounded-full bg-success" />
+                    <p className="text-xs font-semibold text-foreground">
+                      Sincronización de accesos completada
+                    </p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <ShieldCheck className="size-3" /> {usuario.fechaCreacion}
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 size-2 rounded-full bg-muted-foreground" />
+                    <p className="text-xs font-semibold text-foreground">
+                      Creación del registro de usuario en SSO
+                    </p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Calendar className="size-3" /> {usuario.fechaCreacion}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
 
-        {/* Pie del Modal */}
-        <div className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
-          <span className="text-[11px] text-muted-foreground">
-            Gestión de Identidades y Accesos &bull; MINEDUC
+        {/* FOOTER */}
+        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            Gestión de Usuarios &bull; MINEDUC
           </span>
           <div className="flex items-center gap-2">
+            <Button
+              variant="neutral"
+              onClick={() => onOpenChange(false)}
+            >
+              Cerrar
+            </Button>
             {onEdit && (
               <Button
-                variant="outline"
-                size="sm"
+                variant="primary"
                 onClick={() => {
                   onOpenChange(false);
                   onEdit(usuario);
                 }}
-                className="gap-2 text-xs h-9"
+                className="gap-2"
               >
-                <Edit className="size-3.5" />
-                <span>Editar datos</span>
+                <Edit className="size-4" />
+                <span>Editar usuario</span>
               </Button>
             )}
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="text-xs h-9 px-4"
-            >
-              Cerrar
-            </Button>
           </div>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

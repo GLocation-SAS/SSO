@@ -18,7 +18,11 @@ import { UsuariosTable } from "../components/usuarios-table";
 import { UsuarioModalDetail } from "../components/usuario-modal-detail";
 import { UsuarioPasswordDialog } from "../components/usuario-password-dialog";
 import { UsuarioModalForm } from "../components/usuario-modal-form";
-import { UsuarioSheetAccess } from "../components/usuario-sheet-access";
+import { UsuarioModalAccess } from "../components/usuario-modal-access";
+import {
+  UsuariosSummaryCards,
+  SummaryFilterType,
+} from "../components/usuarios-summary-cards";
 
 export function UsuariosView() {
   const [usuarios, setUsuarios] = React.useState<UsuarioItem[]>(mockUsuariosData);
@@ -29,6 +33,68 @@ export function UsuariosView() {
   const [selectedApp, setSelectedApp] = React.useState("Todas");
   const [selectedRol, setSelectedRol] = React.useState("Todos");
   const [selectedEstado, setSelectedEstado] = React.useState("Todos");
+  const [filterSinAccesos, setFilterSinAccesos] = React.useState(false);
+
+  // Métricas operacionales para Cards resumen
+  const totalCount = usuarios.length;
+  const activeCount = React.useMemo(
+    () => usuarios.filter((u) => u.estado === "Activo").length,
+    [usuarios]
+  );
+  const inactiveCount = React.useMemo(
+    () => usuarios.filter((u) => u.estado === "Inactivo").length,
+    [usuarios]
+  );
+  const sinAccesosCount = React.useMemo(
+    () =>
+      usuarios.filter((u) => {
+        const totalAsig = u.sedes.reduce(
+          (acc, s) => acc + (s.asignaciones?.length || 0),
+          0
+        );
+        return totalAsig === 0;
+      }).length,
+    [usuarios]
+  );
+
+  // Filtro activo reflejado en Cards
+  const activeSummaryFilter = React.useMemo<SummaryFilterType | null>(() => {
+    if (filterSinAccesos) return "sin-accesos";
+    if (selectedEstado === "Activo") return "activos";
+    if (selectedEstado === "Inactivo") return "inactivos";
+    if (selectedEstado === "Todos" && !filterSinAccesos) return "total";
+    return null;
+  }, [filterSinAccesos, selectedEstado]);
+
+  const handleSelectSummaryFilter = (filter: SummaryFilterType) => {
+    if (filter === "total") {
+      setSelectedEstado("Todos");
+      setFilterSinAccesos(false);
+    } else if (filter === "activos") {
+      if (activeSummaryFilter === "activos") {
+        setSelectedEstado("Todos");
+        setFilterSinAccesos(false);
+      } else {
+        setSelectedEstado("Activo");
+        setFilterSinAccesos(false);
+      }
+    } else if (filter === "inactivos") {
+      if (activeSummaryFilter === "inactivos") {
+        setSelectedEstado("Todos");
+        setFilterSinAccesos(false);
+      } else {
+        setSelectedEstado("Inactivo");
+        setFilterSinAccesos(false);
+      }
+    } else if (filter === "sin-accesos") {
+      if (activeSummaryFilter === "sin-accesos") {
+        setFilterSinAccesos(false);
+      } else {
+        setFilterSinAccesos(true);
+        setSelectedEstado("Todos");
+      }
+    }
+  };
 
   // Modales y Drawers
   const [detailUser, setDetailUser] = React.useState<UsuarioItem | null>(null);
@@ -47,17 +113,32 @@ export function UsuariosView() {
     open: boolean;
     title: string;
     description: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: "default" | "success" | "danger" | "warning" | "info";
     onConfirm: () => void;
   }>({
     open: false,
     title: "",
     description: "",
+    confirmText: "Confirmar",
+    cancelText: "Cerrar",
+    variant: "warning",
     onConfirm: () => { },
   });
 
   // Filtrado reactivo
   const filteredUsuarios = React.useMemo(() => {
     return usuarios.filter((user) => {
+      // 0. Usuarios sin accesos
+      if (filterSinAccesos) {
+        const totalAsig = user.sedes.reduce(
+          (acc, s) => acc + (s.asignaciones?.length || 0),
+          0
+        );
+        if (totalAsig > 0) return false;
+      }
+
       // 1. Search term
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase().trim();
@@ -72,18 +153,22 @@ export function UsuariosView() {
 
       // 2. Sede
       if (selectedSede !== "Todas") {
-        if (!user.sedes.some(s => s.sedeNombre === selectedSede)) return false;
+        if (!user.sedes.some((s) => s.sedeNombre === selectedSede)) return false;
       }
 
       // 3. Aplicación
       if (selectedApp !== "Todas") {
-        const hasApp = user.sedes.some(s => s.asignaciones.some(a => a.aplicacionNombre === selectedApp));
+        const hasApp = user.sedes.some((s) =>
+          s.asignaciones.some((a) => a.aplicacionNombre === selectedApp)
+        );
         if (!hasApp) return false;
       }
 
       // 4. Rol
       if (selectedRol !== "Todos") {
-        const hasRol = user.sedes.some(s => s.asignaciones.some(a => a.rolNombre === selectedRol));
+        const hasRol = user.sedes.some((s) =>
+          s.asignaciones.some((a) => a.rolNombre === selectedRol)
+        );
         if (!hasRol) return false;
       }
 
@@ -94,7 +179,15 @@ export function UsuariosView() {
 
       return true;
     });
-  }, [usuarios, searchTerm, selectedSede, selectedApp, selectedRol, selectedEstado]);
+  }, [
+    usuarios,
+    searchTerm,
+    selectedSede,
+    selectedApp,
+    selectedRol,
+    selectedEstado,
+    filterSinAccesos,
+  ]);
 
   // Handlers
   const handleOpenDetail = (usuario: UsuarioItem) => {
@@ -138,20 +231,45 @@ export function UsuariosView() {
   };
 
   const handleToggleStatus = (usuario: UsuarioItem) => {
-    const nextStatus = usuario.estado === "Activo" ? "Inactivo" : "Activo";
-    const actionWord = usuario.estado === "Activo" ? "inactivar" : "activar";
+    const isCurrentlyActive = usuario.estado === "Activo";
+    const nextStatus = isCurrentlyActive ? "Inactivo" : "Activo";
+    const nombreCompleto = `${usuario.nombre} ${usuario.apellidos}`.trim();
 
-    setConfirmDialog({
-      open: true,
-      title: `¿Deseas ${actionWord} al usuario?`,
-      description: `Esta acción cambiará el estado de ${usuario.nombre} a "${nextStatus}". Los accesos a las aplicaciones vinculadas serán ajustados de forma inmediata.`,
-      onConfirm: () => {
-        setUsuarios((prev) =>
-          prev.map((u) => (u.id === usuario.id ? { ...u, estado: nextStatus } : u))
-        );
-        toast.info(`Usuario ${actionWord}do correctamente`);
-      },
-    });
+    if (isCurrentlyActive) {
+      setConfirmDialog({
+        open: true,
+        variant: "warning",
+        title: "¿Inactivar usuario?",
+        description: `Estás a punto de inactivar a este usuario. Esta acción suspenderá su acceso a todas las aplicaciones asignadas.`,
+        confirmText: "Inactivar",
+        cancelText: "Cancelar",
+        onConfirm: () => {
+          setUsuarios((prev) =>
+            prev.map((u) => (u.id === usuario.id ? { ...u, estado: "Inactivo" } : u))
+          );
+          toast.info("Usuario inactivado correctamente", {
+            description: `${nombreCompleto} ha pasado a estado Inactivo.`,
+          });
+        },
+      });
+    } else {
+      setConfirmDialog({
+        open: true,
+        variant: "success",
+        title: "¿Activar usuario?",
+        description: `Estás a punto de activar a este usuario. Esta acción restablecerá su acceso a todas las aplicaciones asignadas.`,
+        confirmText: "Activar",
+        cancelText: "Cancelar",
+        onConfirm: () => {
+          setUsuarios((prev) =>
+            prev.map((u) => (u.id === usuario.id ? { ...u, estado: "Activo" } : u))
+          );
+          toast.success("Usuario activado correctamente", {
+            description: `${nombreCompleto} ha pasado a estado Activo.`,
+          });
+        },
+      });
+    }
   };
 
   const handleExport = () => {
@@ -187,18 +305,33 @@ export function UsuariosView() {
             </div>
           </div>
 
+          {/* Cards resumen operativo */}
+          <UsuariosSummaryCards
+            total={totalCount}
+            activos={activeCount}
+            inactivos={inactiveCount}
+            sinAccesos={sinAccesosCount}
+            activeFilter={activeSummaryFilter}
+            onSelectFilter={handleSelectSummaryFilter}
+          />
+
           {/* Filtros */}
           <UsuariosFilterBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             selectedEstado={selectedEstado}
-            onEstadoChange={setSelectedEstado}
+            onEstadoChange={(est) => {
+              setSelectedEstado(est);
+              if (filterSinAccesos) setFilterSinAccesos(false);
+            }}
             selectedSede={selectedSede}
             onSedeChange={setSelectedSede}
             selectedApp={selectedApp}
             onAppChange={setSelectedApp}
             selectedRol={selectedRol}
             onRolChange={setSelectedRol}
+            filterSinAccesos={filterSinAccesos}
+            onFilterSinAccesosChange={setFilterSinAccesos}
           />
 
           {/* Tabla */}
@@ -230,7 +363,7 @@ export function UsuariosView() {
           onSave={handleSaveUser}
         />
 
-        <UsuarioSheetAccess
+        <UsuarioModalAccess
           usuario={accessUser}
           allUsuarios={usuarios}
           open={isAccessOpen}
@@ -250,6 +383,9 @@ export function UsuariosView() {
           onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
           title={confirmDialog.title}
           description={confirmDialog.description}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          variant={confirmDialog.variant}
           onConfirm={confirmDialog.onConfirm}
         />
 

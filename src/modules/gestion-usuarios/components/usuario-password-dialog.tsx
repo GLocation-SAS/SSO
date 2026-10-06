@@ -73,7 +73,7 @@ export function UsuarioPasswordDialog({
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-muted-foreground">
-            Acción contextual de restablecimiento seguro de credenciales para el usuario institucional.
+            Restablece o define una nueva contraseña para este usuario.
           </DialogDescription>
         </DialogHeader>
 
@@ -173,13 +173,12 @@ export function UsuarioPasswordDialog({
           <DialogFooter className="mt-4 flex flex-col-reverse sm:flex-row gap-2 justify-end">
             <Button
               type="button"
-              variant="outline"
-              size="sm"
+              variant="neutral"
               onClick={() => onOpenChange(false)}
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" size="sm" className="gap-2">
+            <Button type="submit" variant="primary" className="gap-2">
               <ShieldCheck className="size-4" />
               Actualizar contraseña
             </Button>

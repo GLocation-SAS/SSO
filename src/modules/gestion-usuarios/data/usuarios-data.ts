@@ -70,6 +70,7 @@ export interface UsuarioItem {
   id: string;
   nombre: string;
   apellidos: string;
+  avatar?: string;
   tipoDocumento: "Cédula";
   documentoIdentificacion: string;
   email: string;
@@ -186,6 +187,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-01",
     nombre: "María Fernanda",
     apellidos: "Gómez Andrade",
+    avatar: "https://i.pravatar.cc/150?u=usr-01",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1719874563",
     email: "maria.gomez@mineduc.gob.ec",
@@ -244,6 +246,26 @@ export const mockUsuariosData: UsuarioItem[] = [
             ]
           }
         ]
+      },
+      {
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-01-4",
+            usuarioId: "usr-01",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-gd-adm",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Administrador",
+            estado: "Activo",
+            fechaAsignacion: "15/09/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -251,6 +273,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-02",
     nombre: "Carlos Eduardo",
     apellidos: "Mendoza Viteri",
+    avatar: "https://i.pravatar.cc/150?u=usr-02",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1715896324",
     email: "carlos.mendoza@mineduc.gob.ec",
@@ -287,6 +310,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-03",
     nombre: "Lucía Gabriela",
     apellidos: "Paredes Roldán",
+    avatar: "https://i.pravatar.cc/150?u=usr-03",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "0104567892",
     email: "lucia.paredes@mineduc.gob.ec",
@@ -324,6 +348,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-04",
     nombre: "Juan Pablo",
     apellidos: "Ortiz Noboa",
+    avatar: "https://i.pravatar.cc/150?u=usr-04",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "0923456781",
     email: "juan.ortiz@mineduc.gob.ec",
@@ -360,6 +385,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-05",
     nombre: "Diana Carolina",
     apellidos: "Villacís Mora",
+    avatar: "https://i.pravatar.cc/150?u=usr-05",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1720145896",
     email: "diana.villacis@mineduc.gob.ec",
@@ -396,6 +422,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-06",
     nombre: "Verónica Patricia",
     apellidos: "Almeida Carrera",
+    avatar: "https://i.pravatar.cc/150?u=usr-06",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1714523698",
     email: "veronica.almeida@mineduc.gob.ec",
@@ -432,6 +459,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-07",
     nombre: "Andrés Felipe",
     apellidos: "Salazar",
+    avatar: "https://i.pravatar.cc/150?u=usr-07",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1720567812",
     email: "andres.salazar@mineduc.gob.ec",
@@ -485,6 +513,7 @@ export const mockUsuariosData: UsuarioItem[] = [
     id: "usr-08",
     nombre: "Sofía Alejandra",
     apellidos: "Torres",
+    avatar: "https://i.pravatar.cc/150?u=usr-08",
     tipoDocumento: "Cédula",
     documentoIdentificacion: "1103567894",
     email: "sofia.torres@mineduc.gob.ec",
@@ -515,6 +544,44 @@ export const mockUsuariosData: UsuarioItem[] = [
             ]
           }
         ]
+      }
+    ]
+  },
+  {
+    id: "usr-09",
+    nombre: "Gabriel Antonio",
+    apellidos: "Morales Silva",
+    avatar: "https://i.pravatar.cc/150?u=usr-09",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1718902341",
+    email: "gabriel.morales@mineduc.gob.ec",
+    identificacion: "1718902341",
+    correo: "gabriel.morales@mineduc.gob.ec",
+    telefono: "+593 99 900 1122",
+    cargo: "Docente",
+    estado: "Pendiente",
+    fechaCreacion: "01/10/2026",
+    sedes: []
+  },
+  {
+    id: "usr-10",
+    nombre: "Elena Rocío",
+    apellidos: "Cárdenas Vaca",
+    avatar: "https://i.pravatar.cc/150?u=usr-10",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1724567819",
+    email: "elena.cardenas@mineduc.gob.ec",
+    identificacion: "1724567819",
+    correo: "elena.cardenas@mineduc.gob.ec",
+    telefono: "+593 99 911 2233",
+    cargo: "Analista de Planta Central",
+    estado: "Inactivo",
+    fechaCreacion: "25/09/2026",
+    sedes: [
+      {
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: []
       }
     ]
   }
