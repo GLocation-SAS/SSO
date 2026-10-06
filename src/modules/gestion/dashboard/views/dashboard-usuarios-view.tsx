@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MinedecSpinner } from "@/components/ui/minedec-spinner";
+import { getAssetPath } from "@/lib/assets";
 import {
   AlertTriangle,
   ShieldCheck,
@@ -284,9 +285,10 @@ export function DashboardUsuariosView() {
           >
             {userPhoto ? (
               <img
-                src={userPhoto}
+                src={getAssetPath(userPhoto)}
                 alt="Resumen de gestión"
-                className="w-full h-full object-cover object-left-top"
+                className="absolute inset-0 w-full h-full object-cover object-left-top"
+                onError={() => setUserPhoto(null)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-muted/30 to-muted/10 p-6">
