@@ -588,15 +588,15 @@ export function DashboardView() {
                 {/* Chart Area */}
                 <div className="relative h-36 w-full mt-4">
                   {/* Y-Axis Grid lines */}
-                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
-                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
-                      <span className="w-8 text-right pr-2 bg-card">50</span>
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                    <div className="border-b border-border/40 w-full flex text-[10px] text-muted-foreground/70 font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-surface">50</span>
                     </div>
-                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
-                      <span className="w-8 text-right pr-2 bg-card">25</span>
+                    <div className="border-b border-border/40 w-full flex text-[10px] text-muted-foreground/70 font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-surface">25</span>
                     </div>
-                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
-                      <span className="w-8 text-right pr-2 bg-card">0</span>
+                    <div className="border-b border-border/40 w-full flex text-[10px] text-muted-foreground/70 font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-surface">0</span>
                     </div>
                   </div>
 
@@ -667,7 +667,7 @@ export function DashboardView() {
                     <div key={app.id} className="flex-1 flex justify-center">
                       <span
                         className={cn(
-                          "transition-colors text-center truncate max-w-[80px]",
+                          "transition-colors text-center leading-tight px-1",
                           hoveredAppIdx === idx ? "text-primary font-bold" : ""
                         )}
                         title={app.name}
