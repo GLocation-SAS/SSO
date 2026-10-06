@@ -101,10 +101,10 @@ const ROLE_DISTRIBUTION = [
   { id: "otros", name: "Otros", count: 62, pct: 5, color: "var(--muted-foreground)", resources: 3, status: "Activo" },
 ];
 
-const TOP_APPLICATIONS = [
-  { id: "notas", name: "Sistema de Notas", count: 650, pct: 52, color: "var(--primary)" },
-  { id: "portal", name: "Portal Educativo", count: 420, pct: 34, color: "var(--info)" },
-  { id: "personal", name: "Gestión de Personal", count: 175, pct: 14, color: "var(--warning)" },
+const APP_CONFIG_DATA = [
+  { id: "notas", name: "Sistema de Notas", roles: 8, recursos: 42, color: "var(--primary)" },
+  { id: "portal", name: "Portal Educativo", roles: 5, recursos: 28, color: "var(--info)" },
+  { id: "personal", name: "Gestión de Personal", roles: 6, recursos: 35, color: "var(--warning)" },
 ];
 
 const ACCESS_HISTORY = [
@@ -540,10 +540,10 @@ export function DashboardView() {
                     ) : (
                       <>
                         <span className="text-xl font-bold font-heading text-foreground tabular-nums">
-                          1.245
+                          5 roles
                         </span>
-                        <span className="text-[10px] font-semibold text-muted-foreground mt-0.5">
-                          usuarios
+                        <span className="text-[9px] font-semibold text-muted-foreground mt-0.5 leading-[1.1]">
+                          1.245 usuarios<br/>asociados
                         </span>
                       </>
                     )}
@@ -614,14 +614,14 @@ export function DashboardView() {
             </CardFooter>
           </Card>
 
-          {/* 3.2 Aplicaciones con más usuarios - BAR CHART */}
+          {/* 3.2 Configuración por aplicación - GROUPED BAR CHART */}
           <Card variant="panel" className="flex flex-col h-full border border-border shadow-2xs">
             <CardHeader className="items-start text-left gap-1 p-6 pb-3 border-b border-border/50 min-h-[76px] flex flex-col justify-center">
               <CardTitle className="text-lg md:text-xl font-heading font-bold text-primary h-auto">
-                Aplicaciones con más usuarios
+                Configuración por aplicación
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground line-clamp-1">
-                Cantidad de usuarios asociados a cada aplicación.
+                Comparación de roles y recursos configurados en cada aplicación.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
@@ -629,10 +629,10 @@ export function DashboardView() {
                 {/* Y-Axis Grid lines */}
                 <div className="absolute inset-x-0 top-0 bottom-7 flex flex-col justify-between pointer-events-none opacity-40">
                   <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>700</span>
+                    <span>50</span>
                   </div>
                   <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>350</span>
+                    <span>25</span>
                   </div>
                   <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
                     <span>0</span>
@@ -640,48 +640,60 @@ export function DashboardView() {
                 </div>
 
                 {/* Bars */}
-                <div className="h-32 flex items-end justify-around gap-4 z-10 px-4 border-b border-border/70">
-                  {TOP_APPLICATIONS.map((app, idx) => {
-                    const heightPercent = (app.count / 700) * 100;
+                <div className="h-32 flex items-end justify-around gap-2 z-10 px-2 border-b border-border/70">
+                  {APP_CONFIG_DATA.map((app, idx) => {
+                    const rolesHeight = (app.roles / 50) * 100;
+                    const recursosHeight = (app.recursos / 50) * 100;
                     const isHovered = hoveredAppIdx === idx;
                     const isDimmed = hoveredAppIdx !== null && !isHovered;
 
                     return (
                       <div
                         key={app.id}
-                        className="flex-1 flex flex-col items-center h-full justify-end relative cursor-pointer group max-w-[80px]"
+                        className="flex-1 flex flex-col items-center h-full justify-end relative cursor-pointer group px-1"
                         onMouseEnter={() => setHoveredAppIdx(idx)}
                         onMouseLeave={() => setHoveredAppIdx(null)}
                         tabIndex={0}
                         role="button"
-                        aria-label={`${app.name}: ${app.count} usuarios`}
+                        aria-label={`${app.name}: ${app.roles} roles, ${app.recursos} recursos`}
                       >
                         {isHovered && (
                           <ChartTooltip
                             active={true}
-                            className="absolute -top-16 left-1/2 -translate-x-1/2 min-w-[130px]"
+                            className="absolute -top-16 left-1/2 -translate-x-1/2 min-w-[160px] z-20"
                           >
                             <ChartTooltipContent
                               title={app.name}
                               label=""
-                              value={`${app.count}`}
+                              value=""
                               indicatorColor={app.color}
-                              subvalue="usuarios asociados"
+                              subvalue={`${app.roles} roles · ${app.recursos} recursos configurados`}
                             />
                           </ChartTooltip>
                         )}
 
-                        <div
-                          className={cn(
-                            "w-full rounded-t-md transition-all duration-200",
-                            isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
-                            isDimmed && "opacity-45"
-                          )}
-                          style={{
-                            height: `${heightPercent}%`,
-                            backgroundColor: app.color,
-                          }}
-                        />
+                        <div className={cn("flex items-end gap-1.5 w-full justify-center", isDimmed && "opacity-45")}>
+                          <div
+                            className={cn(
+                              "w-3 rounded-t-sm transition-all duration-200",
+                              isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
+                            )}
+                            style={{
+                              height: `${rolesHeight}%`,
+                              backgroundColor: "var(--info)",
+                            }}
+                          />
+                          <div
+                            className={cn(
+                              "w-3 rounded-t-sm transition-all duration-200",
+                              isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
+                            )}
+                            style={{
+                              height: `${recursosHeight}%`,
+                              backgroundColor: "var(--warning)",
+                            }}
+                          />
+                        </div>
                       </div>
                     );
                   })}
@@ -689,7 +701,7 @@ export function DashboardView() {
 
                 {/* X-Axis labels */}
                 <div className="flex justify-around text-[11px] font-semibold text-muted-foreground pt-2 px-2">
-                  {TOP_APPLICATIONS.map((app, idx) => (
+                  {APP_CONFIG_DATA.map((app, idx) => (
                     <span
                       key={app.id}
                       className={cn(
@@ -701,14 +713,20 @@ export function DashboardView() {
                     </span>
                   ))}
                 </div>
+
+                {/* Legend */}
+                <ChartLegend alignment="center" className="gap-4 pt-4 w-full justify-center">
+                  <ChartLegendItem label="Roles" color="var(--info)" active={true} />
+                  <ChartLegendItem label="Recursos" color="var(--warning)" active={true} />
+                </ChartLegend>
               </ChartContainer>
             </CardContent>
             <CardFooter className="relative z-10 py-4 px-6 border-t border-border/50 mt-auto flex justify-center items-center w-full">
               <Link
-                href="/aplicaciones"
+                href="/gestion-aplicaciones"
                 className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link"
               >
-                Ver todas las aplicaciones <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
+                Ver configuración de aplicaciones <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
               </Link>
             </CardFooter>
           </Card>
