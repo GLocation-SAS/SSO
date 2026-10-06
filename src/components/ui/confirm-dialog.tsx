@@ -27,21 +27,24 @@ export function ConfirmDialog({
   title = "¿Confirmar acción?",
   description = "Esta acción modificará la configuración del elemento seleccionado.",
   confirmText = "Confirmar",
-  cancelText = "Cancelar",
+  cancelText = "Cerrar",
   variant = "warning",
   onConfirm,
 }: ConfirmDialogProps) {
+  const isStatus = Boolean(variant && variant !== "default");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant={variant} className="sm:max-w-md">
+      <DialogContent variant={variant}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter showCloseButton={false}>
           <Button
             type="button"
             variant="neutral"
+            size="default"
             onClick={() => onOpenChange(false)}
           >
             {cancelText}
@@ -49,6 +52,7 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant={variant === "default" ? "primary" : variant}
+            size="default"
             onClick={() => {
               onConfirm();
               onOpenChange(false);

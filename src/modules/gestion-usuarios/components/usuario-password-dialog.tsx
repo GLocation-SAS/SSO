@@ -7,12 +7,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupButton,
+} from "@/components/ui/input-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Key, Eye, EyeOff, ShieldCheck, Mail, AlertCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Eye, EyeOff, AlertCircle, Info } from "lucide-react";
 import { UsuarioItem } from "../data/usuarios-data";
 
 interface UsuarioPasswordDialogProps {
@@ -31,16 +42,21 @@ export function UsuarioPasswordDialog({
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [requireResetNextLogin, setRequireResetNextLogin] = React.useState(true);
   const [sendEmailNotification, setSendEmailNotification] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [errors, setErrors] = React.useState<{
+    newPassword?: string;
+    confirmPassword?: string;
+  }>({});
 
   React.useEffect(() => {
     if (open) {
       setNewPassword("");
       setConfirmPassword("");
       setShowPassword(false);
-      setError(null);
+      setShowConfirmPassword(false);
+      setErrors({});
     }
   }, [open]);
 
@@ -48,102 +64,196 @@ export function UsuarioPasswordDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPassword || newPassword.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres.");
-      return;
+    const nextErrors: { newPassword?: string; confirmPassword?: string } = {};
+
+    if (!newPassword.trim()) {
+      nextErrors.newPassword = "Por favor completa este campo.";
+    } else if (newPassword.length < 8) {
+      nextErrors.newPassword = "La contraseña debe tener al menos 8 caracteres.";
     }
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+
+    if (!confirmPassword.trim()) {
+      nextErrors.confirmPassword = "Por favor completa este campo.";
+    } else if (newPassword && newPassword !== confirmPassword) {
+      nextErrors.confirmPassword = "Las contraseñas no coinciden.";
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
-    setError(null);
+    setErrors({});
     onSuccess(usuario.id);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="default" className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2 text-primary dark:text-primary-400 mb-1">
-            <Key className="size-5" />
+      <DialogContent variant="default" className="sm:max-w-md bg-background">
+        <TooltipProvider delayDuration={150}>
+          <DialogHeader>
             <DialogTitle className="text-lg font-heading font-bold text-foreground">
               Cambiar clave de usuario
             </DialogTitle>
-          </div>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Restablece o define una nueva contraseña para este usuario.
-          </DialogDescription>
-        </DialogHeader>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Restablece o define una nueva contraseña para este usuario.
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Resumen del usuario destino */}
-        <div className="bg-muted/40 border border-border/70 rounded-xl p-3 flex flex-col gap-1 text-xs">
-          <div className="flex justify-between items-center">
-            <span className="font-bold text-foreground">
-              {usuario.nombre} {usuario.apellidos}
-            </span>
-            <span className="font-mono text-muted-foreground text-[11px]">
-              C.I. {usuario.identificacion}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Mail className="size-3 text-muted-foreground" />
-            <span className="truncate">{usuario.correo}</span>
-          </div>
-        </div>
+          <Separator className="my-3.5" />
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
-          {error && (
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs">
-              <AlertCircle className="size-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Nueva Contraseña */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">
-              Nueva contraseña temporal o definitiva
-            </label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Ingresa la nueva contraseña"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="pr-10 text-xs"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showPassword ? "Ocultar clave" : "Mostrar clave"}
+          {/* Resumen estructurado del usuario */}
+          <div className="rounded-lg border border-border bg-card p-3 flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] text-muted-foreground font-medium">Usuario objetivo</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h4 className="text-sm font-semibold text-foreground leading-tight truncate cursor-default">
+                      {usuario.nombre} {usuario.apellidos}
+                    </h4>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{usuario.nombre} {usuario.apellidos}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Badge
+                appearance="soft"
+                tone={usuario.estado === "Activo" ? "success" : "neutral"}
+                size="sm"
+                className="text-[11px] shrink-0"
               >
-                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
+                {usuario.estado}
+              </Badge>
             </div>
-            <span className="text-[11px] text-muted-foreground">
-              Mínimo 8 caracteres, alfanumérico con mayúsculas y símbolos.
-            </span>
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50 text-xs">
+              <div>
+                <span className="text-[11px] text-muted-foreground block">Identificación</span>
+                <span className="font-mono font-medium text-foreground">
+                  {usuario.tipoDocumento || "C.I."} {usuario.identificacion}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <span className="text-[11px] text-muted-foreground block">Correo institucional</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-foreground truncate block font-medium cursor-default">
+                      {usuario.correo}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{usuario.correo}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
           </div>
 
-          {/* Confirmar Contraseña */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">
-              Confirmar nueva contraseña
-            </label>
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Vuelve a ingresar la contraseña"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="text-xs"
-              required
-            />
-          </div>
+          {/* Formulario con validación UX/UI */}
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 mt-1">
+            {/* Nueva Contraseña */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                  Nueva contraseña <span className="text-danger">*</span>
+                </label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      aria-label="Requisitos de contraseña"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus-visible:outline-none"
+                    >
+                      <Info className="size-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-xs">Mínimo 8 caracteres, alfanumérico con mayúsculas y símbolos</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <InputGroup
+                size="sm"
+                state={errors.newPassword ? "error" : "default"}
+                rightIcon={
+                  <InputGroupButton
+                    size="icon-xs"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar clave" : "Mostrar clave"}
+                  >
+                    {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                  </InputGroupButton>
+                }
+              >
+                <InputGroupInput
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Ingresa la nueva contraseña"
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (errors.newPassword) {
+                      setErrors((prev) => ({ ...prev, newPassword: undefined }));
+                    }
+                  }}
+                  aria-invalid={!!errors.newPassword}
+                />
+              </InputGroup>
+
+              {errors.newPassword ? (
+                <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                  <AlertCircle className="size-3.5 shrink-0" />
+                  <span>{errors.newPassword}</span>
+                </p>
+              ) : (
+                <span className="text-[11px] text-muted-foreground">
+                  Mínimo 8 caracteres, alfanumérico con mayúsculas y símbolos.
+                </span>
+              )}
+            </div>
+
+            {/* Confirmar Contraseña */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                Confirmar nueva contraseña <span className="text-danger">*</span>
+              </label>
+              <InputGroup
+                size="sm"
+                state={errors.confirmPassword ? "error" : "default"}
+                rightIcon={
+                  <InputGroupButton
+                    size="icon-xs"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "Ocultar clave" : "Mostrar clave"}
+                  >
+                    {showConfirmPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                  </InputGroupButton>
+                }
+              >
+                <InputGroupInput
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Vuelve a ingresar la contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (errors.confirmPassword) {
+                      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                    }
+                  }}
+                  aria-invalid={!!errors.confirmPassword}
+                />
+              </InputGroup>
+
+              {errors.confirmPassword && (
+                <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                  <AlertCircle className="size-3.5 shrink-0" />
+                  <span>{errors.confirmPassword}</span>
+                </p>
+              )}
+            </div>
 
           {/* Opciones de seguridad */}
           <div className="flex flex-col gap-2.5 pt-2 border-t border-border/50 text-xs">
@@ -165,27 +275,28 @@ export function UsuarioPasswordDialog({
                 className="mt-0.5"
               />
               <span className="text-muted-foreground leading-snug">
-                Enviar notificación con enlace de acceso seguro a <strong className="text-foreground">{usuario.correo}</strong>.
+                Enviar notificación con enlace seguro a <strong className="text-foreground font-medium">{usuario.correo}</strong>.
               </span>
             </label>
           </div>
 
-          <DialogFooter className="mt-4 flex flex-col-reverse sm:flex-row gap-2 justify-end">
+          {/* Botones verticales apilados a ancho completo */}
+          <div className="flex flex-col gap-2.5 w-full pt-3 border-t border-border mt-1">
+            <Button type="submit" variant="primary" className="w-full">
+              Actualizar contraseña
+            </Button>
             <Button
               type="button"
               variant="neutral"
+              className="w-full"
               onClick={() => onOpenChange(false)}
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" className="gap-2">
-              <ShieldCheck className="size-4" />
-              Actualizar contraseña
-            </Button>
-          </DialogFooter>
+          </div>
         </form>
+        </TooltipProvider>
       </DialogContent>
     </Dialog>
   );
 }
-

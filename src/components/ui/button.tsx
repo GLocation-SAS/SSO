@@ -87,14 +87,14 @@ const buttonVariants = cva(
 
         warning: [
           "border-warning",
-          "text-neutral-950 dark:text-neutral-950",
+          "text-white",
           "bg-warning",
           "font-bold",
 
           "[--radial-bg:var(--primitive-warning-400)] dark:[--radial-bg:var(--primitive-warning-300)]",
           "[--glow:var(--primitive-warning-500)]",
 
-          "hover:bg-warning/90 hover:text-neutral-950",
+          "hover:bg-warning/90 hover:text-white",
         ].join(" "),
 
         danger: [
@@ -144,23 +144,23 @@ const buttonVariants = cva(
 
         neutral: [
           // Base
-          "border-border",
-          "bg-muted",
-          "text-foreground",
+          "border-neutral-500",
+          "bg-neutral-500",
+          "text-white",
           "font-semibold",
 
           // Radial
-          "[--radial-bg:var(--primitive-neutral-200)]",
-          "dark:[--radial-bg:var(--primitive-neutral-700)]",
+          "[--radial-bg:var(--primitive-neutral-700)]",
+          "dark:[--radial-bg:var(--primitive-neutral-800)]",
 
           // Glow
-          "[--glow:var(--primitive-neutral-300)]",
-          "dark:[--glow:var(--primitive-neutral-600)]",
+          "[--glow:var(--primitive-neutral-600)]",
+          "dark:[--glow:var(--primitive-neutral-700)]",
 
           // Hover
-          "hover:bg-muted/80",
-          "hover:text-foreground",
-          "hover:border-border/80",
+          "hover:bg-neutral-700",
+          "hover:border-neutral-700",
+          "hover:text-white",
 
         ].join(" "),
 

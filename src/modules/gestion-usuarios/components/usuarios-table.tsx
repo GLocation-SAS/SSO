@@ -16,9 +16,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, MapPin } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid } from "lucide-react";
 import { UsuarioItem } from "../data/usuarios-data";
 import {
   Pagination,
@@ -41,10 +46,8 @@ interface UsuariosTableProps {
 
 function AccesosCell({
   usr,
-  onManageAccess,
 }: {
   usr: UsuarioItem;
-  onManageAccess: () => void;
 }) {
   const allAsignaciones = React.useMemo(() => {
     return usr.sedes.flatMap((s) => s.asignaciones);
@@ -52,50 +55,125 @@ function AccesosCell({
 
   if (usr.sedes.length === 0 || allAsignaciones.length === 0) {
     return (
-      <div className="flex flex-col gap-0.5 py-1">
-        <span className="text-xs text-muted-foreground italic">Sin accesos</span>
-        <button
-          type="button"
-          onClick={onManageAccess}
-          className="text-xs text-primary font-medium hover:underline text-left inline-flex items-center cursor-pointer focus:outline-none"
+      <div className="flex items-center py-1 min-w-[180px]">
+        <Badge
+          tone="warning"
+          appearance="soft"
+          size="sm"
+          className="w-fit text-[11px] font-medium"
         >
-          Asignar accesos
-        </button>
+          Sin accesos
+        </Badge>
       </div>
     );
   }
 
   const primaryAsig = allAsignaciones[0];
-  const primarySede = primaryAsig.sedeNombre || usr.sedes[0]?.sedeNombre;
-  const primaryApp = primaryAsig.aplicacionNombre;
-  const primaryRol = primaryAsig.rolNombre;
+  const primarySede = primaryAsig.sedeNombre || usr.sedes[0]?.sedeNombre || "Sin sede";
+  const primaryApp = primaryAsig.aplicacionNombre || "Sin aplicación";
+  const primaryRol = primaryAsig.rolNombre || "Sin rol";
   const remainingCount = allAsignaciones.length - 1;
 
   return (
-    <div className="flex flex-col gap-0.5 py-1 min-w-[200px]">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-        <MapPin className="size-3.5 text-primary shrink-0" />
-        <span className="truncate max-w-[190px]" title={primarySede}>
-          {primarySede}
-        </span>
-      </div>
-      <div className="text-xs text-muted-foreground pl-5 truncate max-w-[220px]" title={`${primaryApp} · ${primaryRol}`}>
-        <span className="text-foreground/90 font-medium">{primaryApp}</span>
-        <span className="mx-1 text-muted-foreground/60">&middot;</span>
-        <span>{primaryRol}</span>
-      </div>
+    <div className="flex flex-col gap-1.5 py-1 min-w-[200px]">
+      {/* 1. Sede */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 text-xs cursor-default">
+            <Building2 className="size-3.5 text-primary shrink-0" />
+            <span className="font-semibold text-xs text-foreground truncate max-w-[210px]">
+              {primarySede}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
+          <div className="flex items-center gap-1.5 text-white/80">
+            <Building2 className="size-3.5 text-white/80 shrink-0" />
+            <span className="font-semibold text-[11px]">Sede</span>
+          </div>
+          <p className="text-xs font-medium text-white">{primarySede}</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* 2. Aplicación */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 text-xs cursor-default">
+            <LayoutGrid className="size-3.5 text-primary shrink-0" />
+            <span className="font-semibold text-xs text-foreground truncate max-w-[210px]">
+              {primaryApp}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
+          <div className="flex items-center gap-1.5 text-white/80">
+            <LayoutGrid className="size-3.5 text-white/80 shrink-0" />
+            <span className="font-semibold text-[11px]">Aplicación</span>
+          </div>
+          <p className="text-xs font-medium text-white">{primaryApp}</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* 3. Rol */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 text-xs cursor-default">
+            <ShieldCheck className="size-3.5 text-primary shrink-0" />
+            <span className="font-semibold text-xs text-foreground truncate max-w-[210px]">
+              {primaryRol}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
+          <div className="flex items-center gap-1.5 text-white/80">
+            <ShieldCheck className="size-3.5 text-white/80 shrink-0" />
+            <span className="font-semibold text-[11px]">Rol</span>
+          </div>
+          <p className="text-xs font-medium text-white">{primaryRol}</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Debajo: Badge asignaciones restantes */}
       {remainingCount > 0 && (
-        <div className="text-[11px] text-muted-foreground pl-5 font-medium">
-          +{remainingCount} {remainingCount === 1 ? "asignación" : "asignaciones"}
+        <div className="pt-1 border-t border-border/40 mt-0.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                tone="neutral"
+                appearance="soft"
+                size="sm"
+                className="text-[10px] px-2 py-0.5 font-semibold cursor-help hover:bg-muted/80 transition-colors w-fit"
+              >
+                +{remainingCount} {remainingCount === 1 ? "asignación" : "asignaciones"}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs p-2.5 flex flex-col items-start gap-1.5 text-white">
+              <p className="font-semibold text-[11px] text-white">Asignaciones adicionales:</p>
+              <div className="space-y-1.5 w-full">
+                {allAsignaciones.slice(1).map((asig, idx) => (
+                  <div key={idx} className="flex flex-col gap-0.5 text-[11px] leading-tight text-white pb-1.5 border-b border-white/10 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-1.5 font-semibold text-white">
+                      <Building2 className="size-3 text-white/80 shrink-0" />
+                      <span>{asig.sedeNombre || primarySede}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/90 pl-4">
+                      <span className="inline-flex items-center gap-1">
+                        <LayoutGrid className="size-2.5 text-white/70 shrink-0" />
+                        {asig.aplicacionNombre}
+                      </span>
+                      <span className="text-white/40">·</span>
+                      <span className="inline-flex items-center gap-1 text-white/80">
+                        <ShieldCheck className="size-2.5 text-white/70 shrink-0" />
+                        {asig.rolNombre}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
-      <button
-        type="button"
-        onClick={onManageAccess}
-        className="text-xs text-primary font-medium hover:underline text-left pl-5 mt-0.5 inline-flex items-center cursor-pointer focus:outline-none"
-      >
-        Gestionar accesos
-      </button>
     </div>
   );
 }
@@ -109,7 +187,7 @@ export function UsuariosTable({
   onToggleStatus,
 }: UsuariosTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [itemsPerPage, setItemsPerPage] = React.useState(8);
+  const [itemsPerPage, setItemsPerPage] = React.useState(6);
   const totalPages = Math.ceil(usuarios.length / itemsPerPage) || 1;
 
   const paginatedUsuarios = usuarios.slice(
@@ -118,143 +196,202 @@ export function UsuariosTable({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[200px] dark:text-white pl-6">Usuario</TableHead>
-            <TableHead className="dark:text-white">Tipo de documento</TableHead>
-            <TableHead className="dark:text-white">N.º de documento</TableHead>
-            <TableHead className="dark:text-white">Correo</TableHead>
-            <TableHead className="dark:text-white">Accesos</TableHead>
-            <TableHead className="dark:text-white">Estado</TableHead>
-            <TableHead className="dark:text-white">Fecha de creación</TableHead>
-            <TableHead className="text-right dark:text-white pr-6">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedUsuarios.length === 0 ? (
+    <TooltipProvider delayDuration={150}>
+      <div id="usuarios-table-container" className="flex flex-col gap-4">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
-                No se encontraron usuarios.
-              </TableCell>
+              <TableHead className="w-[180px] min-w-[170px] dark:text-white pl-6">Usuario</TableHead>
+              <TableHead className="w-[150px] min-w-[140px] dark:text-white">Tipo de documento</TableHead>
+              <TableHead className="w-[140px] min-w-[130px] dark:text-white">N.º de documento</TableHead>
+              <TableHead className="w-[200px] min-w-[180px] dark:text-white">Correo</TableHead>
+              <TableHead className="w-[240px] min-w-[220px] dark:text-white">Accesos</TableHead>
+              <TableHead className="w-[110px] min-w-[100px] text-center dark:text-white">Estado</TableHead>
+              <TableHead className="w-[140px] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
+              <TableHead className="w-[190px] min-w-[190px] text-right dark:text-white pr-6">Acciones</TableHead>
             </TableRow>
-          ) : (
-            paginatedUsuarios.map((usr) => {
-              return (
-                <TableRow key={usr.id}>
-                  {/* 1. Usuario */}
-                  <TableCell className="pl-6">
-                    <span className="font-semibold text-sm text-foreground whitespace-nowrap">
-                      {usr.nombre} {usr.apellidos}
-                    </span>
-                  </TableCell>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsuarios.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  No se encontraron usuarios.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedUsuarios.map((usr) => {
+                return (
+                  <TableRow key={usr.id}>
+                    {/* 1. Usuario */}
+                    <TableCell className="pl-6">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="font-semibold text-sm text-foreground truncate block max-w-[190px] cursor-default">
+                            {usr.nombre} {usr.apellidos}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p>{usr.nombre} {usr.apellidos}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
 
-                  {/* 2. Tipo de documento */}
-                  <TableCell>
-                    <span className="text-sm text-foreground">{usr.tipoDocumento || "Cédula"}</span>
-                  </TableCell>
+                    {/* 2. Tipo de documento */}
+                    <TableCell>
+                      <span className="text-sm text-foreground">{usr.tipoDocumento || "Cédula"}</span>
+                    </TableCell>
 
-                  {/* 3. N.º de documento */}
-                  <TableCell>
-                    <span className="text-sm font-medium text-foreground">
-                      {usr.documentoIdentificacion || usr.identificacion || "—"}
-                    </span>
-                  </TableCell>
+                    {/* 3. N.º de documento */}
+                    <TableCell>
+                      <span className="text-sm font-medium text-foreground">
+                        {usr.documentoIdentificacion || usr.identificacion || "—"}
+                      </span>
+                    </TableCell>
 
-                  {/* 4. Correo */}
-                  <TableCell>
-                    <span className="text-sm text-foreground">
-                      {usr.email || usr.correo || "—"}
-                    </span>
-                  </TableCell>
+                    {/* 4. Correo */}
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-sm text-foreground truncate block max-w-[200px] cursor-default">
+                            {usr.email || usr.correo || "—"}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p>{usr.email || usr.correo || "—"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
 
-                  {/* 5. Accesos (Sede · Aplicación · Rol) */}
-                  <TableCell>
-                    <AccesosCell usr={usr} onManageAccess={() => onManageAccess(usr)} />
-                  </TableCell>
+                    {/* 5. Accesos (Sede · Aplicación · Rol) */}
+                    <TableCell>
+                      <AccesosCell usr={usr} />
+                    </TableCell>
 
-                  {/* 6. Estado */}
-                  <TableCell>
-                    <Badge
-                      tone={
-                        usr.estado === "Activo"
-                          ? "success"
-                          : usr.estado === "Inactivo"
-                            ? "neutral"
-                            : "warning"
-                      }
-                      appearance="soft"
-                      className={cn(
-                        "font-semibold border text-xs",
-                        usr.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                        usr.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
-                        usr.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
-                      )}
-                    >
-                      {usr.estado}
-                    </Badge>
-                  </TableCell>
+                    {/* 6. Estado */}
+                    <TableCell className="text-center">
+                      <Badge
+                        tone={
+                          usr.estado === "Activo"
+                            ? "success"
+                            : usr.estado === "Inactivo"
+                              ? "neutral"
+                              : "warning"
+                        }
+                        appearance="soft"
+                        className={cn(
+                          "font-semibold border text-xs",
+                          usr.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
+                          usr.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
+                          usr.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
+                        )}
+                      >
+                        {usr.estado}
+                      </Badge>
+                    </TableCell>
 
-                  {/* 7. Fecha de creación */}
-                  <TableCell>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      {usr.fechaCreacion}
-                    </span>
-                  </TableCell>
+                    {/* 7. Fecha de creación */}
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        {usr.fechaCreacion}
+                      </span>
+                    </TableCell>
 
-                  {/* 8. Acciones: DropdownMenu */}
-                  <TableCell className="text-right pr-6">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="size-4" />
-                          <span className="sr-only">Abrir menú de acciones</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuItem onClick={() => onViewDetail(usr)} className="gap-2.5 cursor-pointer">
-                          <Eye className="size-4 text-muted-foreground" />
-                          <span>Ver detalle</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(usr)} className="gap-2.5 cursor-pointer">
-                          <Edit className="size-4 text-muted-foreground" />
-                          <span>Editar usuario</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onManageAccess(usr)} className="gap-2.5 cursor-pointer">
-                          <ShieldCheck className="size-4 text-muted-foreground" />
-                          <span>Gestionar accesos</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onChangePassword(usr)} className="gap-2.5 cursor-pointer">
-                          <Key className="size-4 text-muted-foreground" />
-                          <span>Cambiar / restablecer clave</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onToggleStatus(usr)}
-                          className={cn(
-                            "gap-2.5 cursor-pointer",
-                            usr.estado === "Activo"
-                              ? "text-danger focus:text-danger"
-                              : "text-success focus:text-success"
-                          )}
-                        >
-                          {usr.estado === "Activo" ? (
-                            <PowerOff className="size-4" />
-                          ) : (
-                            <Power className="size-4" />
-                          )}
-                          <span>{usr.estado === "Activo" ? "Inactivar" : "Activar"}</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
+                    {/* 8. Acciones visibles */}
+                    <TableCell className="text-right pr-6 whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onViewDetail(usr)}
+                              aria-label="Ver detalle"
+                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            >
+                              <Eye className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Ver detalle</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onEdit(usr)}
+                              aria-label="Editar usuario"
+                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            >
+                              <Edit className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Editar usuario</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onManageAccess(usr)}
+                              aria-label="Gestionar accesos"
+                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            >
+                              <ShieldCheck className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Gestionar accesos</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onChangePassword(usr)}
+                              aria-label="Cambiar clave"
+                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            >
+                              <Key className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Cambiar clave</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onToggleStatus(usr)}
+                              aria-label={usr.estado === "Activo" ? "Inactivar usuario" : "Activar usuario"}
+                              className={cn(
+                                "size-8 text-muted-foreground",
+                                usr.estado === "Activo"
+                                  ? "hover:text-danger hover:bg-danger/10"
+                                  : "hover:text-success hover:bg-success/10"
+                              )}
+                            >
+                              {usr.estado === "Activo" ? (
+                                <PowerOff className="size-4" />
+                              ) : (
+                                <Power className="size-4" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {usr.estado === "Activo" ? "Inactivar" : "Activar"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
 
       {/* Paginación */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -272,7 +409,7 @@ export function UsuariosTable({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-[60px]">
-                {[4, 8, 12, 16].map((size) => (
+                {[3, 6, 9, 12].map((size) => (
                   <DropdownMenuItem
                     key={size}
                     onClick={() => {
@@ -328,5 +465,6 @@ export function UsuariosTable({
         </Pagination>
       </div>
     </div>
-  );
+  </TooltipProvider>
+);
 }

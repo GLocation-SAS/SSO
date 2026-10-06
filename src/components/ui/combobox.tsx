@@ -54,19 +54,31 @@ function ComboboxInput({
   disabled,
   showTrigger = true,
   showClear = false,
+  showSearchIcon = true,
+  leftIcon,
+  size,
   state,
   placeholder = "Buscar o seleccionar...",
   ...props
-}: ComboboxPrimitive.Input.Props & {
+}: Omit<ComboboxPrimitive.Input.Props, "size"> & {
   showTrigger?: boolean
   showClear?: boolean
+  showSearchIcon?: boolean
+  leftIcon?: React.ReactNode
+  size?: "default" | "sm" | "lg"
   state?: "default" | "success" | "error"
 }) {
   return (
-    <InputGroup state={state} className={cn("w-auto", className)}>
-      <InputGroupAddon align="inline-start" className="pl-1 pr-1.5 pointer-events-none">
-        <SearchIcon className={cn("size-4 text-muted-foreground", disabled && "opacity-50")} />
-      </InputGroupAddon>
+    <InputGroup state={state} size={size} className={cn("w-auto", className)}>
+      {leftIcon ? (
+        <InputGroupAddon align="inline-start" className="pl-2 pr-1 pointer-events-none">
+          {leftIcon}
+        </InputGroupAddon>
+      ) : showSearchIcon ? (
+        <InputGroupAddon align="inline-start" className="pl-1 pr-1.5 pointer-events-none">
+          <SearchIcon className={cn("size-4 text-muted-foreground", disabled && "opacity-50")} />
+        </InputGroupAddon>
+      ) : null}
       <ComboboxPrimitive.Input
         render={<InputGroupInput />}
         disabled={disabled}

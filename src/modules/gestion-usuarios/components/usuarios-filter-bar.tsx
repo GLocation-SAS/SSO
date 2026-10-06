@@ -106,7 +106,8 @@ export function UsuariosFilterBar({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             onClear={() => onSearchChange("")}
-            className="w-full h-9 text-sm"
+            size="sm"
+            className="w-full text-xs"
           />
         </div>
 
@@ -119,7 +120,7 @@ export function UsuariosFilterBar({
               if (val) onEstadoChange(val);
             }}
           >
-            <ComboboxInput placeholder="Todos los estados" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxInput placeholder="Todos los estados" showClear={false} size="sm" className="w-full text-xs" />
             <ComboboxContent className="min-w-full">
               <ComboboxList>
                 <ComboboxItem value="Todos">Todos los estados</ComboboxItem>
@@ -146,7 +147,7 @@ export function UsuariosFilterBar({
               }
             }}
           >
-            <ComboboxInput placeholder="Todas las sedes" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxInput placeholder="Todas las sedes" showClear={false} size="sm" className="w-full text-xs" />
             <ComboboxContent className="min-w-full">
               <ComboboxList>
                 <ComboboxItem value="Todas">Todas las sedes</ComboboxItem>
@@ -172,7 +173,7 @@ export function UsuariosFilterBar({
               }
             }}
           >
-            <ComboboxInput placeholder="Todas las aplicaciones" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxInput placeholder="Todas las aplicaciones" showClear={false} size="sm" className="w-full text-xs" />
             <ComboboxContent className="min-w-full">
               <ComboboxList>
                 <ComboboxItem value="Todas">Todas las aplicaciones</ComboboxItem>
@@ -203,7 +204,8 @@ export function UsuariosFilterBar({
                   : "Todos los roles"
               }
               showClear={false}
-              className="w-full h-9 text-xs"
+              size="sm"
+              className="w-full text-xs"
             />
             <ComboboxContent className="min-w-full">
               <ComboboxList>

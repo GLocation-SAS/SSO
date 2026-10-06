@@ -104,16 +104,22 @@ export interface InteractiveCardProps {
   icon?: React.ReactNode
   decorativeIcon?: React.ReactNode
   meta?: React.ReactNode
-  color?: "default" | "primary" | "info" | "warning" | "success" | "danger" | "purple"
+  color?: "default" | "neutral" | "primary" | "info" | "warning" | "success" | "danger" | "purple"
   href?: string
   onClick?: () => void
   disabled?: boolean
   className?: string
   hideChevron?: boolean
+  isActive?: boolean
+  borderless?: boolean
+  shadowless?: boolean
+  iconContainerClassName?: string
+  activeInnerBgClassName?: string
 }
 
 const INTERACTIVE_COLORS: Record<string, string> = {
   default: "bg-surface border-border hover:border-transparent",
+  neutral: "bg-muted/30 border-border hover:border-transparent",
   primary: "bg-primary/10 border-primary/20 hover:border-transparent",
   secondary: "bg-secondary/10 border-secondary/20 hover:border-transparent",
   info: "bg-info/10 border-info/20 hover:border-transparent",
@@ -124,6 +130,7 @@ const INTERACTIVE_COLORS: Record<string, string> = {
 
 const INTERACTIVE_INNER_BG: Record<string, string> = {
   default: "bg-surface",
+  neutral: "bg-muted/35 dark:bg-muted/20",
   primary: "bg-primary-50/80 dark:bg-primary-900/20",
   secondary: "bg-secondary-50/80 dark:bg-secondary-900/20",
   info: "bg-info-50/80 dark:bg-info-900/20",
@@ -132,22 +139,63 @@ const INTERACTIVE_INNER_BG: Record<string, string> = {
   danger: "bg-danger-50/80 dark:bg-danger-900/20",
 }
 
+const INTERACTIVE_INNER_BG_ACTIVE: Record<string, string> = {
+  default: "bg-surface-secondary dark:bg-surface/90",
+  neutral: "bg-muted/80 dark:bg-muted/60",
+  primary: "bg-primary-100 dark:bg-primary-900/45",
+  secondary: "bg-secondary-100 dark:bg-secondary-900/45",
+  info: "bg-info-100 dark:bg-info-900/45",
+  warning: "bg-warning-100 dark:bg-warning-900/45",
+  success: "bg-success-100 dark:bg-success-900/45",
+  danger: "bg-danger-100 dark:bg-danger-900/45",
+}
+
 const INTERACTIVE_ICON_COLORS: Record<string, string> = {
   default: "text-primary",
-  primary: "text-primary-600 dark:text-primary-400",
+  neutral: "text-muted-foreground",
+  primary: "text-primary dark:text-primary-300",
   secondary: "text-secondary-600 dark:text-secondary-400",
   info: "text-info-600 dark:text-info-400",
-  warning: "text-warning-600 dark:text-warning-400",
-  success: "text-success-600 dark:text-success-400",
-  danger: "text-danger-600 dark:text-danger-400",
+  warning: "text-warning-700 dark:text-warning-300",
+  success: "text-success-700 dark:text-success-300",
+  danger: "text-danger-700 dark:text-danger-300",
+}
+
+const INTERACTIVE_ICON_BG: Record<string, string> = {
+  default: "bg-surface text-primary",
+  neutral: "bg-muted text-muted-foreground",
+  primary: "bg-primary/15 text-primary dark:text-primary-300",
+  secondary: "bg-secondary/15 text-secondary-600 dark:text-secondary-400",
+  info: "bg-info/15 text-info-600 dark:text-info-400",
+  warning: "bg-warning/15 text-warning-700 dark:text-warning-300",
+  success: "bg-success/15 text-success-700 dark:text-success-300",
+  danger: "bg-danger/15 text-danger-700 dark:text-danger-300",
 }
 
 export function InteractiveCard({
-  title, subtitle, description, icon, decorativeIcon, meta, color = "default", onClick, disabled, className, hideChevron
+  title,
+  subtitle,
+  description,
+  icon,
+  decorativeIcon,
+  meta,
+  color = "default",
+  onClick,
+  disabled,
+  className,
+  hideChevron,
+  isActive = false,
+  borderless = false,
+  shadowless = false,
+  iconContainerClassName,
+  activeInnerBgClassName,
 }: InteractiveCardProps) {
   const colorClass = INTERACTIVE_COLORS[color] || INTERACTIVE_COLORS.default;
-  const innerBgClass = INTERACTIVE_INNER_BG[color] || INTERACTIVE_INNER_BG.default;
+  const innerBgClass = isActive
+    ? (activeInnerBgClassName || INTERACTIVE_INNER_BG_ACTIVE[color] || INTERACTIVE_INNER_BG_ACTIVE.default)
+    : (INTERACTIVE_INNER_BG[color] || INTERACTIVE_INNER_BG.default);
   const iconColorClass = INTERACTIVE_ICON_COLORS[color] || INTERACTIVE_ICON_COLORS.default;
+  const iconBgClass = INTERACTIVE_ICON_BG[color] || INTERACTIVE_ICON_BG.default;
 
   return (
     <button
@@ -155,17 +203,18 @@ export function InteractiveCard({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "group relative w-full text-left rounded-xl border shadow-sm transition-all duration-300 outline-none overflow-hidden p-[1px]",
-        "hover:shadow-md hover:-translate-y-0.5",
+        "group relative w-full text-left rounded-xl transition-all duration-200 outline-none overflow-hidden",
+        borderless ? "p-0 border-0 border-transparent hover:border-transparent" : "p-[1px] border",
+        shadowless ? "shadow-none hover:shadow-none active:shadow-none" : "shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "active:translate-y-0 active:shadow-sm",
-        disabled && "opacity-50 cursor-not-allowed hover:shadow-sm hover:translate-y-0",
+        disabled && "opacity-50 cursor-not-allowed hover:shadow-none hover:translate-y-0",
         colorClass,
+        borderless && "border-transparent hover:border-transparent",
         className
       )}
     >
       {/* Soft Ambient Glow on Hover (Behind inner mask, bleeds through semi-transparent bg) */}
-      {!disabled && (
+      {!disabled && !shadowless && (
         <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0">
           <div
             className={cn(
@@ -178,7 +227,13 @@ export function InteractiveCard({
       )}
 
       {/* Inner Mask to preserve background color and block the center of spinning gradient */}
-      <div className={cn("absolute inset-[1px] rounded-[10px] pointer-events-none z-0 transition-colors duration-300", innerBgClass)} />
+      <div
+        className={cn(
+          "absolute pointer-events-none z-0 transition-colors duration-200",
+          borderless ? "inset-0 rounded-xl" : "inset-[1px] rounded-[10px]",
+          innerBgClass
+        )}
+      />
 
       {/* Decorative Icon (Bottom Right) */}
       {decorativeIcon && (
@@ -189,7 +244,15 @@ export function InteractiveCard({
 
       <div className="relative z-10 p-5 flex items-start gap-4">
         {icon && (
-          <div className={cn("shrink-0 size-11 rounded-full bg-surface shadow-sm border border-border/30 flex items-center justify-center transition-colors", iconColorClass)}>
+          <div
+            className={cn(
+              "shrink-0 size-11 rounded-full flex items-center justify-center transition-colors",
+              (borderless || shadowless)
+                ? cn("border-0 shadow-none", iconBgClass)
+                : cn("bg-surface shadow-sm border border-border/30", iconColorClass),
+              iconContainerClassName
+            )}
+          >
             {icon}
           </div>
         )}

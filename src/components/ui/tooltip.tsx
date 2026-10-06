@@ -41,13 +41,14 @@ const tooltipContentVariants = cva(
     "max-w-xs",
     "origin-(--radix-tooltip-content-transform-origin)",
     "items-center",
-    "gap-[50px]",
+    "gap-1.5",
     "rounded-lg",
     "px-3",
     "py-1.5",
     "text-xs",
     "font-medium",
     "shadow-lg",
+    "text-white",
 
     // Kbd slot styles
     "has-data-[slot=kbd]:pr-1.5",
@@ -76,12 +77,12 @@ const tooltipContentVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground text-white",
-        secondary: "bg-secondary text-secondary-foreground text-white",
-        success: "bg-success text-success-foreground text-white",
-        warning: "bg-warning text-warning-foreground text-white",
-        danger: "bg-danger text-danger-foreground text-white",
-        info: "bg-info text-info-foreground text-white",
+        primary: "bg-primary text-white",
+        secondary: "bg-secondary text-white",
+        success: "bg-success text-white",
+        warning: "bg-warning text-white",
+        danger: "bg-danger text-white",
+        info: "bg-info text-white",
       },
     },
     defaultVariants: {

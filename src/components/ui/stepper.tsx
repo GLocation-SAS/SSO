@@ -1,10 +1,12 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Step {
   id: string;
   title: string;
+  description?: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
@@ -13,9 +15,16 @@ export interface StepperProps {
   activeStep: number;
   completedSteps?: number[];
   onStepClick?: (index: number) => void;
+  showStepTitle?: boolean;
 }
 
-export function Stepper({ steps, activeStep, completedSteps = [], onStepClick }: StepperProps) {
+export function Stepper({
+  steps,
+  activeStep,
+  completedSteps = [],
+  onStepClick,
+  showStepTitle = false,
+}: StepperProps) {
   const filledLines = completedSteps;
 
   return (
@@ -54,6 +63,8 @@ export function Stepper({ steps, activeStep, completedSteps = [], onStepClick }:
                 onClick={() => onStepClick?.(index)}
                 disabled={isPending || !onStepClick}
                 aria-disabled={isPending || !onStepClick}
+                title={step.title}
+                aria-label={`Paso ${index + 1}: ${step.title}`}
                 animate={
                   isCompleted && !isActive ? { scale: [1, 0.95, 1] } : { scale: 1 }
                 }
@@ -64,31 +75,45 @@ export function Stepper({ steps, activeStep, completedSteps = [], onStepClick }:
                   isCompleted || isActive
                     ? "bg-primary-400 border-primary-400 text-white shadow-md shadow-primary-400/20"
                     : "bg-background border-neutral-200 dark:border-neutral-800 text-muted-foreground",
-                  isPending || !onStepClick ? (isPending ? "cursor-not-allowed" : "cursor-default") : "cursor-pointer hover:border-primary-400/50"
+                  isPending || !onStepClick
+                    ? (isPending ? "cursor-not-allowed" : "cursor-default")
+                    : "cursor-pointer hover:border-primary-400/50"
                 )}
               >
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={isCompleted || isActive ? "active" : "pending"}
+                    key={isCompleted && !isActive ? "completed" : isActive ? "active" : "pending"}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.2 }}
                     className="flex items-center justify-center"
                   >
-                    <Icon className="size-5 stroke-[2px]" />
+                    {isCompleted && !isActive ? (
+                      <Check className="size-5 stroke-[2.5px]" />
+                    ) : (
+                      <Icon className="size-5 stroke-[2px]" />
+                    )}
                   </motion.div>
                 </AnimatePresence>
               </motion.button>
 
               {/* Textos inferiores */}
-              <div className="mt-3 text-center z-10">
+              <div className="mt-3 text-center z-10 flex flex-col items-center">
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest transition-colors duration-300",
                   isActive || isCompleted ? "text-primary-400" : "text-muted-foreground"
                 )}>
-                  {step.title}
+                  Paso {index + 1}
                 </span>
+                {showStepTitle && step.title && (
+                  <span className={cn(
+                    "text-xs transition-colors duration-300 mt-0.5",
+                    isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                  )}>
+                    {step.title}
+                  </span>
+                )}
               </div>
             </li>
           );

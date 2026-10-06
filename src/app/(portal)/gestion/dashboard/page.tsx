@@ -2,10 +2,10 @@ import { DashboardUsuariosView } from "@/modules/gestion/dashboard";
 
 export const metadata = {
   title: "Resumen de gestión | Conecta MINEDUC",
-  description: "Métricas y resumen de gestión de usuarios del sistema Conecta MINEDUC",
+  description: "Consulta el estado general de los usuarios, sus accesos y distribución dentro de las aplicaciones.",
 };
 
-export default function GestionUsuariosDashboardPage() {
+export default function GestionDashboardPage() {
   return <DashboardUsuariosView />;
 }
 

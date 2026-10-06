@@ -7,14 +7,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
-import { 
-  Bell, 
-  Check, 
-  GraduationCap, 
-  MessageSquare, 
-  Calendar, 
-  Megaphone, 
-  Heart, 
+import {
+  Bell,
+  Check,
+  GraduationCap,
+  MessageSquare,
+  Calendar,
+  Megaphone,
+  Heart,
   ChevronRight,
   ChevronLeft,
   Settings
@@ -97,16 +97,16 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <div onClick={() => setOpen(true)}>{TriggerButton}</div>
-        <SheetContent 
-          side="bottom" 
+        <SheetContent
+          side="bottom"
           showCloseButton={false}
           className="h-[100dvh] w-full p-0 border-none bg-background flex flex-col focus-visible:outline-none focus:outline-none rounded-none"
         >
           <SheetTitle className="sr-only">Notificaciones</SheetTitle>
-          
+
           {/* Header Móvil */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-border/40 shrink-0 mt-4">
-            <Button 
+            <Button
               variant="ghost"
               size="icon"
               onClick={() => setOpen(false)}
@@ -116,7 +116,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
               <ChevronLeft className="size-6" strokeWidth={2} />
             </Button>
             <h3 className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">Notificaciones</h3>
-            <Button 
+            <Button
               variant="ghost"
               size="icon"
               className="-mr-2 rounded-full text-foreground hover:bg-surface-subtle transition-colors"
@@ -139,7 +139,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
             ) : (
               <div className="flex flex-col py-2">
                 {NOTIFICATIONS.map((notif) => (
-                  <button 
+                  <button
                     key={notif.id}
                     onClick={() => setOpen(false)}
                     className="group relative flex w-full cursor-pointer items-start gap-4 px-5 py-4 outline-none transition-colors active:bg-surface-subtle"
@@ -166,7 +166,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
           {/* Footer Móvil */}
           {!isEmpty && (
             <div className="shrink-0 p-4 pb-8 border-t border-border/40">
-              <Button 
+              <Button
                 variant="ghost"
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl py-6 text-body-sm font-bold text-primary transition-colors hover:bg-primary-400/10"
@@ -187,9 +187,9 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
       <DropdownMenuTrigger asChild>
         {TriggerButton}
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
+      <DropdownMenuContent
         side="bottom"
-        align="end" 
+        align="end"
         sideOffset={12}
         className={cn(
           "w-[380px] rounded-[24px] border border-border bg-surface shadow-md overflow-hidden flex flex-col",
@@ -200,7 +200,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
           "duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
         )}
       >
-        
+
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <h3 className="text-[10px] font-heading font-bold uppercase tracking-widest text-muted-foreground">Notificaciones</h3>
@@ -224,7 +224,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
           ) : (
             <div className="flex flex-col py-2">
               {NOTIFICATIONS.map((notif) => (
-                <DropdownMenuPrimitive.Item 
+                <DropdownMenuPrimitive.Item
                   key={notif.id}
                   className="group relative flex cursor-pointer items-start gap-4 px-5 py-3 outline-none transition-colors hover:bg-surface-subtle"
                   onClick={() => setOpen(false)}
@@ -251,7 +251,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
         {/* Footer */}
         {!isEmpty && (
           <div className="border-t border-border/40 p-2">
-            <Button 
+            <Button
               variant="ghost"
               onClick={() => setOpen(false)}
               className="flex w-full items-center justify-center gap-1 rounded-xl text-xs font-semibold text-primary transition-colors hover:bg-primary-400/5 hover:text-primary-400"

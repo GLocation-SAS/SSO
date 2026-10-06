@@ -17,7 +17,7 @@ interface DialogContextValue {
 const DialogContext = React.createContext<DialogContextValue>({ variant: "default" })
 
 const dialogVariants = cva(
-  "fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 duration-300 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+  "fixed top-1/2 left-1/2 z-50 flex flex-col max-h-[90vh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 duration-300 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
   {
     variants: {
       variant: {
@@ -155,7 +155,7 @@ function DialogContent({
               {children}
             </div>
           ) : (
-            <div className="relative z-10 w-full flex flex-col">
+            <div className="relative z-10 w-full flex flex-col min-h-0 flex-1 overflow-hidden">
               {children}
             </div>
           )}
@@ -223,7 +223,7 @@ function DialogFooter({
     >
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="neutral">
+          <Button variant="neutral" size="default">
             Cerrar
           </Button>
         </DialogPrimitive.Close>
@@ -245,7 +245,13 @@ function DialogTitle({
       data-slot="dialog-title"
       className={cn(
         "text-xl sm:text-2xl font-heading font-bold tracking-tight text-foreground",
-        isStatus && "text-center font-black",
+        isStatus && [
+          "text-center font-black",
+          variant === "warning" && "text-warning",
+          variant === "danger" && "text-danger",
+          variant === "success" && "text-success",
+          variant === "info" && "text-info",
+        ],
         className
       )}
       {...props}

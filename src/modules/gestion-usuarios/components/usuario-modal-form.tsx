@@ -38,7 +38,17 @@ import {
   Check,
   ShieldCheck,
   X,
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  IdCard,
+  AlertCircle,
 } from "lucide-react";
+import {
+  InputGroup,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   UsuarioItem,
   UsuarioSede,
@@ -72,10 +82,9 @@ const createStepIcon = (num: number) => {
 
 const stepperSteps: Step[] = [
   { id: "identificacion", title: "Identificación", icon: createStepIcon(1) },
-  { id: "datos-basicos", title: "Datos básicos", icon: createStepIcon(2) },
-  { id: "sedes", title: "Sedes", icon: createStepIcon(3) },
-  { id: "accesos", title: "Accesos", icon: createStepIcon(4) },
-  { id: "resumen", title: "Resumen", icon: createStepIcon(5) },
+  { id: "datos-sedes", title: "Datos y Sedes", icon: createStepIcon(2) },
+  { id: "accesos", title: "Accesos", icon: createStepIcon(3) },
+  { id: "resumen", title: "Resumen", icon: createStepIcon(4) },
 ];
 
 export function UsuarioModalForm({
@@ -186,11 +195,10 @@ export function UsuarioModalForm({
         newErrors.correo = "Ingresa un correo electrónico válido.";
       }
       if (!estado) newErrors.estado = "El estado es obligatorio.";
-    } else if (stepIndex === 2) {
       if (selectedSedes.length === 0) {
         newErrors.sedes = "Debes seleccionar al menos una sede.";
       }
-    } else if (stepIndex === 3) {
+    } else if (stepIndex === 2) {
       if (asignaciones.length === 0) {
         newErrors.asignaciones = "Debes asignar al menos un acceso al usuario.";
       }
@@ -375,7 +383,11 @@ export function UsuarioModalForm({
                     <ComboboxInput
                       placeholder="Seleccionar tipo..."
                       showClear={false}
-                      className="w-full h-10 text-xs"
+                      showSearchIcon={false}
+                      leftIcon={<IdCard className="size-4 text-muted-foreground" />}
+                      size="sm"
+                      state={errors.tipoDocumento ? "error" : "default"}
+                      className="w-full text-xs"
                     />
                     <ComboboxContent className="min-w-full">
                       <ComboboxList>
@@ -388,8 +400,9 @@ export function UsuarioModalForm({
                     </ComboboxContent>
                   </Combobox>
                   {errors.tipoDocumento && (
-                    <p className="text-[11px] text-danger font-medium">
-                      {errors.tipoDocumento}
+                    <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>{errors.tipoDocumento}</span>
                     </p>
                   )}
                 </div>
@@ -399,23 +412,27 @@ export function UsuarioModalForm({
                   <label className="text-xs font-semibold text-foreground">
                     N.º de documento <span className="text-danger">*</span>
                   </label>
-                  <Input
-                    placeholder="1719874563"
-                    value={identificacion}
-                    onChange={(e) => {
-                      setIdentificacion(e.target.value);
-                      if (errors.identificacion) {
-                        setErrors((prev) => ({ ...prev, identificacion: "" }));
-                      }
-                    }}
-                    className={cn(
-                      "h-10 text-xs font-mono",
-                      errors.identificacion && "border-danger focus-visible:ring-danger"
-                    )}
-                  />
+                  <InputGroup
+                    size="sm"
+                    state={errors.identificacion ? "error" : "default"}
+                    leftIcon={<IdCard className="size-4 text-muted-foreground" />}
+                  >
+                    <InputGroupInput
+                      placeholder="1719874563"
+                      value={identificacion}
+                      onChange={(e) => {
+                        setIdentificacion(e.target.value);
+                        if (errors.identificacion) {
+                          setErrors((prev) => ({ ...prev, identificacion: "" }));
+                        }
+                      }}
+                      className="font-mono text-xs"
+                    />
+                  </InputGroup>
                   {errors.identificacion && (
-                    <p className="text-[11px] text-danger font-medium">
-                      {errors.identificacion}
+                    <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>{errors.identificacion}</span>
                     </p>
                   )}
                 </div>
@@ -423,223 +440,254 @@ export function UsuarioModalForm({
             </div>
           )}
 
-          {/* PASO 2: DATOS BÁSICOS */}
+          {/* PASO 2: DATOS BÁSICOS Y SEDES */}
           {activeStep === 1 && (
-            <div className="space-y-4 max-w-xl mx-auto py-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Nombre */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">
-                    Nombre <span className="text-danger">*</span>
-                  </label>
-                  <Input
-                    placeholder="Ej: María Fernanda"
-                    value={nombre}
-                    onChange={(e) => {
-                      setNombre(e.target.value);
-                      if (errors.nombre) setErrors((prev) => ({ ...prev, nombre: "" }));
-                    }}
-                    className={cn(
-                      "h-10 text-xs",
-                      errors.nombre && "border-danger focus-visible:ring-danger"
+            <div className="space-y-6 max-w-2xl mx-auto py-2">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Nombre */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground">
+                      Nombre <span className="text-danger">*</span>
+                    </label>
+                    <InputGroup
+                      size="sm"
+                      state={errors.nombre ? "error" : "default"}
+                      leftIcon={<User className="size-4 text-muted-foreground" />}
+                    >
+                      <InputGroupInput
+                        placeholder="Ej: María Fernanda"
+                        value={nombre}
+                        onChange={(e) => {
+                          setNombre(e.target.value);
+                          if (errors.nombre) setErrors((prev) => ({ ...prev, nombre: "" }));
+                        }}
+                        className="text-xs"
+                      />
+                    </InputGroup>
+                    {errors.nombre && (
+                      <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{errors.nombre}</span>
+                      </p>
                     )}
-                  />
-                  {errors.nombre && (
-                    <p className="text-[11px] text-danger font-medium">{errors.nombre}</p>
-                  )}
+                  </div>
+
+                  {/* Apellidos */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground">
+                      Apellidos <span className="text-danger">*</span>
+                    </label>
+                    <InputGroup
+                      size="sm"
+                      state={errors.apellidos ? "error" : "default"}
+                      leftIcon={<User className="size-4 text-muted-foreground" />}
+                    >
+                      <InputGroupInput
+                        placeholder="Ej: Gómez Andrade"
+                        value={apellidos}
+                        onChange={(e) => {
+                          setApellidos(e.target.value);
+                          if (errors.apellidos)
+                            setErrors((prev) => ({ ...prev, apellidos: "" }));
+                        }}
+                        className="text-xs"
+                      />
+                    </InputGroup>
+                    {errors.apellidos && (
+                      <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{errors.apellidos}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Apellidos */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">
-                    Apellidos <span className="text-danger">*</span>
-                  </label>
-                  <Input
-                    placeholder="Ej: Gómez Andrade"
-                    value={apellidos}
-                    onChange={(e) => {
-                      setApellidos(e.target.value);
-                      if (errors.apellidos)
-                        setErrors((prev) => ({ ...prev, apellidos: "" }));
-                    }}
-                    className={cn(
-                      "h-10 text-xs",
-                      errors.apellidos && "border-danger focus-visible:ring-danger"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Correo electrónico */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground">
+                      Correo electrónico <span className="text-danger">*</span>
+                    </label>
+                    <InputGroup
+                      size="sm"
+                      state={errors.correo ? "error" : "default"}
+                      leftIcon={<Mail className="size-4 text-muted-foreground" />}
+                    >
+                      <InputGroupInput
+                        type="email"
+                        placeholder="nombre.apellido@mineduc.gob.ec"
+                        value={correo}
+                        onChange={(e) => {
+                          setCorreo(e.target.value);
+                          if (errors.correo) setErrors((prev) => ({ ...prev, correo: "" }));
+                        }}
+                        className="text-xs"
+                      />
+                    </InputGroup>
+                    {errors.correo && (
+                      <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{errors.correo}</span>
+                      </p>
                     )}
+                  </div>
+
+                  {/* Estado */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground">
+                      Estado <span className="text-danger">*</span>
+                    </label>
+                    <Combobox
+                      value={estado}
+                      onValueChange={(val) => {
+                        if (val) setEstado(val as "Activo" | "Inactivo" | "Pendiente");
+                      }}
+                    >
+                      <ComboboxInput
+                        placeholder="Seleccionar estado..."
+                        showClear={false}
+                        showSearchIcon={false}
+                        size="sm"
+                        className="w-full text-xs"
+                      />
+                      <ComboboxContent className="min-w-full">
+                        <ComboboxList>
+                          {ESTADOS_USUARIO.map((est) => (
+                            <ComboboxItem key={est} value={est}>
+                              {est}
+                            </ComboboxItem>
+                          ))}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </div>
+                </div>
+
+                {/* Campos opcionales institucionales */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      Cargo / Función institucional
+                    </label>
+                    <Combobox
+                      value={cargo}
+                      onValueChange={(val) => {
+                        if (val) setCargo(val);
+                      }}
+                    >
+                      <ComboboxInput
+                        placeholder="Seleccionar función..."
+                        showClear={false}
+                        showSearchIcon={false}
+                        leftIcon={<Briefcase className="size-4 text-muted-foreground" />}
+                        size="sm"
+                        className="w-full text-xs"
+                      />
+                      <ComboboxContent className="min-w-full">
+                        <ComboboxList>
+                          {FUNCIONES_INSTITUCIONALES.map((f) => (
+                            <ComboboxItem key={f} value={f}>
+                              {f}
+                            </ComboboxItem>
+                          ))}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      Teléfono de contacto
+                    </label>
+                    <InputGroup
+                      size="sm"
+                      leftIcon={<Phone className="size-4 text-muted-foreground" />}
+                    >
+                      <InputGroupInput
+                        type="tel"
+                        placeholder="+593 99 123 4567"
+                        value={telefono}
+                        onChange={(e) => setTelefono(e.target.value)}
+                        className="text-xs"
+                      />
+                    </InputGroup>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sección de Sedes dentro del mismo paso */}
+              <div className="pt-3 border-t border-border/60 space-y-3">
+                <div className="space-y-0.5">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Building2 className="size-4 text-primary" />
+                    <span>Sedes asignadas <span className="text-danger">*</span></span>
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Selecciona las sedes donde el usuario prestará servicios o tendrá permisos.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Multiselect
+                    options={sedeOptions}
+                    selected={selectedSedes}
+                    onChange={(newSelected) => {
+                      setSelectedSedes(newSelected);
+                      if (errors.sedes) setErrors((prev) => ({ ...prev, sedes: "" }));
+                    }}
+                    placeholder="Buscar y seleccionar sedes..."
+                    searchPlaceholder="Buscar por nombre de sede..."
+                    className="w-full"
                   />
-                  {errors.apellidos && (
-                    <p className="text-[11px] text-danger font-medium">
-                      {errors.apellidos}
+                  {errors.sedes && (
+                    <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>{errors.sedes}</span>
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Correo electrónico */}
+                {/* Badges / Chips seleccionados */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">
-                    Correo electrónico <span className="text-danger">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="nombre.apellido@mineduc.gob.ec"
-                    value={correo}
-                    onChange={(e) => {
-                      setCorreo(e.target.value);
-                      if (errors.correo) setErrors((prev) => ({ ...prev, correo: "" }));
-                    }}
-                    className={cn(
-                      "h-10 text-xs",
-                      errors.correo && "border-danger focus-visible:ring-danger"
-                    )}
-                  />
-                  {errors.correo && (
-                    <p className="text-[11px] text-danger font-medium">{errors.correo}</p>
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    Sedes seleccionadas ({selectedSedes.length})
+                  </span>
+                  {selectedSedes.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">
+                      No has seleccionado ninguna sede aún.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSedes.map((sedeName) => (
+                        <Badge
+                          key={sedeName}
+                          tone="primary"
+                          appearance="soft"
+                          className="text-xs px-3 py-1 flex items-center gap-1.5 font-medium"
+                        >
+                          <Building2 className="size-3.5" />
+                          <span>{sedeName}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedSedes((prev) => prev.filter((s) => s !== sedeName))
+                            }
+                            className="hover:opacity-75 cursor-pointer ml-1"
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                 </div>
-
-                {/* Estado */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">
-                    Estado <span className="text-danger">*</span>
-                  </label>
-                  <Combobox
-                    value={estado}
-                    onValueChange={(val) => {
-                      if (val) setEstado(val as "Activo" | "Inactivo" | "Pendiente");
-                    }}
-                  >
-                    <ComboboxInput
-                      placeholder="Seleccionar estado..."
-                      showClear={false}
-                      className="w-full h-10 text-xs"
-                    />
-                    <ComboboxContent className="min-w-full">
-                      <ComboboxList>
-                        {ESTADOS_USUARIO.map((est) => (
-                          <ComboboxItem key={est} value={est}>
-                            {est}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                </div>
-              </div>
-
-              {/* Campos opcionales institucionales */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground">
-                    Cargo / Función institucional
-                  </label>
-                  <Combobox
-                    value={cargo}
-                    onValueChange={(val) => {
-                      if (val) setCargo(val);
-                    }}
-                  >
-                    <ComboboxInput
-                      placeholder="Seleccionar función..."
-                      showClear={false}
-                      className="w-full h-10 text-xs"
-                    />
-                    <ComboboxContent className="min-w-full">
-                      <ComboboxList>
-                        {FUNCIONES_INSTITUCIONALES.map((f) => (
-                          <ComboboxItem key={f} value={f}>
-                            {f}
-                          </ComboboxItem>
-                        ))}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground">
-                    Teléfono de contacto
-                  </label>
-                  <Input
-                    placeholder="+593 99 123 4567"
-                    value={telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                    className="h-10 text-xs"
-                  />
-                </div>
               </div>
             </div>
           )}
 
-          {/* PASO 3: SEDES */}
+          {/* PASO 3: ACCESOS */}
           {activeStep === 2 && (
-            <div className="space-y-5 max-w-2xl mx-auto py-2">
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold text-foreground">
-                  Sedes del usuario
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Selecciona las sedes donde el usuario prestará servicios o tendrá permisos.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Multiselect
-                  options={sedeOptions}
-                  selected={selectedSedes}
-                  onChange={(newSelected) => {
-                    setSelectedSedes(newSelected);
-                    if (errors.sedes) setErrors((prev) => ({ ...prev, sedes: "" }));
-                  }}
-                  placeholder="Buscar y seleccionar sedes..."
-                  searchPlaceholder="Buscar por nombre de sede..."
-                  className="w-full"
-                />
-                {errors.sedes && (
-                  <p className="text-[11px] text-danger font-medium">{errors.sedes}</p>
-                )}
-              </div>
-
-              {/* Visualización de Badges / Chips seleccionados */}
-              <div className="space-y-2 pt-2">
-                <span className="text-xs font-semibold text-muted-foreground block">
-                  Sedes seleccionadas ({selectedSedes.length})
-                </span>
-                {selectedSedes.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic">
-                    No has seleccionado ninguna sede aún.
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedSedes.map((sedeName) => (
-                      <Badge
-                        key={sedeName}
-                        tone="primary"
-                        appearance="soft"
-                        className="text-xs px-3 py-1 flex items-center gap-1.5 font-medium"
-                      >
-                        <Building2 className="size-3.5" />
-                        <span>{sedeName}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSelectedSedes((prev) => prev.filter((s) => s !== sedeName))
-                          }
-                          className="hover:opacity-75 cursor-pointer ml-1"
-                        >
-                          <X className="size-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* PASO 4: ACCESOS */}
-          {activeStep === 3 && (
             <div className="space-y-5 max-w-3xl mx-auto py-2">
               <div className="space-y-1">
                 <h3 className="text-sm font-bold text-foreground">
@@ -717,7 +765,9 @@ export function UsuarioModalForm({
                                 <ComboboxInput
                                   placeholder="Seleccionar aplicación..."
                                   showClear={false}
-                                  className="w-full h-9 text-xs"
+                                  showSearchIcon={false}
+                                  size="sm"
+                                  className="w-full text-xs"
                                 />
                                 <ComboboxContent className="min-w-full">
                                   <ComboboxList>
@@ -754,7 +804,9 @@ export function UsuarioModalForm({
                                       : "Selecciona aplicación"
                                   }
                                   showClear={false}
-                                  className="w-full h-9 text-xs"
+                                  showSearchIcon={false}
+                                  size="sm"
+                                  className="w-full text-xs"
                                 />
                                 <ComboboxContent className="min-w-full">
                                   <ComboboxList>
@@ -840,8 +892,8 @@ export function UsuarioModalForm({
             </div>
           )}
 
-          {/* PASO 5: RESUMEN */}
-          {activeStep === 4 && (
+          {/* PASO 4: RESUMEN */}
+          {activeStep === 3 && (
             <div className="space-y-6 max-w-3xl mx-auto py-2">
               <div className="space-y-1">
                 <h3 className="text-sm font-bold text-foreground">

@@ -77,6 +77,11 @@ const navSections: NavSection[] = [
         href: "/gestion-usuarios/usuarios",
         icon: Users,
       },
+      {
+        label: "Resumen de gestión",
+        href: "/gestion/dashboard",
+        icon: LayoutDashboard,
+      },
     ],
   },
 ];
@@ -99,12 +104,14 @@ function checkIsPathActive(currentPath: string | null | undefined, targetHref: s
     return current === "/dashboard" || current === "/";
   }
 
+  if (target === "/gestion/dashboard") {
+    return current === "/gestion/dashboard" || current === "/gestion-usuarios/dashboard";
+  }
+
   if (target === "/gestion-usuarios/usuarios") {
     return (
       current === "/gestion-usuarios/usuarios" ||
-      current === "/usuarios" ||
-      current.startsWith("/gestion-usuarios") ||
-      current.startsWith("/usuarios")
+      current === "/usuarios"
     );
   }
 

@@ -21,12 +21,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  getAvatarInitials,
-} from "@/components/ui/avatar";
-import {
   Building2,
   Calendar,
   Clock,
@@ -67,52 +61,40 @@ export function UsuarioModalDetail({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-background"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
           <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
             Detalle del usuario
           </DialogTitle>
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-6">
-          {/* Header de resumen */}
-          <div className="flex items-start gap-4 p-4 rounded-xl border border-border/80 bg-surface/70">
-            <Avatar size="lg" className="size-14 border border-border/60 shrink-0">
-              <AvatarImage
-                src={usuario.avatar || `https://i.pravatar.cc/150?u=${usuario.id}`}
-                alt={`${usuario.nombre} ${usuario.apellidos}`}
-              />
-              <AvatarFallback className="text-sm font-bold bg-primary/10 text-primary">
-                {getAvatarInitials(`${usuario.nombre} ${usuario.apellidos}`)}
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <Badge
-                  tone={
-                    usuario.estado === "Activo"
-                      ? "success"
-                      : usuario.estado === "Inactivo"
-                        ? "neutral"
-                        : "warning"
-                  }
-                  appearance="soft"
-                  className="font-semibold text-xs px-2.5 py-0.5"
-                >
-                  {usuario.estado}
-                </Badge>
-              </div>
-              <h2 className="text-lg font-bold text-foreground truncate">
-                {usuario.nombre} {usuario.apellidos}
-              </h2>
-              <p className="text-xs text-muted-foreground truncate">
-                {usuario.email || usuario.correo || "—"}
-              </p>
+        <div className="overflow-y-auto flex-1 p-6 space-y-6 bg-background">
+          {/* Header de resumen sin avatar */}
+          <div className="p-4 rounded-xl border border-border bg-background space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Badge
+                tone={
+                  usuario.estado === "Activo"
+                    ? "success"
+                    : usuario.estado === "Inactivo"
+                      ? "neutral"
+                      : "warning"
+                }
+                appearance="soft"
+                className="font-semibold text-xs px-2.5 py-0.5"
+              >
+                {usuario.estado}
+              </Badge>
             </div>
+            <h2 className="text-lg font-bold text-foreground">
+              {usuario.nombre} {usuario.apellidos}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {usuario.email || usuario.correo || "—"}
+            </p>
           </div>
 
           {/* Tabs Navigation */}
@@ -136,7 +118,7 @@ export function UsuarioModalDetail({
                   Información general
                 </h3>
 
-                <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
+                <div className="rounded-xl border border-border bg-background p-4 divide-y divide-border/60 text-sm">
                   <div className="flex items-center justify-between py-2.5 first:pt-0">
                     <span className="text-xs text-muted-foreground">Tipo de documento</span>
                     <span className="font-semibold text-foreground">
@@ -192,7 +174,7 @@ export function UsuarioModalDetail({
                   <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     Datos institucionales
                   </h3>
-                  <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
+                  <div className="rounded-xl border border-border bg-background p-4 divide-y divide-border/60 text-sm">
                     {usuario.cargo && (
                       <div className="flex items-center justify-between py-2 first:pt-0">
                         <span className="text-xs text-muted-foreground">Cargo / Función</span>
@@ -214,19 +196,19 @@ export function UsuarioModalDetail({
             <TabsContent value="accesos" className="mt-0 space-y-4 outline-none">
               {/* Resumen de contadores */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Sedes</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {usuario.sedes.length}
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Aplicaciones</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {aplicacionesUnicas.length}
                   </span>
                 </div>
-                <div className="p-3.5 rounded-xl border border-border bg-surface/70 text-center">
+                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Roles asignados</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {totalAsignaciones}
@@ -244,10 +226,10 @@ export function UsuarioModalDetail({
                   usuario.sedes.map((sede) => (
                     <div
                       key={sede.sedeId || sede.sedeNombre}
-                      className="rounded-xl border border-border overflow-hidden bg-surface"
+                      className="rounded-xl border border-border overflow-hidden bg-background"
                     >
                       {/* Cabecera Sede */}
-                      <div className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between">
+                      <div className="bg-background px-4 py-3 border-b border-border flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                           <Building2 className="size-4 text-primary shrink-0" />
                           <span>{sede.sedeNombre}</span>
@@ -263,23 +245,23 @@ export function UsuarioModalDetail({
                       {/* Tabla Aplicación | Rol | Estado */}
                       <Table>
                         <TableHeader>
-                          <TableRow className="border-b border-border/60 bg-muted/20">
-                            <TableHead className="text-xs font-semibold h-9 text-foreground pl-4">
+                          <TableRow className="border-b border-primary/30 bg-primary">
+                            <TableHead className="text-xs font-semibold h-9 text-white pl-4">
                               Aplicación
                             </TableHead>
-                            <TableHead className="text-xs font-semibold h-9 text-foreground">
+                            <TableHead className="text-xs font-semibold h-9 text-white">
                               Rol
                             </TableHead>
-                            <TableHead className="text-xs font-semibold h-9 text-right pr-4 text-foreground">
+                            <TableHead className="text-xs font-semibold h-9 text-right pr-4 text-white">
                               Estado
                             </TableHead>
                           </TableRow>
                         </TableHeader>
-                        <TableBody>
+                        <TableBody className="bg-background">
                           {sede.asignaciones.map((asig) => (
                             <TableRow
                               key={asig.id}
-                              className="border-b border-border/40 hover:bg-muted/10 last:border-b-0"
+                              className="bg-background border-b border-border/40 hover:bg-muted/15 last:border-b-0"
                             >
                               <TableCell className="py-2.5 pl-4 text-xs font-semibold text-foreground">
                                 {asig.aplicacionNombre}
@@ -312,7 +294,7 @@ export function UsuarioModalDetail({
 
             {/* TAB 3: ACTIVIDAD */}
             <TabsContent value="actividad" className="mt-0 space-y-4 outline-none">
-              <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
+              <div className="rounded-xl border border-border bg-background p-4 space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Registro reciente de actividad
                 </h3>
@@ -351,17 +333,14 @@ export function UsuarioModalDetail({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            Gestión de Usuarios &bull; MINEDUC
-          </span>
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex items-center justify-between sm:justify-between">
+          <Button
+            variant="neutral"
+            onClick={() => onOpenChange(false)}
+          >
+            Cerrar
+          </Button>
           <div className="flex items-center gap-2">
-            <Button
-              variant="neutral"
-              onClick={() => onOpenChange(false)}
-            >
-              Cerrar
-            </Button>
             {onEdit && (
               <Button
                 variant="primary"

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Card } from "@/components/ui/card";
+import { InteractiveCard } from "@/components/ui/data-display";
 import { Users, UserCheck, UserX, UserMinus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,123 +24,91 @@ export function UsuariosSummaryCards({
   activeFilter,
   onSelectFilter,
 }: UsuariosSummaryCardsProps) {
-  const cards: Array<{
-    id: SummaryFilterType;
-    label: string;
-    value: number;
-    icon: React.ComponentType<{ className?: string }>;
-    accentColor: string;
-  }> = [
-      {
-        id: "total",
-        label: "Total de usuarios",
-        value: total,
-        icon: Users,
-        accentColor: "text-muted-foreground",
-      },
-      {
-        id: "activos",
-        label: "Usuarios activos",
-        value: activos,
-        icon: UserCheck,
-        accentColor: "text-success-600 dark:text-success-400",
-      },
-      {
-        id: "inactivos",
-        label: "Usuarios inactivos",
-        value: inactivos,
-        icon: UserX,
-        accentColor: "text-muted-foreground",
-      },
-      {
-        id: "sin-accesos",
-        label: "Usuarios sin accesos",
-        value: sinAccesos,
-        icon: UserMinus,
-        accentColor: "text-warning-600 dark:text-warning-400",
-      },
-    ];
+  const cards = [
+    {
+      id: "total" as const,
+      label: "Total de usuarios",
+      value: total,
+      icon: Users,
+      color: "primary" as const,
+      activePill: "text-primary dark:text-primary-300",
+      pulseColor: "bg-primary",
+      iconContainer: "bg-primary/15 text-primary",
+      activeBg: "bg-primary-100/90 dark:bg-primary-900/50",
+    },
+    {
+      id: "activos" as const,
+      label: "Usuarios activos",
+      value: activos,
+      icon: UserCheck,
+      color: "success" as const,
+      activePill: "text-success-700 dark:text-success-400",
+      pulseColor: "bg-success-500",
+      iconContainer: "bg-success/15 text-success-700 dark:text-success-300",
+      activeBg: "bg-success-100/90 dark:bg-success-900/50",
+    },
+    {
+      id: "inactivos" as const,
+      label: "Usuarios inactivos",
+      value: inactivos,
+      icon: UserX,
+      color: "neutral" as const,
+      activePill: "text-muted-foreground",
+      pulseColor: "bg-muted-foreground",
+      iconContainer: "bg-muted-foreground/25 dark:bg-muted-foreground/35 text-foreground dark:text-neutral-200",
+      activeBg: "bg-muted/80 dark:bg-muted/60",
+    },
+    {
+      id: "sin-accesos" as const,
+      label: "Usuarios sin accesos",
+      value: sinAccesos,
+      icon: UserMinus,
+      color: "warning" as const,
+      activePill: "text-warning-700 dark:text-warning-400",
+      pulseColor: "bg-warning-500",
+      iconContainer: "bg-warning/15 text-warning-700 dark:text-warning-300",
+      activeBg: "bg-warning-100/90 dark:bg-warning-900/50",
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
       {cards.map((c) => {
         const isActive = activeFilter === c.id;
         const Icon = c.icon;
 
         return (
-          <Card
+          <InteractiveCard
             key={c.id}
-            size="sm"
-            variant="panel"
-            role="button"
-            tabIndex={0}
-            aria-pressed={isActive}
+            title={c.label}
+            color={c.color}
+            hideChevron
+            borderless
+            shadowless
+            isActive={isActive}
+            iconContainerClassName={c.iconContainer}
+            activeInnerBgClassName={c.activeBg}
             onClick={() => onSelectFilter(c.id)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onSelectFilter(c.id);
-              }
-            }}
-            className={cn(
-              "cursor-pointer select-none transition-all duration-200 border rounded-xl",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
-              isActive
-                ? "border-primary ring-2 ring-primary bg-primary/5 dark:bg-primary-950/20 shadow-xs"
-                : "border-border/80 hover:border-border hover:bg-muted/30 bg-surface shadow-2xs"
-            )}
-            innerClassName="p-4 flex flex-col justify-between h-full gap-2 text-left items-stretch"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span
-                className={cn(
-                  "text-xs font-semibold truncate",
-                  isActive
-                    ? "text-primary dark:text-primary-300 font-bold"
-                    : "text-muted-foreground"
-                )}
-                title={c.label}
-              >
-                {c.label}
-              </span>
-              <div
-                className={cn(
-                  "size-7 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
-                  isActive
-                    ? "bg-primary/10 border-primary/20 text-primary"
-                    : "bg-muted/40 border-border/60 text-muted-foreground"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "size-3.5",
-                    isActive ? "text-primary" : c.accentColor
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-baseline justify-between gap-2 pt-1">
-              <span
-                className={cn(
-                  "text-2xl font-bold font-heading tracking-tight",
-                  isActive ? "text-primary dark:text-white" : "text-foreground"
-                )}
-              >
-                {c.value.toLocaleString("es-EC")}
-              </span>
-
-              {isActive && (
-                <span className="text-[11px] font-medium text-primary dark:text-primary-300 flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                  Filtrado
+            icon={<Icon className="size-5" />}
+            decorativeIcon={<Icon className="size-full" />}
+            className="cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110"
+            meta={
+              <div className="flex items-baseline justify-between gap-2 pt-0.5">
+                <span className="text-2xl font-bold font-heading tracking-tight text-foreground">
+                  {c.value.toLocaleString("es-EC")}
                 </span>
-              )}
-            </div>
-          </Card>
+
+                {isActive && (
+                  <span className={cn("text-[11px] font-semibold flex items-center gap-1", c.activePill)}>
+                    <span className={cn("size-1.5 rounded-full animate-pulse", c.pulseColor)} />
+                    Filtrado
+                  </span>
+                )}
+              </div>
+            }
+          />
         );
       })}
     </div>
   );
 }
-
