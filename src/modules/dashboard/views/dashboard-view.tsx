@@ -122,6 +122,7 @@ export function DashboardView() {
   const [hoveredAppIdx, setHoveredAppIdx] = React.useState<number | null>(null);
   const [hoveredDayIdx, setHoveredDayIdx] = React.useState<number | null>(null);
   const [activeFilter, setActiveFilter] = React.useState("Hoy");
+  const [activeAppRoleFilter, setActiveAppRoleFilter] = React.useState(APLICACIONES_OPTIONS[0]);
 
   const filterMultiplier = activeFilter === "Hoy" ? 1 : activeFilter === "Ayer" ? 0.8 : activeFilter === "Esta semana" ? 4.5 : activeFilter === "Semana anterior" ? 5.2 : 18.4;
 
@@ -458,16 +459,21 @@ export function DashboardView() {
                   Distribución de usuarios según los roles asignados en una aplicación.
                 </CardDescription>
               </div>
-              <div className="w-full relative">
-                <select 
-                  className="w-full text-sm border border-border/60 rounded-md bg-surface text-foreground py-1.5 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 hover:border-primary/50 transition-colors"
-                  defaultValue="Sistema de Notas"
-                >
-                  {APLICACIONES_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full no-scrollbar">
+                {APLICACIONES_OPTIONS.map((opt) => (
+                  <Badge 
+                    key={opt}
+                    tone={activeAppRoleFilter === opt ? "primary" : "neutral"}
+                    appearance={activeAppRoleFilter === opt ? "solid" : "soft"} 
+                    className={cn(
+                      "cursor-pointer whitespace-nowrap shadow-none",
+                      activeAppRoleFilter !== opt && "hover:bg-muted/50 border-transparent"
+                    )}
+                    onClick={() => setActiveAppRoleFilter(opt)}
+                  >
+                    {opt}
+                  </Badge>
+                ))}
               </div>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
@@ -576,7 +582,7 @@ export function DashboardView() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
                   <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
-                    <DialogTitle className="text-xl font-heading text-primary">Roles de Sistema de Notas</DialogTitle>
+                    <DialogTitle className="text-xl font-heading text-primary">Roles de {activeAppRoleFilter}</DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground">
                       Detalle de usuarios y recursos asociados a cada rol.
                     </DialogDescription>
