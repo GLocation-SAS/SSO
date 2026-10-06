@@ -350,8 +350,8 @@ export function DashboardView() {
                     tone={activeFilter === filter ? "primary" : "neutral"}
                     appearance={activeFilter === filter ? "solid" : "soft"} 
                     className={cn(
-                      "cursor-pointer whitespace-nowrap shadow-none",
-                      activeFilter !== filter && "hover:bg-muted/50 border-transparent"
+                      "cursor-pointer whitespace-nowrap shadow-none transition-colors duration-300",
+                      activeFilter !== filter && "hover:bg-muted/50 dark:hover:bg-neutral-800 border-transparent"
                     )}
                     onClick={() => setActiveFilter(filter)}
                   >
@@ -466,8 +466,8 @@ export function DashboardView() {
                     tone={activeAppRoleFilter === opt ? "primary" : "neutral"}
                     appearance={activeAppRoleFilter === opt ? "solid" : "soft"} 
                     className={cn(
-                      "cursor-pointer whitespace-nowrap shadow-none",
-                      activeAppRoleFilter !== opt && "hover:bg-muted/50 border-transparent"
+                      "cursor-pointer whitespace-nowrap shadow-none transition-colors duration-300",
+                      activeAppRoleFilter !== opt && "hover:bg-muted/50 dark:hover:bg-neutral-800 border-transparent"
                     )}
                     onClick={() => setActiveAppRoleFilter(opt)}
                   >
