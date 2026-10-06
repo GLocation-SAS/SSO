@@ -387,6 +387,8 @@ export function DashboardView() {
                 {RECENT_CHANGES_SUMMARY.map((change) => {
                   const Icon = change.icon;
                   const displayCount = Math.max(1, Math.floor(change.count * filterMultiplier));
+                  const datePrefix = activeFilter === "Esta semana" ? "02 Oct, " : activeFilter === "Semana anterior" ? "24 Sep, " : activeFilter === "Último mes" ? "10 Sep, " : "";
+                  
                   return (
                     <div
                       key={change.id}
@@ -423,7 +425,7 @@ export function DashboardView() {
                         </div>
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           <span className="font-mono text-[11px] font-semibold text-muted-foreground">
-                            {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Último: 02 Oct, ${change.lastTime}`}
+                            {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Último: ${datePrefix}${change.lastTime}`}
                           </span>
                           <span className={cn(
                             "text-[11px] font-bold transition-colors hover:underline flex items-center gap-0.5",
@@ -446,7 +448,7 @@ export function DashboardView() {
                             <div key={i} className="flex gap-4 items-start">
                               <div className={cn("shrink-0 text-left pt-0.5", activeFilter === "Hoy" || activeFilter === "Ayer" ? "w-14" : "w-24")}>
                                 <span className="font-mono text-[10px] font-medium text-muted-foreground">
-                                  {activeFilter === "Hoy" || activeFilter === "Ayer" ? ev.time : `02 Oct, ${ev.time}`}
+                                  {activeFilter === "Hoy" || activeFilter === "Ayer" ? ev.time : `${datePrefix}${ev.time}`}
                                 </span>
                               </div>
                               <div className="flex flex-col flex-1 min-w-0">
