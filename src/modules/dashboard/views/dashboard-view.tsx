@@ -423,7 +423,7 @@ export function DashboardView() {
                         </div>
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           <span className="font-mono text-[11px] font-semibold text-muted-foreground">
-                            {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Actualizado`}
+                            {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Último: 02 Oct, ${change.lastTime}`}
                           </span>
                           <span className={cn(
                             "text-[11px] font-bold transition-colors hover:underline flex items-center gap-0.5",
@@ -444,8 +444,10 @@ export function DashboardView() {
                         <div className="p-4 flex flex-col gap-4">
                           {(MOCK_EVENTS[change.id as keyof typeof MOCK_EVENTS] || []).slice(0, displayCount).map((ev, i) => (
                             <div key={i} className="flex gap-4 items-start">
-                              <div className="w-14 shrink-0 text-left pt-0.5">
-                                <span className="font-mono text-[10px] font-medium text-muted-foreground">{ev.time}</span>
+                              <div className={cn("shrink-0 text-left pt-0.5", activeFilter === "Hoy" || activeFilter === "Ayer" ? "w-14" : "w-24")}>
+                                <span className="font-mono text-[10px] font-medium text-muted-foreground">
+                                  {activeFilter === "Hoy" || activeFilter === "Ayer" ? ev.time : `02 Oct, ${ev.time}`}
+                                </span>
                               </div>
                               <div className="flex flex-col flex-1 min-w-0">
                                 <span className="text-xs font-bold text-foreground leading-snug truncate">{ev.title}</span>
