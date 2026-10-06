@@ -25,7 +25,18 @@ import {
   Clock,
   TrendingUp,
   Network,
+  ChevronDown,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Link } from "@/routing";
 import { cn } from "@/lib/utils";
 import {
@@ -71,62 +82,29 @@ const ATTENTION_ITEMS = [
   },
 ];
 
-const RECENT_CHANGES = [
-  {
-    id: 1,
-    time: "08:02",
-    type: "Permiso agregado al rol",
-    badge: "Permisos",
-    badgeTone: "info" as const,
-    icon: Key,
-    iconColor: "bg-info/10 text-info border-info/20",
-    description: "Permiso «Crear» en Contratos para Talento Humano Distrital.",
-  },
-  {
-    id: 2,
-    time: "07:44",
-    type: "Nuevo rol creado",
-    badge: "Roles",
-    badgeTone: "primary" as const,
-    icon: ShieldCheck,
-    iconColor: "bg-primary/10 text-primary border-primary/20",
-    description: "Rol «Analista de notas» en Sistema de Notas.",
-  },
-  {
-    id: 3,
-    time: "07:30",
-    type: "Usuario desactivado",
-    badge: "Usuarios",
-    badgeTone: "warning" as const,
-    icon: Users,
-    iconColor: "bg-warning/10 text-warning border-warning/20",
-    description: "Lucía Toapanta marcada como inactiva.",
-  },
-  {
-    id: 4,
-    time: "07:15",
-    type: "Aplicación sincronizada",
-    badge: "Apps",
-    badgeTone: "info" as const,
-    icon: AppWindow,
-    iconColor: "bg-info/10 text-info border-info/20",
-    description: "Portal Docente sincronizó catálogo de recursos.",
-  },
+const APLICACIONES_OPTIONS = ["Sistema de Notas", "Portal Educativo", "Gestión de Personal"];
+
+const RECENT_CHANGES_SUMMARY = [
+  { id: "usuarios", group: "Usuarios", count: 8, lastTime: "10:24 AM", icon: Users, color: "bg-primary/10 text-primary border-primary/20" },
+  { id: "roles", group: "Roles", details: "Sistema de Notas", count: 5, lastTime: "09:40 AM", icon: ShieldCheck, color: "bg-info/10 text-info border-info/20" },
+  { id: "recursos", group: "Recursos", details: "Sistema de Notas", count: 12, lastTime: "08:02 AM", icon: Layers, color: "bg-warning/10 text-warning border-warning/20" },
+  { id: "asignaciones", group: "Asignaciones de acceso", count: 6, lastTime: "07:45 AM", icon: Network, color: "bg-success/10 text-success border-success/20" },
+  { id: "permisos", group: "Permisos", count: 9, lastTime: "07:20 AM", icon: Key, color: "bg-muted text-muted-foreground border-border" }
 ];
 
 
 const ROLE_DISTRIBUTION = [
-  { id: "docente", name: "Docente", count: 560, pct: 45, color: "var(--primary)" },
-  { id: "th-distrital", name: "Talento Humano Distrital", count: 311, pct: 25, color: "var(--info)" },
-  { id: "jefe-th", name: "Jefe de Talento Humano", count: 187, pct: 15, color: "var(--warning)" },
-  { id: "registro", name: "Registro y Control", count: 125, pct: 10, color: "var(--success)" },
-  { id: "otros", name: "Otros", count: 62, pct: 5, color: "var(--muted-foreground)" },
+  { id: "docente", name: "Docente", count: 560, pct: 45, color: "var(--primary)", resources: 8, status: "Activo" },
+  { id: "analista", name: "Analista de notas", count: 311, pct: 25, color: "var(--info)", resources: 12, status: "Activo" },
+  { id: "rector", name: "Rector", count: 187, pct: 15, color: "var(--warning)", resources: 24, status: "Activo" },
+  { id: "admin", name: "Administrador", count: 125, pct: 10, color: "var(--success)", resources: 45, status: "Activo" },
+  { id: "otros", name: "Otros", count: 62, pct: 5, color: "var(--muted-foreground)", resources: 3, status: "Activo" },
 ];
 
 const TOP_APPLICATIONS = [
-  { id: "geoportal", name: "Geoportal", count: 650, pct: 52, color: "var(--primary)" },
-  { id: "sso", name: "SSO", count: 420, pct: 34, color: "var(--info)" },
-  { id: "tramites", name: "Trámites", count: 175, pct: 14, color: "var(--warning)" },
+  { id: "notas", name: "Sistema de Notas", count: 650, pct: 52, color: "var(--primary)" },
+  { id: "portal", name: "Portal Educativo", count: 420, pct: 34, color: "var(--info)" },
+  { id: "personal", name: "Gestión de Personal", count: 175, pct: 14, color: "var(--warning)" },
 ];
 
 const ACCESS_HISTORY = [
@@ -352,48 +330,91 @@ export function DashboardView() {
 
           {/* 2.2 Últimos cambios de gestión */}
           <Card variant="panel" className="flex flex-col h-full">
-            <CardHeader className="items-start text-left gap-1 p-6 pb-3 border-b border-border/50">
-              <div className="flex items-center justify-between w-full">
+            <CardHeader className="items-start text-left gap-4 p-6 pb-3 border-b border-border/50">
+              <div className="flex flex-col gap-1 w-full">
                 <CardTitle className="text-lg md:text-xl font-heading font-bold text-primary h-auto">
                   Últimos cambios de gestión
                 </CardTitle>
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold">
-                  Hoy
-                </Badge>
+                <CardDescription className="text-xs text-muted-foreground">
+                  Resumen de la actividad administrativa reciente.
+                </CardDescription>
               </div>
-              <CardDescription className="text-xs text-muted-foreground">
-                Registro reciente de acciones sobre usuarios, aplicaciones y roles.
-              </CardDescription>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full no-scrollbar">
+                <Badge tone="primary" className="cursor-pointer whitespace-nowrap shadow-none">Hoy</Badge>
+                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Ayer</Badge>
+                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Esta semana</Badge>
+                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Semana anterior</Badge>
+                <Badge appearance="soft" tone="neutral" className="cursor-pointer hover:bg-muted/50 whitespace-nowrap shadow-none border-transparent">Último mes</Badge>
+              </div>
             </CardHeader>
             <CardContent className="px-6 py-4 flex-1">
               <div className="flex flex-col gap-3">
-                {RECENT_CHANGES.map((change) => {
+                {RECENT_CHANGES_SUMMARY.map((change) => {
                   const Icon = change.icon;
                   return (
                     <div
                       key={change.id}
-                      className="flex items-start gap-3.5 p-3 rounded-xl border border-border/60 bg-surface shadow-2xs hover:bg-muted/30 hover:border-border transition-all duration-150 text-left"
+                      className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-surface shadow-2xs hover:bg-muted/30 hover:border-border transition-all duration-150 text-left"
                     >
-                      <div className={cn("size-9 rounded-lg flex items-center justify-center shrink-0 border", change.iconColor)}>
-                        <Icon className="size-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="text-sm font-bold text-foreground leading-snug truncate">
-                            {change.type}
+                      <div className="flex items-center gap-3">
+                        <div className={cn("size-9 rounded-lg flex items-center justify-center shrink-0 border", change.color)}>
+                          <Icon className="size-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <h4 className="text-sm font-bold text-foreground leading-snug">
+                            {change.group}
                           </h4>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Badge className={cn("border shadow-none font-bold uppercase", change.iconColor)} appearance="ghost" size="sm">
-                              {change.badge}
-                            </Badge>
-                            <span className="font-mono text-[11px] font-semibold text-muted-foreground">
-                              {change.time}
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              {change.count} cambios
                             </span>
+                            {change.details && (
+                              <>
+                                <span className="text-muted-foreground/40 text-[10px]">•</span>
+                                <span className="text-xs text-muted-foreground truncate max-w-[120px]">{change.details}</span>
+                              </>
+                            )}
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                          {change.description}
-                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <span className="font-mono text-[11px] font-semibold text-muted-foreground">
+                          Último: {change.lastTime}
+                        </span>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <button className="text-[11px] font-bold text-primary hover:underline outline-none text-right">
+                              Ver detalle
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[600px] gap-0 p-0 overflow-hidden">
+                            <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
+                              <DialogTitle className="text-xl font-heading text-primary">Cambios en {change.group.toLowerCase()}</DialogTitle>
+                              <DialogDescription className="text-sm text-muted-foreground">
+                                {change.details ? `${change.details} · ` : ""}Hoy · {change.count} cambios registrados
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex flex-col p-6 max-h-[60vh] overflow-y-auto">
+                              <div className="flex gap-4 items-start pb-4 border-b border-border/50 mb-4">
+                                <div className="w-20 shrink-0 text-left">
+                                  <span className="font-mono text-xs font-semibold text-muted-foreground">{change.lastTime}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-sm font-bold text-foreground">Registro actualizado</span>
+                                  <span className="text-sm text-muted-foreground">Se modificó un registro en {change.group.toLowerCase()}.</span>
+                                </div>
+                              </div>
+                            </div>
+                            <DialogFooter className="flex items-center sm:justify-between w-full p-4 border-t border-border/50 bg-muted/10">
+                              <DialogClose asChild>
+                                <Button variant="ghost" size="sm">Cerrar</Button>
+                              </DialogClose>
+                              <Button variant="primary" size="sm" asChild>
+                                <Link href="/auditoria">Ver auditoría completa <ArrowRight className="size-4 ml-1.5" /></Link>
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   );
@@ -415,13 +436,26 @@ export function DashboardView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* 3.1 Usuarios por rol - DONUT CHART */}
           <Card variant="panel" className="flex flex-col h-full border border-border shadow-2xs">
-            <CardHeader className="items-start text-left gap-1 p-6 pb-3 border-b border-border/50 min-h-[76px] flex flex-col justify-center">
-              <CardTitle className="text-lg md:text-xl font-heading font-bold text-primary h-auto">
-                Usuarios por rol
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground line-clamp-1">
-                Distribución según el perfil de acceso principal en el sistema.
-              </CardDescription>
+            <CardHeader className="items-start text-left gap-4 p-6 pb-3 border-b border-border/50 min-h-[76px] flex flex-col justify-center">
+              <div className="flex flex-col gap-1 w-full">
+                <CardTitle className="text-lg md:text-xl font-heading font-bold text-primary h-auto">
+                  Usuarios por rol
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground line-clamp-2">
+                  Distribución de usuarios según los roles asignados en una aplicación.
+                </CardDescription>
+              </div>
+              <div className="w-full relative">
+                <select 
+                  className="w-full text-sm border border-border/60 rounded-md bg-surface text-foreground py-1.5 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 hover:border-primary/50 transition-colors"
+                  defaultValue="Sistema de Notas"
+                >
+                  {APLICACIONES_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              </div>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
               <ChartContainer minHeight={180} className="relative flex flex-col items-center justify-center w-full">
@@ -493,10 +527,10 @@ export function DashboardView() {
                     ) : (
                       <>
                         <span className="text-xl font-bold font-heading text-foreground tabular-nums">
-                          100%
+                          1.245
                         </span>
                         <span className="text-[10px] font-semibold text-muted-foreground mt-0.5">
-                          1.245 usuarios
+                          usuarios
                         </span>
                       </>
                     )}
@@ -521,23 +555,60 @@ export function DashboardView() {
               </ChartContainer>
             </CardContent>
             <CardFooter className="relative z-10 py-4 px-6 border-t border-border/50 mt-auto flex justify-center items-center w-full">
-              <Link
-                href="/roles"
-                className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link"
-              >
-                Ver todos los roles <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link outline-none">
+                    Ver detalle de roles <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
+                  <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
+                    <DialogTitle className="text-xl font-heading text-primary">Roles de Sistema de Notas</DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                      Detalle de usuarios y recursos asociados a cada rol.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-muted/40 border-b border-border/50 sticky top-0 backdrop-blur-md">
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider col-span-1">Rol</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Usuarios</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Recursos</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-right">Estado</span>
+                    </div>
+                    <div className="flex flex-col divide-y divide-border/40">
+                      {ROLE_DISTRIBUTION.map((r) => (
+                        <div key={r.id} className="grid grid-cols-4 gap-4 px-6 py-4 items-center hover:bg-muted/10 transition-colors">
+                          <div className="flex items-center gap-2 col-span-1">
+                            <div className="size-2 rounded-full shrink-0" style={{ backgroundColor: r.color }} />
+                            <span className="text-sm font-bold text-foreground truncate">{r.name}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-muted-foreground text-center tabular-nums">{r.count}</span>
+                          <span className="text-sm font-semibold text-muted-foreground text-center tabular-nums">{r.resources}</span>
+                          <div className="text-right">
+                            <Badge appearance="soft" tone="success" size="sm">{r.status}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <DialogFooter className="p-4 border-t border-border/50 bg-muted/10 flex justify-end">
+                    <DialogClose asChild>
+                      <Button variant="outline" size="sm">Cerrar</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardFooter>
           </Card>
 
-          {/* 3.2 Aplicaciones con mayor número de usuarios - BAR CHART */}
+          {/* 3.2 Aplicaciones con más usuarios - BAR CHART */}
           <Card variant="panel" className="flex flex-col h-full border border-border shadow-2xs">
             <CardHeader className="items-start text-left gap-1 p-6 pb-3 border-b border-border/50 min-h-[76px] flex flex-col justify-center">
               <CardTitle className="text-lg md:text-xl font-heading font-bold text-primary h-auto">
-                Aplicaciones con mayor número de usuarios
+                Aplicaciones con más usuarios
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground line-clamp-1">
-                Sistemas con mayor concentración de usuarios.
+                Cantidad de usuarios asociados a cada aplicación.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
@@ -570,7 +641,7 @@ export function DashboardView() {
                         onMouseLeave={() => setHoveredAppIdx(null)}
                         tabIndex={0}
                         role="button"
-                        aria-label={`${app.name}: ${app.count} usuarios (${app.pct}%)`}
+                        aria-label={`${app.name}: ${app.count} usuarios`}
                       >
                         {isHovered && (
                           <ChartTooltip
@@ -579,10 +650,10 @@ export function DashboardView() {
                           >
                             <ChartTooltipContent
                               title={app.name}
-                              label="Usuarios"
+                              label=""
                               value={`${app.count}`}
                               indicatorColor={app.color}
-                              subvalue={`${app.pct}% de concentración`}
+                              subvalue="usuarios asociados"
                             />
                           </ChartTooltip>
                         )}
@@ -786,7 +857,7 @@ export function DashboardView() {
                 href="/auditoria"
                 className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link"
               >
-                Ver historial de accesos <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
+                Ver trazabilidad de ingresos <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
               </Link>
             </CardFooter>
           </Card>
