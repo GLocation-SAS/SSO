@@ -170,7 +170,7 @@ export function DashboardView() {
           <CardBadge className="bg-white/15 !text-white border border-white/20 dark:bg-muted/50 dark:!text-muted-foreground dark:border-border backdrop-blur-xs w-fit text-xs font-semibold px-3 py-1 transition-colors">
             Hola, Paula Rozo 👋
           </CardBadge>
-          <CardTitle className="text-2xl md:text-3xl font-heading font-bold !text-white dark:!text-primary-300 tracking-tight h-auto transition-colors">
+          <CardTitle className="text-2xl md:text-3xl font-heading font-bold !text-white dark:!text-primary-200 tracking-tight h-auto transition-colors">
             Bienvenida a Conecta MINEDUC
           </CardTitle>
           <CardDescription className="text-sm md:text-base !text-white/90 dark:!text-muted-foreground font-normal transition-colors">
