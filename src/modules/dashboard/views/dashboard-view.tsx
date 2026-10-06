@@ -86,7 +86,6 @@ const APLICACIONES_OPTIONS = ["Sistema de Notas", "Portal Educativo", "Gestión 
 
 const RECENT_CHANGES_SUMMARY = [
   { id: "usuarios", group: "Usuarios", count: 8, lastTime: "10:24 AM", icon: Users, color: "bg-muted text-foreground border-border" },
-  { id: "aplicaciones", group: "Aplicaciones", count: 2, lastTime: "09:55 AM", icon: AppWindow, color: "bg-primary/10 text-primary border-primary/20" },
   { id: "roles", group: "Roles", details: "Sistema de Notas", count: 5, lastTime: "09:40 AM", icon: ShieldCheck, color: "bg-info/10 text-info border-info/20" },
   { id: "recursos", group: "Recursos", details: "Sistema de Notas", count: 12, lastTime: "08:02 AM", icon: Layers, color: "bg-warning/10 text-warning border-warning/20" },
   { id: "asignaciones", group: "Asignaciones de acceso", count: 6, lastTime: "07:45 AM", icon: Network, color: "bg-success/10 text-success border-success/20" },
@@ -231,7 +230,7 @@ export function DashboardView() {
               icon={<Layers />}
             />
             <KpiCard
-              label="Accesos"
+              label="Asignaciones de acceso"
               value="8.421"
               color="success-400"
               comparison="Relaciones configuradas"
