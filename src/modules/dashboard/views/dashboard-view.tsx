@@ -672,7 +672,7 @@ export function DashboardView() {
                           </ChartTooltip>
                         )}
 
-                        <div className={cn("flex items-end gap-1.5 w-full justify-center", isDimmed && "opacity-45")}>
+                        <div className={cn("flex items-end gap-1.5 w-full h-full justify-center", isDimmed && "opacity-45")}>
                           <div
                             className={cn(
                               "w-3 rounded-t-sm transition-all duration-200",
