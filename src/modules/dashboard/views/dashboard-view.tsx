@@ -587,19 +587,19 @@ export function DashboardView() {
               <ChartContainer minHeight={180} className="relative flex flex-col justify-end w-full max-w-[280px]">
                 {/* Y-Axis Grid lines */}
                 <div className="absolute inset-x-0 top-0 bottom-7 flex flex-col justify-between pointer-events-none opacity-40">
-                  <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>50</span>
+                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
+                    <span className="w-6 text-right pr-2">50</span>
                   </div>
-                  <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>25</span>
+                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
+                    <span className="w-6 text-right pr-2">25</span>
                   </div>
-                  <div className="border-b border-border/60 w-full flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>0</span>
+                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
+                    <span className="w-6 text-right pr-2">0</span>
                   </div>
                 </div>
 
                 {/* Bars */}
-                <div className="h-32 flex items-end justify-around gap-2 z-10 px-2 border-b border-border/70">
+                <div className="h-32 flex items-end justify-between gap-1 z-10 pl-6 pr-2 border-b border-border/70">
                   {APP_CONFIG_DATA.map((app, idx) => {
                     const rolesHeight = (app.roles / 50) * 100;
                     const recursosHeight = (app.recursos / 50) * 100;
@@ -659,17 +659,19 @@ export function DashboardView() {
                 </div>
 
                 {/* X-Axis labels */}
-                <div className="flex justify-around text-[11px] font-semibold text-muted-foreground pt-2 px-2">
+                <div className="flex justify-between gap-1 text-[11px] font-semibold text-muted-foreground pt-2 pl-6 pr-2">
                   {APP_CONFIG_DATA.map((app, idx) => (
-                    <span
-                      key={app.id}
-                      className={cn(
-                        "transition-colors text-center truncate max-w-[80px]",
-                        hoveredAppIdx === idx ? "text-primary font-bold" : ""
-                      )}
-                    >
-                      {app.name}
-                    </span>
+                    <div key={app.id} className="flex-1 flex justify-center">
+                      <span
+                        className={cn(
+                          "transition-colors text-center truncate max-w-[80px]",
+                          hoveredAppIdx === idx ? "text-primary font-bold" : ""
+                        )}
+                        title={app.name}
+                      >
+                        {app.name}
+                      </span>
+                    </div>
                   ))}
                 </div>
 
