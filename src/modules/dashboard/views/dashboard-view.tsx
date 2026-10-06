@@ -702,26 +702,29 @@ export function DashboardView() {
                 Ingresos a aplicaciones
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground line-clamp-1">
-                Comportamiento de actividad y accesos de los últimos 7 días.
+                Actividad de inicio de sesión registrada durante los últimos 7 días.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
               <div className="w-full max-w-[280px] flex flex-col justify-center">
-                <div className="flex items-center justify-between gap-3 mb-2 px-1">
-                  <div>
+                <div className="flex items-start justify-between gap-3 mb-4 px-1">
+                  <div className="flex flex-col">
                     <div className="text-2xl font-heading font-bold text-foreground leading-none">
                       14.280
                     </div>
-                    <p className="text-[11px] text-muted-foreground font-medium mt-1 flex items-center gap-1">
-                      Registrados <span className="text-success font-semibold flex items-center"><TrendingUp className="size-3 inline" />+12%</span>
+                    <p className="text-[11px] text-muted-foreground font-medium mt-1">
+                      Ingresos registrados
                     </p>
+                    <div className="text-[11px] text-success font-semibold mt-1.5 flex items-center gap-1">
+                      <TrendingUp className="size-3" /> 12 % vs. 7 días anteriores
+                    </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end">
                     <div className="text-2xl font-heading font-bold text-foreground leading-none">
                       98,5 %
                     </div>
                     <p className="text-[11px] text-muted-foreground font-medium mt-1">
-                      Exitosos
+                      Ingresos exitosos
                     </p>
                   </div>
                 </div>
