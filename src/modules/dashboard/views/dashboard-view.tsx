@@ -343,8 +343,8 @@ export function DashboardView() {
                     tone={activeFilter === filter ? "primary" : "neutral"}
                     appearance={activeFilter === filter ? "solid" : "soft"} 
                     className={cn(
-                      "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300",
-                      activeFilter !== filter && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 dark:hover:text-primary-300 border-transparent"
+                      "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300 dark:text-white dark:hover:text-white",
+                      activeFilter !== filter && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 border-transparent"
                     )}
                     onClick={() => setActiveFilter(filter)}
                   >
@@ -459,8 +459,8 @@ export function DashboardView() {
                     tone={activeAppRoleFilter === opt ? "primary" : "neutral"}
                     appearance={activeAppRoleFilter === opt ? "solid" : "soft"} 
                     className={cn(
-                      "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300",
-                      activeAppRoleFilter !== opt && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 dark:hover:text-primary-300 border-transparent"
+                      "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300 dark:text-white dark:hover:text-white",
+                      activeAppRoleFilter !== opt && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 border-transparent"
                     )}
                     onClick={() => setActiveAppRoleFilter(opt)}
                   >
