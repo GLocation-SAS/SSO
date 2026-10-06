@@ -126,20 +126,13 @@ export function DashboardView() {
 
   const filterMultiplier = activeFilter === "Hoy" ? 1 : activeFilter === "Ayer" ? 0.8 : activeFilter === "Esta semana" ? 4.5 : activeFilter === "Semana anterior" ? 5.2 : 18.4;
 
-  const radius = 38;
-  const circumference = 2 * Math.PI * radius;
+  const appMultiplier = activeAppRoleFilter === "Sistema de Notas" ? 1 : activeAppRoleFilter === "Portal Educativo" ? 0.7 : 0.4;
+  const currentRoles = ROLE_DISTRIBUTION.map(r => ({
+    ...r,
+    count: Math.floor(r.count * appMultiplier)
+  })).slice(0, activeAppRoleFilter === "Sistema de Notas" ? 5 : activeAppRoleFilter === "Portal Educativo" ? 4 : 3);
 
-  const donutSegments = React.useMemo(() => {
-    let acc = 0;
-    const segments = [];
-    for (const item of ROLE_DISTRIBUTION) {
-      const strokeDasharray = `${(item.pct / 100) * circumference} ${circumference}`;
-      const strokeDashoffset = -((acc / 100) * circumference);
-      acc += item.pct;
-      segments.push({ ...item, strokeDasharray, strokeDashoffset });
-    }
-    return segments;
-  }, [circumference]);
+  const totalUsers = currentRoles.reduce((acc, r) => acc + r.count, 0);
 
   const activeRole = ROLE_DISTRIBUTION.find((r) => r.id === hoveredRoleId);
 
@@ -475,103 +468,63 @@ export function DashboardView() {
                   </Badge>
                 ))}
               </div>
+              <div className="mt-4 pt-4 border-t border-border/50 text-xs font-semibold text-muted-foreground flex items-center gap-1.5 w-full">
+                <span className="text-foreground font-bold">{totalUsers}</span> usuarios asociados
+                <span className="text-muted-foreground/40">•</span>
+                <span className="text-foreground font-bold">{currentRoles.length}</span> roles
+              </div>
             </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
-              <ChartContainer minHeight={180} className="relative flex flex-col items-center justify-center w-full">
-                {/* Floating Tooltip */}
-                {activeRole && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none z-20">
-                    <ChartTooltip active={true}>
-                      <ChartTooltipContent
-                        title={activeRole.name}
-                        label="Usuarios"
-                        value={activeRole.count}
-                        indicatorColor={activeRole.color}
-                        subvalue={`${activeRole.pct}% del total asignado`}
-                      />
-                    </ChartTooltip>
-                  </div>
-                )}
-
-                {/* Donut SVG */}
-                <div className="relative size-36 flex items-center justify-center my-1">
-                  <svg className="size-full -rotate-90" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r={radius}
-                      fill="transparent"
-                      stroke="var(--muted)"
-                      strokeWidth="11"
-                      className="opacity-25"
-                    />
-                    {donutSegments.map((seg) => {
-                      const isHovered = hoveredRoleId === seg.id;
-                      const isDimmed = hoveredRoleId !== null && !isHovered;
-                      return (
-                        <circle
-                          key={seg.id}
-                          cx="50"
-                          cy="50"
-                          r={radius}
-                          fill="transparent"
-                          stroke={seg.color}
-                          strokeWidth={isHovered ? 13 : 11}
-                          strokeDasharray={seg.strokeDasharray}
-                          strokeDashoffset={seg.strokeDashoffset}
-                          strokeLinecap="round"
-                          className={cn(
-                            "cursor-pointer transition-all duration-200",
-                            isHovered ? "filter drop-shadow-md" : "",
-                            isDimmed ? "opacity-35" : "opacity-100"
-                          )}
-                          onMouseEnter={() => setHoveredRoleId(seg.id)}
-                          onMouseLeave={() => setHoveredRoleId(null)}
-                        />
-                      );
-                    })}
-                  </svg>
-
-                  {/* Center Hole */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center px-1">
-                    {activeRole ? (
-                      <>
-                        <span className="text-lg font-bold font-heading text-foreground tabular-nums leading-tight">
-                          {activeRole.count}
-                        </span>
-                        <span className="text-[10px] font-bold truncate max-w-[90px]" style={{ color: activeRole.color }}>
-                          {activeRole.pct}% {activeRole.name}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-xl font-bold font-heading text-foreground tabular-nums">
-                          5 roles
-                        </span>
-                        <span className="text-[9px] font-semibold text-muted-foreground mt-0.5 leading-[1.1]">
-                          1.245 usuarios<br/>asociados
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <ChartLegend alignment="center" className="gap-2 pt-3 w-full justify-center flex-wrap">
-                  {ROLE_DISTRIBUTION.map((item) => (
-                    <ChartLegendItem
-                      key={item.id}
-                      label={item.name}
-                      color={item.color}
-                      value={`${item.pct}%`}
-                      active={hoveredRoleId === null || hoveredRoleId === item.id}
-                      onMouseEnter={() => setHoveredRoleId(item.id)}
+            <CardContent className="flex flex-col p-6 flex-1 min-h-[260px] justify-center">
+              <div className="flex flex-col gap-4 w-full">
+                {currentRoles.map((role, idx) => {
+                  const isHovered = hoveredRoleId === role.id;
+                  const isDimmed = hoveredRoleId !== null && !isHovered;
+                  // Calcular el porcentaje real en base al total simulado
+                  const pct = Math.round((role.count / totalUsers) * 100);
+                  
+                  return (
+                    <div 
+                      key={role.id} 
+                      className="flex flex-col gap-1.5 w-full relative group"
+                      onMouseEnter={() => setHoveredRoleId(role.id)}
                       onMouseLeave={() => setHoveredRoleId(null)}
-                      className="text-[10px] py-0"
-                    />
-                  ))}
-                </ChartLegend>
-              </ChartContainer>
+                    >
+                      {/* Tooltip on Hover */}
+                      {isHovered && (
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                          <ChartTooltip active={true}>
+                            <ChartTooltipContent
+                              title={role.name}
+                              label="Usuarios"
+                              value={role.count}
+                              indicatorColor="var(--primary)"
+                              subvalue={`${pct}% del total asignado`}
+                            />
+                          </ChartTooltip>
+                        </div>
+                      )}
+
+                      <div className={cn("flex justify-between items-end", isDimmed && "opacity-50 transition-opacity")}>
+                        <span className="text-[13px] font-semibold text-foreground truncate pr-2">{role.name}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-bold text-foreground">{role.count}</span>
+                          <span className="text-[11px] font-semibold text-muted-foreground w-8 text-right">{pct}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-2.5 bg-muted/40 rounded-full overflow-hidden">
+                        <div 
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            isDimmed ? "bg-primary/30" : "bg-primary",
+                            idx === 0 && !isDimmed ? "bg-primary" : idx === 1 && !isDimmed ? "bg-primary/80" : idx === 2 && !isDimmed ? "bg-primary/60" : !isDimmed ? "bg-primary/40" : ""
+                          )}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
             <CardFooter className="relative z-10 py-4 px-6 border-t border-border/50 mt-auto flex justify-center items-center w-full">
               <Dialog>
