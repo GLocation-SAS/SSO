@@ -269,7 +269,7 @@ export function DashboardView() {
                   <AlertTriangle className="size-5 shrink-0" />
                   Requiere atención
                 </CardTitle>
-                <Badge variant="warning" size="sm" className="font-bold">
+                <Badge variant="warning" size="sm" className="font-bold dark:text-white">
                   {ATTENTION_ITEMS.length} avisos
                 </Badge>
               </div>
