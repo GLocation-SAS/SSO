@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { LoginSSOView } from "@/modules/auth/views/login-sso-view";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Conecta MINEDUC | Iniciar sesión",
+  description: "Administración centralizada de accesos y permisos a las aplicaciones y recursos institucionales del MINEDUC.",
+};
 
 export default function LandingPage() {
-  redirect("/login-sso");
+  return <LoginSSOView />;
 }

@@ -4,13 +4,19 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const isGithubActions = process.env.GITHUB_ACTIONS === "true";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isGithubActions ? "/SSO" : "");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "export",
+  basePath: basePath || undefined,
+  trailingSlash: true,
   turbopack: {
     root: process.cwd(),
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
