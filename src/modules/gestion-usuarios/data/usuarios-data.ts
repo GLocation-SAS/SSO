@@ -1,402 +1,521 @@
-export interface Recurso {
+export interface PermisoRecurso {
+  recursoCodigo: string;
+  recursoNombre: string;
+  puedeVer: boolean;
+  puedeCrear: boolean;
+  puedeEditar: boolean;
+  puedeEliminar: boolean;
+}
+
+export interface Aplicacion {
+  id: string;
   codigo: string;
   nombre: string;
-  tipo: "lectura" | "escritura" | "administracion" | "exportacion";
+  descripcion?: string;
+  activo: boolean;
+}
+
+export interface Rol {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+export interface Sede {
+  id: string;
+  codigo: string;
+  nombre: string;
+  tipo: "Planta Central" | "Coordinación Zonal" | "Distrito";
 }
 
 export interface RolAplicacion {
+  id: string;
   aplicacionId: string;
   aplicacionNombre: string;
   rolId: string;
   rolNombre: string;
-  recursos: string[];
+  usuariosMaxPermitidos?: number;
+}
+
+export interface RolAplicacionSede {
+  sedeId: string;
+  sedeNombre: string;
+  rolAplicacionId: string;
+  usuariosMaxPermitidos?: number;
+}
+
+export interface UsuarioSedeRolAplicacion {
+  id: string;
+  usuarioId: string;
+  sedeId: string;
+  sedeNombre: string;
+  rolAplicacionId: string;
+  aplicacionNombre: string;
+  rolNombre: string;
+  estado: "Activo" | "Inactivo";
+  fechaAsignacion?: string;
+  fechaFinalizacion?: string;
+  permisos: PermisoRecurso[];
+}
+
+export type UsuarioAsignacion = UsuarioSedeRolAplicacion;
+
+export interface UsuarioSede {
+  sedeId: string;
+  sedeNombre: string;
+  asignaciones: UsuarioSedeRolAplicacion[];
 }
 
 export interface UsuarioItem {
   id: string;
   nombre: string;
   apellidos: string;
-  identificacion: string;
-  correo: string;
-  telefono: string;
-  cargo: string;
-  sede: string;
+  tipoDocumento: "Cédula";
+  documentoIdentificacion: string;
+  email: string;
+  // Aliases para compatibilidad
+  identificacion?: string;
+  correo?: string;
+  telefono?: string;
+  cargo?: string;
   estado: "Activo" | "Inactivo" | "Pendiente";
-  ultimoAcceso: string;
   fechaCreacion: string;
-  rolesAplicaciones: RolAplicacion[];
+  sedes: UsuarioSede[];
 }
 
-export const SEDES_MINEDUC = [
-  "Planta Central (Quito)",
-  "Coordinación Zonal 9 (DMQ)",
-  "Coordinación Zonal 8 (Guayaquil - Samborondón)",
-  "Coordinación Zonal 2 (Pichincha - Napo - Orellana)",
-  "Coordinación Zonal 6 (Azuay - Cañar - Morona Santiago)",
-  "Distrito 17D01 - Noroccidente",
-  "Distrito 17D04 - Centro",
-] as const;
-
-export const APLICACIONES_MINEDUC = [
-  "SIGE",
-  "Geoportal",
-  "SAE",
-  "SSO",
-  "SGC",
-  "Trámites",
-  "Innovación",
-] as const;
-
+export const TIPOS_DOCUMENTO = ["Cédula"] as const;
 export const ESTADOS_USUARIO = ["Activo", "Inactivo", "Pendiente"] as const;
+
+export const SEDES_CATALOGO: Sede[] = [
+  { id: "sede-pc", codigo: "PC-01", nombre: "Planta Central", tipo: "Planta Central" },
+  { id: "sede-cz9", codigo: "CZ-09", nombre: "Coordinación Zonal 9", tipo: "Coordinación Zonal" },
+  { id: "sede-cz6", codigo: "CZ-06", nombre: "Coordinación Zonal 6", tipo: "Coordinación Zonal" },
+  { id: "sede-cz8", codigo: "CZ-08", nombre: "Coordinación Zonal 8", tipo: "Coordinación Zonal" },
+  { id: "sede-d1701", codigo: "17D01", nombre: "Distrito 17D01", tipo: "Distrito" },
+  { id: "sede-d0903", codigo: "09D03", nombre: "Distrito 09D03", tipo: "Distrito" },
+  { id: "sede-d1101", codigo: "11D01", nombre: "Distrito 11D01", tipo: "Distrito" },
+  { id: "sede-d1704", codigo: "17D04", nombre: "Distrito 17D04", tipo: "Distrito" },
+];
+
+export const SEDES_MINEDUC = SEDES_CATALOGO.map(s => s.nombre);
+
+export const APLICACIONES_CATALOGO: Aplicacion[] = [
+  { id: "app-gd", codigo: "SGD", nombre: "Gestión Docente", activo: true },
+  { id: "app-sso", codigo: "SSO", nombre: "SSO", activo: true },
+  { id: "app-sige", codigo: "SIGE", nombre: "SIGE", activo: true },
+  { id: "app-geo", codigo: "GEOPORTAL", nombre: "Geoportal", activo: true },
+  { id: "app-sae", codigo: "SAE", nombre: "SAE", activo: true },
+  { id: "app-sgc", codigo: "SGC", nombre: "SGC", activo: true },
+  { id: "app-tram", codigo: "TRAMITES", nombre: "Trámites", activo: true },
+  { id: "app-inno", codigo: "INNOVACION", nombre: "Innovación", activo: true },
+];
+
+export const APLICACIONES_MINEDUC = APLICACIONES_CATALOGO.map(a => a.nombre);
+
+export const ROLES_CONFIRMADOS_SGD = [
+  "Administración financiera",
+  "Administrador",
+  "Contratos Planificación",
+  "Docente",
+  "Jefe de Talento Humano",
+  "Registro y control",
+  "Talento Humano",
+  "Talento Humano Distrital",
+] as const;
+
+export const ROLES_APLICACION: RolAplicacion[] = [
+  // Gestión Docente (Confirmados estrictamente en manuales)
+  { id: "ra-gd-af", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-af", rolNombre: "Administración financiera", usuariosMaxPermitidos: 10 },
+  { id: "ra-gd-adm", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-adm", rolNombre: "Administrador", usuariosMaxPermitidos: 5 },
+  { id: "ra-gd-cp", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-cp", rolNombre: "Contratos Planificación", usuariosMaxPermitidos: 15 },
+  { id: "ra-gd-doc", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-doc", rolNombre: "Docente" },
+  { id: "ra-gd-jth", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-jth", rolNombre: "Jefe de Talento Humano", usuariosMaxPermitidos: 9 },
+  { id: "ra-gd-rc", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-rc", rolNombre: "Registro y control", usuariosMaxPermitidos: 20 },
+  { id: "ra-gd-th", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-th", rolNombre: "Talento Humano", usuariosMaxPermitidos: 30 },
+  { id: "ra-gd-thd", aplicacionId: "app-gd", aplicacionNombre: "Gestión Docente", rolId: "r-thd", rolNombre: "Talento Humano Distrital", usuariosMaxPermitidos: 40 },
+
+  // SSO
+  { id: "ra-sso-sa", aplicacionId: "app-sso", aplicacionNombre: "SSO", rolId: "r-sso-sa", rolNombre: "Super Administrador", usuariosMaxPermitidos: 3 },
+  { id: "ra-sso-aud", aplicacionId: "app-sso", aplicacionNombre: "SSO", rolId: "r-sso-aud", rolNombre: "Auditor de Seguridad", usuariosMaxPermitidos: 5 },
+  { id: "ra-sso-gz", aplicacionId: "app-sso", aplicacionNombre: "SSO", rolId: "r-sso-gz", rolNombre: "Gestor Zonal de Usuarios", usuariosMaxPermitidos: 15 },
+  { id: "ra-sso-ma", aplicacionId: "app-sso", aplicacionNombre: "SSO", rolId: "r-sso-ma", rolNombre: "Operador de Mesa de Ayuda", usuariosMaxPermitidos: 25 },
+
+  // SIGE
+  { id: "ra-sige-an", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-an", rolNombre: "Auditor Nacional", usuariosMaxPermitidos: 8 },
+  { id: "ra-sige-mat", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-mat", rolNombre: "Operador Matriculación", usuariosMaxPermitidos: 50 },
+  { id: "ra-sige-sop", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-sop", rolNombre: "Técnico de Soporte", usuariosMaxPermitidos: 20 },
+];
+
+export const ROLES_POR_APLICACION: Record<string, string[]> = {
+  "Gestión Docente": [...ROLES_CONFIRMADOS_SGD],
+  "SSO": ["Super Administrador", "Auditor de Seguridad", "Gestor Zonal de Usuarios", "Operador de Mesa de Ayuda"],
+  "SIGE": ["Auditor Nacional", "Operador Matriculación", "Técnico de Soporte"],
+  "Geoportal": ["Administrador de Capas", "Especialista SIG", "Consultor Territorial"],
+  "SAE": ["Analista de Cupos", "Coordinador de Admisión"],
+  "SGC": ["Director de Gestión Calidad", "Técnico de Soporte Calidad"],
+  "Trámites": ["Gestor de Trámites", "Revisor Documental"],
+  "Innovación": ["Evaluador de Proyectos", "Gestor Pedagógico"],
+};
+
+export const ROL_APLICACION_SEDE: RolAplicacionSede[] = [
+  // Gestión Docente roles por sedes
+  { sedeId: "sede-cz9", sedeNombre: "Coordinación Zonal 9", rolAplicacionId: "ra-gd-th", usuariosMaxPermitidos: 5 },
+  { sedeId: "sede-cz9", sedeNombre: "Coordinación Zonal 9", rolAplicacionId: "ra-gd-jth", usuariosMaxPermitidos: 1 },
+  { sedeId: "sede-d1701", sedeNombre: "Distrito 17D01", rolAplicacionId: "ra-gd-thd", usuariosMaxPermitidos: 4 },
+  { sedeId: "sede-d1701", sedeNombre: "Distrito 17D01", rolAplicacionId: "ra-gd-doc", usuariosMaxPermitidos: 100 },
+  { sedeId: "sede-cz6", sedeNombre: "Coordinación Zonal 6", rolAplicacionId: "ra-gd-jth", usuariosMaxPermitidos: 1 },
+  { sedeId: "sede-cz6", sedeNombre: "Coordinación Zonal 6", rolAplicacionId: "ra-gd-th", usuariosMaxPermitidos: 5 },
+  { sedeId: "sede-d0903", sedeNombre: "Distrito 09D03", rolAplicacionId: "ra-gd-rc", usuariosMaxPermitidos: 3 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-af", usuariosMaxPermitidos: 4 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-cp", usuariosMaxPermitidos: 6 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-adm", usuariosMaxPermitidos: 2 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-sso-sa", usuariosMaxPermitidos: 2 },
+  { sedeId: "sede-d1101", sedeNombre: "Distrito 11D01", rolAplicacionId: "ra-gd-doc", usuariosMaxPermitidos: 80 },
+];
+
+export const FUNCIONES_INSTITUCIONALES = [
+  "Coordinador Zonal",
+  "Director Distrital",
+  "Funcionario de Talento Humano",
+  "Docente",
+  "Analista de Planta Central",
+] as const;
 
 export const mockUsuariosData: UsuarioItem[] = [
   {
     id: "usr-01",
-    nombre: "Paula Andrea",
-    apellidos: "Rozo Salazar",
-    identificacion: "1724589632",
-    correo: "paula.rozo@minedec.gov.co",
-    telefono: "+593 99 874 5210",
-    cargo: "Administradora de Identidades y Accesos",
-    sede: "Planta Central (Quito)",
+    nombre: "María Fernanda",
+    apellidos: "Gómez Andrade",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1719874563",
+    email: "maria.gomez@mineduc.gob.ec",
+    identificacion: "1719874563",
+    correo: "maria.gomez@mineduc.gob.ec",
+    telefono: "+593 99 111 2222",
+    cargo: "Funcionario de Talento Humano",
     estado: "Activo",
-    ultimoAcceso: "Hoy, 14:32",
-    fechaCreacion: "12/01/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "15/09/2026",
+    sedes: [
       {
-        aplicacionId: "sso",
-        aplicacionNombre: "SSO",
-        rolId: "superadmin",
-        rolNombre: "Super Administrador",
-        recursos: [
-          "sso:usuarios:full",
-          "sso:roles:administrar",
-          "sso:auditoria:consultar",
-          "sso:seguridad:politicas",
-        ],
-      },
-      {
-        aplicacionId: "geoportal",
-        aplicacionNombre: "Geoportal",
-        rolId: "admin_geoportal",
-        rolNombre: "Administrador de Capas",
-        recursos: [
-          "geoportal:capas:publicar",
-          "geoportal:metadatos:editar",
-          "geoportal:servidores:configurar",
-        ],
-      },
-      {
-        aplicacionId: "sige",
-        aplicacionNombre: "SIGE",
-        rolId: "auditor_sige",
-        rolNombre: "Auditor Nacional",
-        recursos: ["sige:instituciones:lectura", "sige:auditoria:reportes"],
-      },
-    ],
+        sedeId: "sede-cz9",
+        sedeNombre: "Coordinación Zonal 9",
+        asignaciones: [
+          {
+            id: "usra-01-1",
+            usuarioId: "usr-01",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-gd-th",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Talento Humano",
+            estado: "Activo",
+            fechaAsignacion: "15/09/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+              { recursoCodigo: "MOV-PERS", recursoNombre: "Movimientos de Personal", puedeVer: true, puedeCrear: true, puedeEditar: false, puedeEliminar: false },
+            ]
+          },
+          {
+            id: "usra-01-2",
+            usuarioId: "usr-01",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-sige-mat",
+            aplicacionNombre: "SIGE",
+            rolNombre: "Operador Matriculación",
+            estado: "Activo",
+            fechaAsignacion: "15/09/2026",
+            permisos: [
+              { recursoCodigo: "MAT-ALUM", recursoNombre: "Matriculación de Alumnos", puedeVer: true, puedeCrear: true, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-01-3",
+            usuarioId: "usr-01",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-sso-ma",
+            aplicacionNombre: "SSO",
+            rolNombre: "Operador de Mesa de Ayuda",
+            estado: "Activo",
+            fechaAsignacion: "15/09/2026",
+            permisos: [
+              { recursoCodigo: "USR-CONS", recursoNombre: "Consulta de Usuarios", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-02",
     nombre: "Carlos Eduardo",
     apellidos: "Mendoza Viteri",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1715896324",
+    email: "carlos.mendoza@mineduc.gob.ec",
     identificacion: "1715896324",
-    correo: "carlos.mendoza@minedec.gov.co",
-    telefono: "+593 98 456 1234",
-    cargo: "Especialista de Sistemas de Información",
-    sede: "Planta Central (Quito)",
+    correo: "carlos.mendoza@mineduc.gob.ec",
+    telefono: "+593 99 222 3333",
+    cargo: "Funcionario de Talento Humano",
     estado: "Activo",
-    ultimoAcceso: "Hoy, 11:15",
-    fechaCreacion: "05/03/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "02/08/2026",
+    sedes: [
       {
-        aplicacionId: "geoportal",
-        aplicacionNombre: "Geoportal",
-        rolId: "especialista_sig",
-        rolNombre: "Especialista SIG",
-        recursos: [
-          "geoportal:capas:lectura",
-          "geoportal:analisis:ejecutar",
-          "geoportal:mapas:exportar",
-        ],
-      },
-      {
-        aplicacionId: "sige",
-        aplicacionNombre: "SIGE",
-        rolId: "tecnico_soporte",
-        rolNombre: "Técnico de Integración",
-        recursos: ["sige:matriculas:lectura", "sige:sedes:sincronizar"],
-      },
-    ],
+        sedeId: "sede-d1701",
+        sedeNombre: "Distrito 17D01",
+        asignaciones: [
+          {
+            id: "usra-02-1",
+            usuarioId: "usr-02",
+            sedeId: "sede-d1701",
+            sedeNombre: "Distrito 17D01",
+            rolAplicacionId: "ra-gd-thd",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Talento Humano Distrital",
+            estado: "Activo",
+            fechaAsignacion: "02/08/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-03",
-    nombre: "María Fernanda",
-    apellidos: "Gómez Andrade",
-    identificacion: "1719874563",
-    correo: "maria.gomez@minedec.gov.co",
-    telefono: "+593 97 123 7890",
-    cargo: "Directora Zonal de Talento Humano",
-    sede: "Coordinación Zonal 9 (DMQ)",
+    nombre: "Lucía Gabriela",
+    apellidos: "Paredes Roldán",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "0104567892",
+    email: "lucia.paredes@mineduc.gob.ec",
+    identificacion: "0104567892",
+    correo: "lucia.paredes@mineduc.gob.ec",
+    telefono: "+593 99 333 4444",
+    cargo: "Coordinador Zonal",
     estado: "Activo",
-    ultimoAcceso: "Ayer, 16:45",
-    fechaCreacion: "18/02/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "21/07/2026",
+    sedes: [
       {
-        aplicacionId: "sso",
-        aplicacionNombre: "SSO",
-        rolId: "gestor_accesos",
-        rolNombre: "Gestor Zonal de Usuarios",
-        recursos: ["sso:usuarios:crear", "sso:usuarios:inactivar"],
-      },
-      {
-        aplicacionId: "sgc",
-        aplicacionNombre: "SGC",
-        rolId: "director_th",
-        rolNombre: "Director de Gestión Calidad",
-        recursos: ["sgc:auditorias:aprobar", "sgc:planes:gestionar"],
-      },
-    ],
+        sedeId: "sede-cz6",
+        sedeNombre: "Coordinación Zonal 6",
+        asignaciones: [
+          {
+            id: "usra-03-1",
+            usuarioId: "usr-03",
+            sedeId: "sede-cz6",
+            sedeNombre: "Coordinación Zonal 6",
+            rolAplicacionId: "ra-gd-jth",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Jefe de Talento Humano",
+            estado: "Activo",
+            fechaAsignacion: "21/07/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "MOV-PERS", recursoNombre: "Movimientos de Personal", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-04",
     nombre: "Juan Pablo",
     apellidos: "Ortiz Noboa",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "0923456781",
+    email: "juan.ortiz@mineduc.gob.ec",
     identificacion: "0923456781",
-    correo: "juan.ortiz@minedec.gov.co",
-    telefono: "+593 96 321 4567",
-    cargo: "Analista de Admisión y Matrícula",
-    sede: "Coordinación Zonal 8 (Guayaquil - Samborondón)",
+    correo: "juan.ortiz@mineduc.gob.ec",
+    telefono: "+593 99 444 5555",
+    cargo: "Director Distrital",
     estado: "Activo",
-    ultimoAcceso: "Hoy, 09:20",
-    fechaCreacion: "22/04/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "05/06/2026",
+    sedes: [
       {
-        aplicacionId: "sae",
-        aplicacionNombre: "SAE",
-        rolId: "analista_cupos",
-        rolNombre: "Analista de Cupos",
-        recursos: ["sae:asignaciones:procesar", "sae:reportes:exportar"],
-      },
-      {
-        aplicacionId: "sige",
-        aplicacionNombre: "SIGE",
-        rolId: "operador_matricula",
-        rolNombre: "Operador Matriculación",
-        recursos: ["sige:estudiantes:editar", "sige:matriculas:crear"],
-      },
-    ],
+        sedeId: "sede-d0903",
+        sedeNombre: "Distrito 09D03",
+        asignaciones: [
+          {
+            id: "usra-04-1",
+            usuarioId: "usr-04",
+            sedeId: "sede-d0903",
+            sedeNombre: "Distrito 09D03",
+            rolAplicacionId: "ra-gd-rc",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Registro y control",
+            estado: "Activo",
+            fechaAsignacion: "05/06/2026",
+            permisos: [
+              { recursoCodigo: "REG-ASIS", recursoNombre: "Registro y Asistencia", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-05",
     nombre: "Diana Carolina",
     apellidos: "Villacís Mora",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1720145896",
+    email: "diana.villacis@mineduc.gob.ec",
     identificacion: "1720145896",
-    correo: "diana.villacis@minedec.gov.co",
-    telefono: "+593 95 654 3218",
-    cargo: "Responsable de Ventanilla y Atención Ciudadana",
-    sede: "Distrito 17D01 - Noroccidente",
+    correo: "diana.villacis@mineduc.gob.ec",
+    telefono: "+593 99 555 6666",
+    cargo: "Analista de Planta Central",
     estado: "Activo",
-    ultimoAcceso: "Hace 2 días",
-    fechaCreacion: "10/05/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "14/05/2026",
+    sedes: [
       {
-        aplicacionId: "tramites",
-        aplicacionNombre: "Trámites",
-        rolId: "gestor_tramites",
-        rolNombre: "Gestor de Trámites",
-        recursos: [
-          "tramites:solicitudes:revisar",
-          "tramites:documentos:validar",
-          "tramites:notificaciones:enviar",
-        ],
-      },
-    ],
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-05-1",
+            usuarioId: "usr-05",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-gd-af",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Administración financiera",
+            estado: "Activo",
+            fechaAsignacion: "14/05/2026",
+            permisos: [
+              { recursoCodigo: "NOM-REM", recursoNombre: "Nómina y Remuneraciones", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-06",
-    nombre: "Roberto Javier",
-    apellidos: "Cárdenas Silva",
-    identificacion: "1803214569",
-    correo: "roberto.cardenas@minedec.gov.co",
-    telefono: "+593 99 112 3344",
-    cargo: "Auditor de Seguridad de la Información",
-    sede: "Planta Central (Quito)",
-    estado: "Inactivo",
-    ultimoAcceso: "14/09/2026",
-    fechaCreacion: "14/01/2023",
-    rolesAplicaciones: [
+    nombre: "Verónica Patricia",
+    apellidos: "Almeida Carrera",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1714523698",
+    email: "veronica.almeida@mineduc.gob.ec",
+    identificacion: "1714523698",
+    correo: "veronica.almeida@mineduc.gob.ec",
+    telefono: "+593 99 666 7777",
+    cargo: "Analista de Planta Central",
+    estado: "Activo",
+    fechaCreacion: "28/04/2026",
+    sedes: [
       {
-        aplicacionId: "sso",
-        aplicacionNombre: "SSO",
-        rolId: "auditor_sec",
-        rolNombre: "Auditor de Seguridad",
-        recursos: ["sso:auditoria:consultar", "sso:logs:exportar"],
-      },
-    ],
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-06-1",
+            usuarioId: "usr-06",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-gd-cp",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Contratos Planificación",
+            estado: "Activo",
+            fechaAsignacion: "28/04/2026",
+            permisos: [
+              { recursoCodigo: "PLAN-CONT", recursoNombre: "Planificación de Contratos", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-07",
-    nombre: "Lucía Gabriela",
-    apellidos: "Paredes Roldán",
-    identificacion: "0104567892",
-    correo: "lucia.paredes@minedec.gov.co",
-    telefono: "+593 98 776 5544",
-    cargo: "Coordinadora Zonal de Planificación Educativa",
-    sede: "Coordinación Zonal 6 (Azuay - Cañar - Morona Santiago)",
+    nombre: "Andrés Felipe",
+    apellidos: "Salazar",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1720567812",
+    email: "andres.salazar@mineduc.gob.ec",
+    identificacion: "1720567812",
+    correo: "andres.salazar@mineduc.gob.ec",
+    telefono: "+593 99 777 8888",
+    cargo: "Analista de Planta Central",
     estado: "Activo",
-    ultimoAcceso: "Hoy, 12:05",
-    fechaCreacion: "30/06/2024",
-    rolesAplicaciones: [
+    fechaCreacion: "10/03/2026",
+    sedes: [
       {
-        aplicacionId: "geoportal",
-        aplicacionNombre: "Geoportal",
-        rolId: "consultor_territorio",
-        rolNombre: "Consultor Territorial",
-        recursos: ["geoportal:capas:lectura", "geoportal:indicadores:analisis"],
-      },
-      {
-        aplicacionId: "sae",
-        aplicacionNombre: "SAE",
-        rolId: "coord_admision",
-        rolNombre: "Coordinador de Admisión",
-        recursos: ["sae:oferta:planificar", "sae:reportes:consolidados"],
-      },
-      {
-        aplicacionId: "innovacion",
-        aplicacionNombre: "Innovación",
-        rolId: "evaluador_proy",
-        rolNombre: "Evaluador de Proyectos",
-        recursos: ["innovacion:propuestas:calificar"],
-      },
-    ],
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-07-1",
+            usuarioId: "usr-07",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-gd-adm",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Administrador",
+            estado: "Activo",
+            fechaAsignacion: "10/03/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "DIS-TRAB", recursoNombre: "Distributivo de Trabajo", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "PLAN-CONT", recursoNombre: "Planificación de Contratos", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "REG-ASIS", recursoNombre: "Registro y Asistencia", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+            ]
+          },
+          {
+            id: "usra-07-2",
+            usuarioId: "usr-07",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-sso-sa",
+            aplicacionNombre: "SSO",
+            rolNombre: "Super Administrador",
+            estado: "Activo",
+            fechaAsignacion: "10/03/2026",
+            permisos: [
+              { recursoCodigo: "ALL-SEC", recursoNombre: "Seguridad y Auditoría Global", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     id: "usr-08",
-    nombre: "Esteban Andrés",
-    apellidos: "Vega Benítez",
-    identificacion: "1500234567",
-    correo: "esteban.vega@minedec.gov.co",
-    telefono: "+593 97 998 8776",
-    cargo: "Técnico Zonal de Infraestructura",
-    sede: "Coordinación Zonal 2 (Pichincha - Napo - Orellana)",
-    estado: "Pendiente",
-    ultimoAcceso: "Sin registro",
-    fechaCreacion: "02/10/2026",
-    rolesAplicaciones: [
-      {
-        aplicacionId: "geoportal",
-        aplicacionNombre: "Geoportal",
-        rolId: "levantamiento_campo",
-        rolNombre: "Técnico de Campo",
-        recursos: ["geoportal:puntos:capturar"],
-      },
-    ],
-  },
-  {
-    id: "usr-09",
-    nombre: "Verónica Patricia",
-    apellidos: "Almeida Carrera",
-    identificacion: "1714523698",
-    correo: "veronica.almeida@minedec.gov.co",
-    telefono: "+593 96 554 4332",
-    cargo: "Especialista de Calidad Educativa",
-    sede: "Distrito 17D04 - Centro",
-    estado: "Activo",
-    ultimoAcceso: "Hoy, 08:40",
-    fechaCreacion: "19/07/2024",
-    rolesAplicaciones: [
-      {
-        aplicacionId: "sgc",
-        aplicacionNombre: "SGC",
-        rolId: "tecnico_calidad",
-        rolNombre: "Técnico de Soporte Calidad",
-        recursos: ["sgc:documental:control", "sgc:evidencias:cargar"],
-      },
-      {
-        aplicacionId: "innovacion",
-        aplicacionNombre: "Innovación",
-        rolId: "gestor_pedagogico",
-        rolNombre: "Gestor Pedagógico",
-        recursos: ["innovacion:guias:publicar"],
-      },
-    ],
-  },
-  {
-    id: "usr-10",
-    nombre: "Hugo Francisco",
-    apellidos: "Pazmiño Terán",
-    identificacion: "0918765432",
-    correo: "hugo.pazmino@minedec.gov.co",
-    telefono: "+593 95 112 2334",
-    cargo: "Analista de Mesa de Servicios SSO",
-    sede: "Coordinación Zonal 8 (Guayaquil - Samborondón)",
-    estado: "Activo",
-    ultimoAcceso: "Ayer, 18:10",
-    fechaCreacion: "11/08/2024",
-    rolesAplicaciones: [
-      {
-        aplicacionId: "sso",
-        aplicacionNombre: "SSO",
-        rolId: "operador_helpdesk",
-        rolNombre: "Operador de Mesa de Ayuda",
-        recursos: [
-          "sso:claves:reestablecer",
-          "sso:cuentas:desbloquear",
-          "sso:usuarios:consulta",
-        ],
-      },
-    ],
-  },
-  {
-    id: "usr-11",
-    nombre: "Silvia Elena",
-    apellidos: "Guamán Yánez",
-    identificacion: "0602345678",
-    correo: "silvia.guaman@minedec.gov.co",
-    telefono: "+593 99 334 5566",
-    cargo: "Directora Distrital de Educación",
-    sede: "Distrito 17D01 - Noroccidente",
-    estado: "Activo",
-    ultimoAcceso: "Hoy, 10:30",
-    fechaCreacion: "03/01/2024",
-    rolesAplicaciones: [
-      {
-        aplicacionId: "sige",
-        aplicacionNombre: "SIGE",
-        rolId: "director_distrital",
-        rolNombre: "Director Distrital",
-        recursos: ["sige:instituciones:aprobar", "sige:docentes:consultar"],
-      },
-      {
-        aplicacionId: "tramites",
-        aplicacionNombre: "Trámites",
-        rolId: "revisor_documental",
-        rolNombre: "Revisor Documental",
-        recursos: ["tramites:firmas:autorizar"],
-      },
-    ],
-  },
-  {
-    id: "usr-12",
-    nombre: "Fernando Javier",
-    apellidos: "Montenegro Lara",
-    identificacion: "1002345671",
-    correo: "fernando.montenegro@minedec.gov.co",
-    telefono: "+593 98 223 3445",
-    cargo: "Técnico Informático Zonal",
-    sede: "Coordinación Zonal 2 (Pichincha - Napo - Orellana)",
+    nombre: "Sofía Alejandra",
+    apellidos: "Torres",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1103567894",
+    email: "sofia.torres@mineduc.gob.ec",
+    identificacion: "1103567894",
+    correo: "sofia.torres@mineduc.gob.ec",
+    telefono: "+593 99 888 9999",
+    cargo: "Docente",
     estado: "Inactivo",
-    ultimoAcceso: "01/08/2026",
-    fechaCreacion: "15/09/2023",
-    rolesAplicaciones: [
+    fechaCreacion: "18/01/2026",
+    sedes: [
       {
-        aplicacionId: "sige",
-        aplicacionNombre: "SIGE",
-        rolId: "tecnico_soporte",
-        rolNombre: "Técnico de Soporte",
-        recursos: ["sige:usuarios:soporte"],
-      },
-    ],
-  },
+        sedeId: "sede-d1101",
+        sedeNombre: "Distrito 11D01",
+        asignaciones: [
+          {
+            id: "usra-08-1",
+            usuarioId: "usr-08",
+            sedeId: "sede-d1101",
+            sedeNombre: "Distrito 11D01",
+            rolAplicacionId: "ra-gd-doc",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Docente",
+            estado: "Inactivo",
+            fechaAsignacion: "18/01/2026",
+            fechaFinalizacion: "30/08/2026",
+            permisos: [
+              { recursoCodigo: "DIS-TRAB", recursoNombre: "Distributivo de Trabajo", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ];
-

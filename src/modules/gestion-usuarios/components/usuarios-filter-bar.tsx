@@ -1,182 +1,277 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Search } from "@/components/ui/search";
 import {
   Combobox,
   ComboboxInput,
   ComboboxContent,
   ComboboxList,
-  ComboboxItem
+  ComboboxItem,
 } from "@/components/ui/combobox";
+import { DataChip } from "@/components/ui/data-display";
 import {
-  ChevronDown,
-  FilterX,
-  MapPin,
-  AppWindow,
-  ShieldCheck,
-  Check,
-} from "lucide-react";
-import {
-  SEDES_MINEDUC,
-  APLICACIONES_MINEDUC,
+  SEDES_CATALOGO,
+  APLICACIONES_CATALOGO,
   ESTADOS_USUARIO,
+  ROLES_APLICACION,
+  ROL_APLICACION_SEDE,
+  ROLES_POR_APLICACION,
 } from "../data/usuarios-data";
 
 interface UsuariosFilterBarProps {
   searchTerm: string;
-  onSearchChange: (val: string) => void;
-  selectedSede: string;
-  onSedeChange: (val: string) => void;
-  selectedApp: string;
-  onAppChange: (val: string) => void;
+  onSearchChange: (value: string) => void;
   selectedEstado: string;
-  onEstadoChange: (val: string) => void;
-  onResetFilters: () => void;
-  totalFiltered: number;
+  onEstadoChange: (value: string) => void;
+  selectedSede: string;
+  onSedeChange: (value: string) => void;
+  selectedApp: string;
+  onAppChange: (value: string) => void;
+  selectedRol: string;
+  onRolChange: (value: string) => void;
 }
 
 export function UsuariosFilterBar({
   searchTerm,
   onSearchChange,
+  selectedEstado,
+  onEstadoChange,
   selectedSede,
   onSedeChange,
   selectedApp,
   onAppChange,
-  selectedEstado,
-  onEstadoChange,
-  onResetFilters,
-  totalFiltered,
+  selectedRol,
+  onRolChange,
 }: UsuariosFilterBarProps) {
   const hasActiveFilters =
-    Boolean(searchTerm) ||
-    selectedSede !== "all" ||
-    selectedApp !== "all" ||
-    selectedEstado !== "all";
+    searchTerm !== "" ||
+    selectedEstado !== "Todos" ||
+    selectedApp !== "Todas" ||
+    selectedSede !== "Todas" ||
+    selectedRol !== "Todos";
+
+  const handleReset = () => {
+    onSearchChange("");
+    onEstadoChange("Todos");
+    onAppChange("Todas");
+    onSedeChange("Todas");
+    onRolChange("Todos");
+  };
+
+  // Roles dependientes de Aplicación y contextualizados por ROL_APLICACION_SEDE
+  const availableRoles = React.useMemo(() => {
+    if (selectedApp === "Todas" || selectedApp === "all" || !selectedApp) {
+      return [];
+    }
+
+    const appRoles = ROLES_APLICACION.filter((ra) => ra.aplicacionNombre === selectedApp);
+
+    // Si hay una sede específica seleccionada, filtrar según ROL_APLICACION_SEDE
+    if (selectedSede !== "Todas" && selectedSede !== "all" && selectedSede) {
+      const sedeEntry = SEDES_CATALOGO.find((s) => s.nombre === selectedSede);
+      if (sedeEntry) {
+        const allowedIds = ROL_APLICACION_SEDE.filter(
+          (ras) => ras.sedeId === sedeEntry.id || ras.sedeNombre === selectedSede
+        ).map((ras) => ras.rolAplicacionId);
+
+        if (allowedIds.length > 0) {
+          const filtered = appRoles.filter((ra) => allowedIds.includes(ra.id)).map((ra) => ra.rolNombre);
+          if (filtered.length > 0) return Array.from(new Set(filtered));
+        }
+      }
+    }
+
+    if (appRoles.length > 0) {
+      return Array.from(new Set(appRoles.map((ra) => ra.rolNombre)));
+    }
+
+    return ROLES_POR_APLICACION[selectedApp] || [];
+  }, [selectedApp, selectedSede]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
-        {/* Search Input */}
-        <div className="flex-1 min-w-[240px]">
+    <div className="flex flex-col gap-4 mb-6">
+      <div className="flex flex-wrap items-end gap-3.5 w-full">
+        {/* SearchInput principal */}
+        <div className="flex-1 min-w-[340px] max-w-[500px]">
           <Search
-            placeholder="Buscar por nombre, cédula o correo..."
+            placeholder="Buscar por nombre, número de documento o correo..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             onClear={() => onSearchChange("")}
-            className="w-full"
+            className="w-full h-9 text-sm"
           />
         </div>
 
-        {/* Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Filtro por Estado */}
-          <div className="w-[140px]">
-            <Combobox
-              value={selectedEstado}
-              onValueChange={(val) => { if(val) onEstadoChange(val) }}
-            >
-              <ComboboxInput placeholder="Estado" showClear={false} />
-              <ComboboxContent>
-                <ComboboxList>
-                  <ComboboxItem value="all">Todos los estados</ComboboxItem>
-                  {ESTADOS_USUARIO.map((est) => (
-                    <ComboboxItem key={est} value={est}>
-                      {est}
-                    </ComboboxItem>
-                  ))}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
-          </div>
+        {/* Filtro por Estado */}
+        <div className="w-[170px] shrink-0 flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase">Estado</label>
+          <Combobox
+            value={selectedEstado}
+            onValueChange={(val) => {
+              if (val) onEstadoChange(val);
+            }}
+          >
+            <ComboboxInput placeholder="Todos los estados" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxContent className="min-w-full">
+              <ComboboxList>
+                <ComboboxItem value="Todos">Todos los estados</ComboboxItem>
+                {ESTADOS_USUARIO.map((est) => (
+                  <ComboboxItem key={est} value={est}>
+                    {est}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </div>
 
-          {/* Filtro por Aplicación */}
-          <div className="w-[160px]">
-            <Combobox
-              value={selectedApp}
-              onValueChange={(val) => { if(val) onAppChange(val) }}
-            >
-              <ComboboxInput placeholder="Aplicación" showClear={false} />
-              <ComboboxContent>
-                <ComboboxList>
-                  <ComboboxItem value="all">Todas las aplicaciones</ComboboxItem>
-                  {APLICACIONES_MINEDUC.map((app) => (
-                    <ComboboxItem key={app} value={app}>
-                      {app}
-                    </ComboboxItem>
-                  ))}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
-          </div>
+        {/* Filtro por Sede */}
+        <div className="w-[240px] shrink-0 flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase">Sede</label>
+          <Combobox
+            value={selectedSede}
+            onValueChange={(val) => {
+              if (val) {
+                onSedeChange(val);
+                // Si el rol ya no es válido para la combinación sede-app, resetear
+                onRolChange("Todos");
+              }
+            }}
+          >
+            <ComboboxInput placeholder="Todas las sedes" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxContent className="min-w-full">
+              <ComboboxList>
+                <ComboboxItem value="Todas">Todas las sedes</ComboboxItem>
+                {SEDES_CATALOGO.map((sede) => (
+                  <ComboboxItem key={sede.id} value={sede.nombre}>
+                    {sede.nombre}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </div>
 
-          {/* Filtro por Sede */}
-          <div className="w-[200px]">
-            <Combobox
-              value={selectedSede}
-              onValueChange={(val) => { if(val) onSedeChange(val) }}
-            >
-              <ComboboxInput placeholder="Sede" showClear={false} />
-              <ComboboxContent>
-                <ComboboxList>
-                  <ComboboxItem value="all">Todas las sedes</ComboboxItem>
-                  {SEDES_MINEDUC.map((sede) => (
-                    <ComboboxItem key={sede} value={sede}>
-                      {sede}
-                    </ComboboxItem>
-                  ))}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
-          </div>
+        {/* Filtro por Aplicación */}
+        <div className="w-[230px] shrink-0 flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase">Aplicación</label>
+          <Combobox
+            value={selectedApp}
+            onValueChange={(val) => {
+              if (val) {
+                onAppChange(val);
+                onRolChange("Todos"); // Dependiente: resetear rol al cambiar aplicación
+              }
+            }}
+          >
+            <ComboboxInput placeholder="Todas las aplicaciones" showClear={false} className="w-full h-9 text-xs" />
+            <ComboboxContent className="min-w-full">
+              <ComboboxList>
+                <ComboboxItem value="Todas">Todas las aplicaciones</ComboboxItem>
+                {APLICACIONES_CATALOGO.map((app) => (
+                  <ComboboxItem key={app.id} value={app.nombre}>
+                    {app.nombre}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </div>
 
-          {/* Botón Reset si hay filtros aplicados */}
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onResetFilters}
-              className="gap-1.5 h-9 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <FilterX className="size-3.5" />
-              Limpiar filtros
-            </Button>
-          )}
+        {/* Filtro por Rol (Dependiente de Aplicación y Sede) */}
+        <div className="w-[260px] shrink-0 flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase">Rol</label>
+          <Combobox
+            value={selectedRol}
+            onValueChange={(val) => {
+              if (val) onRolChange(val);
+            }}
+            disabled={selectedApp === "Todas" || selectedApp === "all" || !selectedApp}
+          >
+            <ComboboxInput
+              placeholder={
+                selectedApp === "Todas" || !selectedApp
+                  ? "Elija aplicación primero"
+                  : "Todos los roles"
+              }
+              showClear={false}
+              className="w-full h-9 text-xs"
+            />
+            <ComboboxContent className="min-w-full">
+              <ComboboxList>
+                <ComboboxItem value="Todos">Todos los roles</ComboboxItem>
+                {availableRoles.map((rol) => (
+                  <ComboboxItem key={rol} value={rol}>
+                    {rol}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </div>
       </div>
 
-      {/* Active filters indicators */}
+      {/* Chips de Filtros Activos */}
       {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40 text-xs text-muted-foreground">
-          <span className="font-medium mr-1">Filtros activos:</span>
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/50">
+          <span className="text-xs text-muted-foreground font-medium mr-1">Filtros activos:</span>
+
           {searchTerm && (
-            <Badge tone="primary" appearance="soft" size="sm" className="gap-1">
-              Búsqueda: {searchTerm}
-            </Badge>
+            <DataChip
+              label={`Búsqueda: ${searchTerm}`}
+              removable
+              onRemove={() => onSearchChange("")}
+              className="bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+            />
           )}
-          {selectedEstado !== "all" && (
-            <Badge tone="neutral" appearance="soft" size="sm">
-              Estado: {selectedEstado}
-            </Badge>
+          {selectedEstado !== "Todos" && (
+            <DataChip
+              label={`Estado: ${selectedEstado}`}
+              removable
+              onRemove={() => onEstadoChange("Todos")}
+              className="bg-success/10 border-success/30 text-success-600 dark:text-success-400 hover:bg-success/20"
+            />
           )}
-          {selectedApp !== "all" && (
-            <Badge tone="info" appearance="soft" size="sm">
-              App: {selectedApp}
-            </Badge>
+          {selectedSede !== "Todas" && (
+            <DataChip
+              label={`Sede: ${selectedSede}`}
+              removable
+              onRemove={() => onSedeChange("Todas")}
+              className="bg-warning/10 border-warning/30 text-warning-600 dark:text-warning-400 hover:bg-warning/20"
+            />
           )}
-          {selectedSede !== "all" && (
-            <Badge tone="secondary" appearance="soft" size="sm">
-              Sede: {selectedSede}
-            </Badge>
+          {selectedApp !== "Todas" && (
+            <DataChip
+              label={`App: ${selectedApp}`}
+              removable
+              onRemove={() => {
+                onAppChange("Todas");
+                onRolChange("Todos");
+              }}
+              className="bg-info/10 border-info/30 text-info-600 dark:text-info-400 hover:bg-info/20"
+            />
           )}
-          <span className="ml-auto text-[11px] text-muted-foreground">
-            {totalFiltered} resultados encontrados
-          </span>
+          {selectedRol !== "Todos" && (
+            <DataChip
+              label={`Rol: ${selectedRol}`}
+              removable
+              onRemove={() => onRolChange("Todos")}
+              className="bg-secondary-50 border-secondary-300 text-secondary-600 dark:bg-secondary-900/40 dark:text-secondary-300 hover:bg-secondary-100"
+            />
+          )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            className="text-xs h-7 px-2 ml-auto text-muted-foreground hover:text-foreground"
+          >
+            Limpiar todos
+          </Button>
         </div>
       )}
     </div>
   );
 }
-
