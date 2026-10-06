@@ -39,6 +39,7 @@ import {
 import { NotificationsMenu } from "@/components/shared/notifications-menu";
 import { UserMenu } from "@/components/shared/user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getAssetPath } from "@/lib/assets";
 
 /* ─────────────────────────────────────────────
    Tipos y datos de navegación
@@ -136,8 +137,8 @@ export const defaultNavItems: NavItem[] = [
 
 export const defaultHeaderConfig = {
   showLogo: true,
-  logoUrlLight: "/horizontal-light.svg",
-  logoUrlDark: "/horizontal-dark.svg",
+  logoUrlLight: getAssetPath("/horizontal-light.svg"),
+  logoUrlDark: getAssetPath("/horizontal-dark.svg"),
   title: "",
   showSearch: true,
   showThemeToggle: true,
@@ -546,12 +547,12 @@ function GeoportalHeaderContent({
                   {showLogo && (
                     <>
                       <img
-                        src={headerConfig.logoUrlLight}
+                        src={getAssetPath(headerConfig.logoUrlLight)}
                         alt="Logo MINEDEC GEOportal"
                         className="h-10 w-auto object-contain dark:hidden"
                       />
                       <img
-                        src={headerConfig.logoUrlDark}
+                        src={getAssetPath(headerConfig.logoUrlDark)}
                         alt="Logo MINEDEC GEOportal"
                         className="h-10 w-auto object-contain hidden dark:block"
                       />
@@ -674,12 +675,12 @@ function GeoportalHeaderContent({
                             {showLogo && (
                               <>
                                 <img
-                                  src={headerConfig.logoUrlLight}
+                                  src={getAssetPath(headerConfig.logoUrlLight)}
                                   alt="Logo MINEDEC GEOportal"
                                   className="h-9 w-auto object-contain dark:hidden"
                                 />
                                 <img
-                                  src={headerConfig.logoUrlDark}
+                                  src={getAssetPath(headerConfig.logoUrlDark)}
                                   alt="Logo MINEDEC GEOportal"
                                   className="h-9 w-auto object-contain hidden dark:block"
                                 />

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/data-display";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { getAssetPath } from "@/lib/assets";
 
 interface LogoManagerCardProps {
   /** Identificador del recurso en minedec-kit-assets (bucket de borrador, NUNCA minedec-design-tokens). */
@@ -66,11 +67,11 @@ export function LogoManagerCard({
 
   const handleFileSelect = (newFiles: File[], type: 'light' | 'dark') => {
     if (newFiles.length === 0) return;
-    
+
     const file = newFiles[0];
     const isSvgOrPng = file.type === "image/svg+xml" || file.type === "image/png";
     const setter = type === 'light' ? setLightFiles : setDarkFiles;
-    
+
     if (!isSvgOrPng) {
       setter([
         {
@@ -114,7 +115,7 @@ export function LogoManagerCard({
   const handleOpenConfirm = () => {
     const hasLight = lightFiles.length > 0 && lightFiles[0].status === "success";
     const hasDark = darkFiles.length > 0 && darkFiles[0].status === "success";
-    
+
     if (!hasLight && !hasDark) return;
     setIsUploadOpen(false);
     setIsConfirmOpen(true);
@@ -139,7 +140,7 @@ export function LogoManagerCard({
         const bodyLight = new FormData();
         bodyLight.append("file", lightFiles[0].file);
         // Compatibilidad: el light principal lo subimos como slot (p/ej 'horizontal')
-        bodyLight.append("slot", slot); 
+        bodyLight.append("slot", slot);
         uploadPromises.push(
           fetch("/api/kit-assets", { method: "POST", body: bodyLight })
             .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
@@ -196,13 +197,13 @@ export function LogoManagerCard({
         {/* Image Box */}
         <div className="relative h-48 p-6 flex flex-col items-center justify-center border-b border-border/40 bg-surface/50">
           <img
-            src={lightImg}
+            src={getAssetPath(lightImg)}
             alt={`${title} Light`}
             className={`dark:hidden ${maxHeightClass} w-auto object-contain transition-transform group-hover:scale-105`}
             onError={() => setLightImg(defaultLightImg)}
           />
           <img
-            src={darkImg}
+            src={getAssetPath(darkImg)}
             alt={`${title} Dark`}
             className={`hidden dark:block ${maxHeightClass} w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-md`}
             onError={() => setDarkImg(defaultDarkImg)}
@@ -228,17 +229,17 @@ export function LogoManagerCard({
           </div>
 
           <div className="mt-auto flex flex-col gap-2">
-            <a href={lightImg} download className="w-full dark:hidden">
+            <a href={getAssetPath(lightImg)} download className="w-full dark:hidden">
               <Button variant="primary" className="w-full rounded-xl" leftIcon={<Download className="size-4" />}>
                 Descargar SVG
               </Button>
             </a>
-            <a href={darkImg} download className="w-full hidden dark:block">
+            <a href={getAssetPath(darkImg)} download className="w-full hidden dark:block">
               <Button variant="primary" className="w-full rounded-xl" leftIcon={<Download className="size-4" />}>
                 Descargar SVG
               </Button>
             </a>
-            
+
             <Button variant="neutral" className="w-full rounded-xl" leftIcon={<Edit2 className="size-4" />} onClick={handleOpenUpload}>
               {editLabel}
             </Button>
@@ -255,7 +256,7 @@ export function LogoManagerCard({
               Carga las versiones del logotipo para fondos claros y oscuros.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="py-2 flex flex-col gap-4 mt-2">
             {/* Indicador de pasos estilo Stepper */}
             <div className="w-full px-4 sm:px-12 mb-0">
@@ -270,15 +271,15 @@ export function LogoManagerCard({
                   const isCompleted = currentStep > index + 1;
 
                   return (
-                    <li 
-                      key={step.id} 
+                    <li
+                      key={step.id}
                       className="flex-1 relative flex flex-col items-center group"
                       aria-current={isActive ? "step" : undefined}
                     >
                       {/* Conector Line */}
                       {index === 0 && (
                         <div className="absolute top-[24px] left-[50%] right-[-50%] h-[3px] bg-neutral-200 dark:bg-neutral-800 z-0">
-                          <motion.div 
+                          <motion.div
                             className="h-full bg-primary-400 origin-left"
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: currentStep > 1 ? 1 : 0 }}
@@ -296,7 +297,7 @@ export function LogoManagerCard({
                           "size-12 rounded-full flex items-center justify-center relative transition-all duration-300 border-2 outline-none z-10",
                           isActive ? "ring-4 ring-primary/20 dark:ring-primary/40 ring-offset-0" : "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                           isCompleted || isActive
-                            ? "bg-primary-400 border-primary-400 text-white shadow-md shadow-primary-400/20" 
+                            ? "bg-primary-400 border-primary-400 text-white shadow-md shadow-primary-400/20"
                             : "bg-background border-neutral-200 dark:border-neutral-800 text-muted-foreground",
                           "cursor-pointer hover:border-primary-400/50"
                         )}
@@ -332,7 +333,7 @@ export function LogoManagerCard({
 
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
-                <motion.div 
+                <motion.div
                   key="step1"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -370,7 +371,7 @@ export function LogoManagerCard({
               )}
 
               {currentStep === 2 && (
-                <motion.div 
+                <motion.div
                   key="step2"
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}

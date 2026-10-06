@@ -37,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/routing";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/assets";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface NavItemChild {
@@ -80,6 +81,36 @@ const navSections: NavSection[] = [
   },
 ];
 
+// ── Helper: Normalización de rutas ─────────────────────────────────────────
+function normalizePath(p: string | null | undefined): string {
+  if (!p) return "";
+  let clean = p.split("?")[0].split("#")[0];
+  clean = clean.replace(/^\/SSO(?=\/|$)/i, "");
+  clean = clean.replace(/^\/(?:es|en)(?=\/|$)/i, "");
+  clean = clean.replace(/\/+$/, "");
+  return clean === "" ? "/" : clean;
+}
+
+function checkIsPathActive(currentPath: string | null | undefined, targetHref: string): boolean {
+  const current = normalizePath(currentPath);
+  const target = normalizePath(targetHref);
+
+  if (target === "/dashboard") {
+    return current === "/dashboard" || current === "/";
+  }
+
+  if (target === "/gestion-usuarios/usuarios") {
+    return (
+      current === "/gestion-usuarios/usuarios" ||
+      current === "/usuarios" ||
+      current.startsWith("/gestion-usuarios") ||
+      current.startsWith("/usuarios")
+    );
+  }
+
+  return current === target || current.startsWith(target + "/");
+}
+
 // ── Subcomponent: SidebarNavItem ───────────────────────────────────────────
 function SidebarNavItem({
   item,
@@ -94,31 +125,22 @@ function SidebarNavItem({
   const Icon = item.icon;
   const hasChildren = !!item.children?.length;
 
-  const isChildActive = (href: string) => {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard" || pathname === "/";
-    }
-    return pathname === href || pathname.startsWith(href + "/");
-  };
+  const isChildActive = (href: string) => checkIsPathActive(pathname, href);
 
   const hasActiveChild = React.useMemo(
     () => item.children?.some((child) => isChildActive(child.href)) ?? false,
     [item.children, pathname]
   );
 
-  const isParentActive =
-    (item.href === "/dashboard"
-      ? pathname === "/dashboard" || pathname === "/"
-      : pathname === item.href || pathname.startsWith(item.href + "/")) ||
-    hasActiveChild;
+  const isParentActive = checkIsPathActive(pathname, item.href) || hasActiveChild;
 
   const [open, setOpen] = React.useState(hasActiveChild || isParentActive);
 
   React.useEffect(() => {
-    if (hasActiveChild) {
+    if (hasActiveChild || isParentActive) {
       setOpen(true);
     }
-  }, [hasActiveChild]);
+  }, [hasActiveChild, isParentActive]);
 
   return (
     <li>
@@ -130,21 +152,21 @@ function SidebarNavItem({
                 type="button"
                 onClick={() => setOpen(!open)}
                 className={cn(
-                  "w-full flex items-center transition-all duration-150 outline-none",
+                  "w-full flex items-center transition-all duration-150 outline-none select-none",
                   collapsed
                     ? "justify-center p-2 rounded-lg size-8 mx-auto"
                     : "gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-left",
                   isParentActive
-                    ? "bg-primary/10 text-primary font-medium"
+                    ? "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/25"
                     : "text-foreground/70 hover:bg-muted/60 hover:text-foreground"
                 )}
               >
                 <div className="relative flex items-center justify-center shrink-0">
-                  <Icon className="size-4 shrink-0" />
+                  <Icon className={cn("size-4 shrink-0", isParentActive ? "text-primary dark:text-primary" : "")} />
                 </div>
                 {!collapsed && (
                   <>
-                    <span className="flex-1 truncate">{item.label}</span>
+                    <span className={cn("flex-1 truncate", isParentActive && "text-primary dark:text-primary")}>{item.label}</span>
                     <ChevronRight
                       className={cn(
                         "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 ml-auto",
@@ -159,19 +181,19 @@ function SidebarNavItem({
                 href={item.href}
                 onClick={onNavigate}
                 className={cn(
-                  "w-full flex items-center transition-all duration-150 outline-none",
+                  "w-full flex items-center transition-all duration-150 outline-none select-none",
                   collapsed
                     ? "justify-center p-2 rounded-lg size-8 mx-auto"
                     : "gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-left",
                   isParentActive
-                    ? "bg-primary/10 text-primary font-medium"
+                    ? "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/25"
                     : "text-foreground/70 hover:bg-muted/60 hover:text-foreground"
                 )}
               >
                 <div className="relative flex items-center justify-center shrink-0">
-                  <Icon className="size-4 shrink-0" />
+                  <Icon className={cn("size-4 shrink-0", isParentActive ? "text-primary dark:text-primary" : "")} />
                 </div>
-                {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                {!collapsed && <span className={cn("flex-1 truncate", isParentActive && "text-primary dark:text-primary")}>{item.label}</span>}
               </Link>
             )}
           </TooltipTrigger>
@@ -208,15 +230,15 @@ function SidebarNavItem({
                         href={child.href}
                         onClick={onNavigate}
                         className={cn(
-                          "flex items-center rounded-lg transition-all duration-200 outline-none",
+                          "flex items-center rounded-lg transition-all duration-150 outline-none select-none",
                           collapsed
-                            ? "justify-center p-2 size-8 opacity-60 hover:opacity-100 hover:bg-muted/50 hover:text-foreground"
+                            ? "justify-center p-2 size-8 text-foreground/60 hover:text-foreground hover:bg-muted/50"
                             : "w-full gap-2 px-2.5 py-1.5 text-xs font-medium text-left",
                           childActive && collapsed
-                            ? "bg-primary/10 text-primary opacity-100 font-semibold"
+                            ? "bg-primary/10 text-primary font-semibold hover:bg-primary/15 hover:text-primary dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/25"
                             : "",
                           childActive && !collapsed
-                            ? "bg-primary/10 text-primary font-medium"
+                            ? "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary dark:bg-primary/20 dark:text-primary dark:hover:bg-primary/25"
                             : "",
                           !childActive && !collapsed
                             ? "text-foreground/60 hover:text-foreground hover:bg-muted/50"
@@ -226,11 +248,12 @@ function SidebarNavItem({
                         <ChildIcon
                           className={cn(
                             "shrink-0",
-                            collapsed ? "size-4" : "size-3.5"
+                            collapsed ? "size-4" : "size-3.5",
+                            childActive ? "text-primary dark:text-primary" : ""
                           )}
                         />
                         {!collapsed && (
-                          <span className="truncate">{child.label}</span>
+                          <span className={cn("truncate", childActive && "text-primary dark:text-primary")}>{child.label}</span>
                         )}
                       </Link>
                     </TooltipTrigger>
@@ -340,12 +363,12 @@ export function GeoportalSidebar({
                 {collapsed ? (
                   <>
                     <img
-                      src="/escudo-light.svg"
+                      src={getAssetPath("/escudo-light.svg")}
                       alt="Símbolo Icon"
                       className="h-6 w-auto object-contain mx-auto dark:hidden"
                     />
                     <img
-                      src="/escudo-dark.svg"
+                      src={getAssetPath("/escudo-dark.svg")}
                       alt="Símbolo Icon"
                       className="h-6 w-auto object-contain mx-auto hidden dark:block"
                     />
@@ -353,12 +376,12 @@ export function GeoportalSidebar({
                 ) : (
                   <>
                     <img
-                      src="/horizontal-light.svg"
+                      src={getAssetPath("/horizontal-light.svg")}
                       alt="Logo MINEDEC GEOportal"
                       className="h-5.5 w-auto object-contain dark:hidden"
                     />
                     <img
-                      src="/horizontal-dark.svg"
+                      src={getAssetPath("/horizontal-dark.svg")}
                       alt="Logo MINEDEC GEOportal"
                       className="h-5.5 w-auto object-contain hidden dark:block"
                     />
@@ -391,12 +414,12 @@ export function GeoportalSidebar({
                 onClick={handleNavigate}
               >
                 <img
-                  src="/horizontal-light.svg"
+                  src={getAssetPath("/horizontal-light.svg")}
                   alt="Logo MINEDEC"
                   className="h-5.5 w-auto object-contain dark:hidden"
                 />
                 <img
-                  src="/horizontal-dark.svg"
+                  src={getAssetPath("/horizontal-dark.svg")}
                   alt="Logo MINEDEC"
                   className="h-5.5 w-auto object-contain hidden dark:block"
                 />

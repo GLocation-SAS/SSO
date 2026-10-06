@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { getAssetPath } from "@/lib/assets";
 import {
   Globe2,
   Home,
@@ -192,12 +193,12 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
             {collapsed ? (
               <>
                 <img
-                  src="/escudo-light.svg"
+                  src={getAssetPath("/escudo-light.svg")}
                   alt="Símbolo Icon"
                   className="h-6 w-auto object-contain mx-auto dark:hidden"
                 />
                 <img
-                  src="/escudo-dark.svg"
+                  src={getAssetPath("/escudo-dark.svg")}
                   alt="Símbolo Icon"
                   className="h-6 w-auto object-contain mx-auto hidden dark:block"
                 />
@@ -205,12 +206,12 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
             ) : (
               <>
                 <img
-                  src="/horizontal-light.svg"
+                  src={getAssetPath("/horizontal-light.svg")}
                   alt="Logo MINEDEC GEOportal"
                   className="h-7 w-auto object-contain dark:hidden"
                 />
                 <img
-                  src="/horizontal-dark.svg"
+                  src={getAssetPath("/horizontal-dark.svg")}
                   alt="Logo MINEDEC GEOportal"
                   className="h-7 w-auto object-contain hidden dark:block"
                 />

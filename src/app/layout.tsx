@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../messages/es.json";
+import { getAssetPath } from "@/lib/assets";
 
 /*
   TIPOGRAFÍAS
@@ -54,8 +55,8 @@ export const metadata = {
   description: "Base frontend y sistema de diseño de MINEDEC.",
   icons: [
     {
-      url: "/favicon-light.svg",
-      href: "/favicon-light.svg",
+      url: getAssetPath("/favicon-light.svg"),
+      href: getAssetPath("/favicon-light.svg"),
     }
   ],
 };

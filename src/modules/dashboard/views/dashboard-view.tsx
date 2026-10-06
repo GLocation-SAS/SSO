@@ -147,13 +147,17 @@ export function DashboardView() {
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
 
-  let accumulatedPct = 0;
-  const donutSegments = ROLE_DISTRIBUTION.map((item) => {
-    const strokeDasharray = `${(item.pct / 100) * circumference} ${circumference}`;
-    const strokeDashoffset = -((accumulatedPct / 100) * circumference);
-    accumulatedPct += item.pct;
-    return { ...item, strokeDasharray, strokeDashoffset };
-  });
+  const donutSegments = React.useMemo(() => {
+    let acc = 0;
+    const segments = [];
+    for (const item of ROLE_DISTRIBUTION) {
+      const strokeDasharray = `${(item.pct / 100) * circumference} ${circumference}`;
+      const strokeDashoffset = -((acc / 100) * circumference);
+      acc += item.pct;
+      segments.push({ ...item, strokeDasharray, strokeDashoffset });
+    }
+    return segments;
+  }, [circumference]);
 
   const activeRole = ROLE_DISTRIBUTION.find((r) => r.id === hoveredRoleId);
 
@@ -268,7 +272,7 @@ export function DashboardView() {
             </div>
 
             {/* Borde dinámico rotatorio con máscara perfecta (más lento: 8s) */}
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none rounded-[inherit]"
               style={{
                 padding: "2px",
@@ -278,7 +282,7 @@ export function DashboardView() {
                 maskComposite: "exclude"
               }}
             >
-              <div 
+              <div
                 className="absolute left-1/2 top-1/2 aspect-square w-[200%] -translate-x-1/2 -translate-y-1/2 animate-[spin_8s_linear_infinite]"
                 style={{ background: 'conic-gradient(from 0deg, transparent 0 250deg, var(--warning) 360deg)' }}
               />

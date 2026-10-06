@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton, InputGroupText } from "@/components/ui/input-group";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -33,14 +34,14 @@ export function LoginSSOForm({ className }: { className?: string }) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailEmpty = formData.email.trim() === "";
   const isEmailValidFormat = emailRegex.test(formData.email);
-  const emailErrorMsg = isEmailEmpty 
-    ? "Ingresa tu correo electrónico." 
+  const emailErrorMsg = isEmailEmpty
+    ? "Ingresa tu correo electrónico."
     : (!isEmailValidFormat ? "Ingresa un correo válido." : null);
 
   const isPasswordEmpty = formData.password === "";
   const isPasswordShort = formData.password.length > 0 && formData.password.length < 8;
-  const passwordErrorMsg = isPasswordEmpty 
-    ? "Ingresa tu contraseña." 
+  const passwordErrorMsg = isPasswordEmpty
+    ? "Ingresa tu contraseña."
     : (isPasswordShort ? "La contraseña debe tener mínimo 8 caracteres." : null);
 
   const hasErrors = !!emailErrorMsg || !!passwordErrorMsg;
@@ -79,7 +80,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
 
   const handleCredentialsLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFormValid) {
       showValidationToast();
       return;
@@ -104,7 +105,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
     >
       <div className="mb-6 flex items-center justify-between">
         <Image
-          src="/horizontal-light.svg"
+          src={getAssetPath("/horizontal-light.svg")}
           alt="Logo Conecta MINEDUC"
           width={180}
           height={45}
@@ -112,7 +113,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
           unoptimized
         />
         <Image
-          src="/horizontal-dark.svg"
+          src={getAssetPath("/horizontal-dark.svg")}
           alt="Logo Conecta MINEDUC"
           width={180}
           height={45}

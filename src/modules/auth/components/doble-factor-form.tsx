@@ -3,6 +3,7 @@
 import { useState, useRef, KeyboardEvent, ChangeEvent, ClipboardEvent } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
@@ -24,7 +25,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
     if (!/^[0-9]*$/.test(value)) return;
 
     const newCode = [...code];
-    
+
     // Si escribió un caracter
     if (value.length > 0) {
       newCode[index] = value.slice(-1); // tomar solo el último caracter
@@ -62,7 +63,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
       if (i < 6) newCode[i] = pastedData[i];
     }
     setCode(newCode);
-    
+
     // Foco al último input modificado o al final
     const focusIndex = Math.min(pastedData.length, 5);
     inputRefs.current[focusIndex]?.focus();
@@ -100,7 +101,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image
-              src="/horizontal-light.svg"
+              src={getAssetPath("/horizontal-light.svg")}
               alt="Logo Gobierno de Ecuador Claro"
               width={140}
               height={45}
@@ -108,7 +109,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
               unoptimized
             />
             <Image
-              src="/horizontal-dark.svg"
+              src={getAssetPath("/horizontal-dark.svg")}
               alt="Logo Gobierno de Ecuador Oscuro"
               width={140}
               height={45}
@@ -123,7 +124,7 @@ export function DobleFactorForm({ className }: { className?: string }) {
 
         {/* Textos Informativos */}
         <div className="mb-4 text-center sm:text-left">
-          <button 
+          <button
             type="button"
             className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-secondary dark:hover:text-secondary-300 transition-colors"
             onClick={() => router.push('/login-sso')}
@@ -158,8 +159,8 @@ export function DobleFactorForm({ className }: { className?: string }) {
                 className={cn(
                   "w-12 h-14 sm:w-14 sm:h-16 flex-1 rounded-md border text-center font-heading text-h3 font-bold outline-none transition-all duration-300",
                   // Variación suave de fondo neutral cuando está lleno
-                  digit !== "" 
-                    ? "bg-neutral-300 border-neutral-300 text-neutral-500 scale-105 dark:bg-neutral-700 dark:border-neutral-700 dark:text-neutral-500" 
+                  digit !== ""
+                    ? "bg-neutral-300 border-neutral-300 text-neutral-500 scale-105 dark:bg-neutral-700 dark:border-neutral-700 dark:text-neutral-500"
                     : "bg-surface border-input text-neutral-500 focus:border-neutral-300 focus:ring-2 focus:ring-ring"
                 )}
               />

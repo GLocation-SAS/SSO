@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { LoginSSOBackground } from "@/modules/auth/components/login-sso-background";
 import { VerificationCodeInput } from "../components/verification-code-input";
+import { getAssetPath } from "@/lib/assets";
 
 export function DobleFactorView() {
   const router = useRouter();
@@ -43,11 +44,11 @@ export function DobleFactorView() {
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center lg:justify-end p-4 lg:p-12 xl:p-24 overflow-hidden bg-background">
       <LoginSSOBackground />
-      
+
       <div className="mr-0 lg:mr-12 xl:mr-24 w-full sm:max-w-lg relative z-10 min-h-[550px] sm:min-h-[650px] flex flex-col justify-center rounded-xl border border-border bg-card p-6 sm:p-10 shadow-lg text-card-foreground">
         <div className="mb-6 flex items-center justify-between">
           <Image
-            src="/horizontal-light.svg"
+            src={getAssetPath("/horizontal-light.svg")}
             alt="Logo Conecta MINEDUC"
             width={180}
             height={45}
@@ -55,7 +56,7 @@ export function DobleFactorView() {
             unoptimized
           />
           <Image
-            src="/horizontal-dark.svg"
+            src={getAssetPath("/horizontal-dark.svg")}
             alt="Logo Conecta MINEDUC"
             width={180}
             height={45}
@@ -104,7 +105,7 @@ export function DobleFactorView() {
             >
               {isLoading ? "Verificando..." : "Verificar y continuar"}
             </Button>
-            
+
             <Button
               type="button"
               variant="neutral"

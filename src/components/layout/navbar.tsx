@@ -19,6 +19,7 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getAssetPath } from "@/lib/assets";
 import {
   Sheet,
   SheetContent,
@@ -121,20 +122,22 @@ export function Navbar() {
             <div className="relative h-16 flex items-center justify-center px-2">
               <div className="absolute inset-0 bg-primary/10 rounded-xl blur-lg group-hover:bg-primary/20 transition-colors" />
               <Image
-                src="/horizontal-light.svg"
+                src={getAssetPath("/horizontal-light.svg")}
                 alt="MINEDEC Logo Light"
                 width={240}
                 height={64}
                 className="relative z-10 h-14 w-auto dark:hidden"
                 priority
+                unoptimized
               />
               <Image
-                src="/horizontal-dark.svg"
+                src={getAssetPath("/horizontal-dark.svg")}
                 alt="MINEDEC Logo Dark"
                 width={240}
                 height={64}
                 className="relative z-10 h-14 w-auto hidden dark:block"
                 priority
+                unoptimized
               />
             </div>
           </Link>
@@ -193,20 +196,22 @@ export function Navbar() {
                   <div className="flex items-center gap-2">
                     <SheetTitle className="sr-only">Glocation</SheetTitle>
                     <Image
-                      src="/horizontal-light.svg"
+                      src={getAssetPath("/horizontal-light.svg")}
                       alt="MINEDEC Logo Light"
                       width={180}
                       height={48}
                       className="relative z-10 h-12 w-auto dark:hidden"
                       priority
+                      unoptimized
                     />
                     <Image
-                      src="/horizontal-dark.svg"
+                      src={getAssetPath("/horizontal-dark.svg")}
                       alt="MINEDEC Logo Dark"
                       width={180}
                       height={48}
                       className="relative z-10 h-12 w-auto hidden dark:block"
                       priority
+                      unoptimized
                     />
                   </div>
                 </SheetHeader>
@@ -214,20 +219,20 @@ export function Navbar() {
                   {navLinks.map((link) => {
                     const isActive = currentActiveId === link.id;
                     return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.id)}
-                      className={cn(
-                        "flex items-center justify-between p-4 rounded-2xl transition-colors border",
-                        isActive 
-                          ? "bg-surface border-border/40 text-foreground" 
-                          : "border-transparent hover:bg-surface hover:border-border/40 text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <span className="font-semibold text-lg">{link.label}</span>
-                      <ChevronDown className="-rotate-90 size-4 opacity-50" />
-                    </Link>
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={(e) => handleNavClick(e, link.id)}
+                        className={cn(
+                          "flex items-center justify-between p-4 rounded-2xl transition-colors border",
+                          isActive
+                            ? "bg-surface border-border/40 text-foreground"
+                            : "border-transparent hover:bg-surface hover:border-border/40 text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <span className="font-semibold text-lg">{link.label}</span>
+                        <ChevronDown className="-rotate-90 size-4 opacity-50" />
+                      </Link>
                     );
                   })}
                 </div>

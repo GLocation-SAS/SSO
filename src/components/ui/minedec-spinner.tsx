@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/assets";
 
 export type MinedecSpinnerProps = {
   size?: "sm" | "md" | "lg";
@@ -44,7 +45,7 @@ export function MinedecSpinner({
 
         <img
           className="minedec-spinner__shield dark:hidden"
-          src="/escudo-light.svg"
+          src={getAssetPath("/escudo-light.svg")}
           alt=""
           aria-hidden="true"
           style={{
@@ -52,10 +53,10 @@ export function MinedecSpinner({
             height: logoSize,
           }}
         />
-        
+
         <img
           className="minedec-spinner__shield hidden dark:block"
-          src="/escudo-dark.svg"
+          src={getAssetPath("/escudo-dark.svg")}
           alt=""
           aria-hidden="true"
           style={{

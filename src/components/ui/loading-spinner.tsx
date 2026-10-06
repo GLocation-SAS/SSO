@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/assets";
 
 interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg";
@@ -15,7 +16,7 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
       md: "h-16 w-16",
       lg: "h-[104px] w-[104px]",
     };
-    
+
 
     const shieldClasses = {
       sm: "h-[18px] w-[18px]",
@@ -50,19 +51,19 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
           </svg>
 
           <img
-            src="/escudo-light.svg"
+            src={getAssetPath("/escudo-light.svg")}
             alt=""
             aria-hidden="true"
             className={cn("absolute inset-0 m-auto object-contain dark:hidden pointer-events-none", shieldClasses[size])}
           />
           <img
-            src="/escudo-dark.svg"
+            src={getAssetPath("/escudo-dark.svg")}
             alt=""
             aria-hidden="true"
             className={cn("absolute inset-0 m-auto hidden object-contain dark:block pointer-events-none", shieldClasses[size])}
           />
         </div>
-        
+
         {/* Mensaje opcional */}
         {label && (
           <span className="text-sm font-medium text-muted-foreground animate-pulse">

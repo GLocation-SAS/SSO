@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
+import { getAssetPath } from "@/lib/assets";
 import {
   LayoutDashboard,
   LogOut,
@@ -139,33 +140,37 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
           <div className="flex items-center justify-center shrink-0 w-full">
             {/* Expanded Logos */}
             <Image
-              src="/horizontal-light.svg"
+              src={getAssetPath("/horizontal-light.svg")}
               alt="MINEDEC Logo"
               width={110}
               height={26}
+              unoptimized
               className="h-[26px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
             <Image
-              src="/horizontal-dark.svg"
+              src={getAssetPath("/horizontal-dark.svg")}
               alt="MINEDEC Logo"
               width={110}
               height={26}
+              unoptimized
               className="h-[26px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
 
             {/* Collapsed Icons */}
             <Image
-              src="/escudo-light.svg"
+              src={getAssetPath("/escudo-light.svg")}
               alt="MINEDEC Icon"
               width={22}
               height={22}
+              unoptimized
               className="h-[22px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
             <Image
-              src="/escudo-dark.svg"
+              src={getAssetPath("/escudo-dark.svg")}
               alt="MINEDEC Icon"
               width={22}
               height={22}
+              unoptimized
               className="h-[22px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
           </div>
