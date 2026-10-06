@@ -585,81 +585,84 @@ export function DashboardView() {
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-6 flex-1 min-h-[260px]">
               <ChartContainer minHeight={180} className="relative flex flex-col justify-end w-full max-w-[280px]">
-                {/* Y-Axis Grid lines */}
-                <div className="absolute inset-x-0 top-0 bottom-7 flex flex-col justify-between pointer-events-none opacity-40">
-                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
-                    <span className="w-6 text-right pr-2">50</span>
+                {/* Chart Area */}
+                <div className="relative h-36 w-full mt-4">
+                  {/* Y-Axis Grid lines */}
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
+                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-card">50</span>
+                    </div>
+                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-card">25</span>
+                    </div>
+                    <div className="border-b border-border/60 w-full flex text-[9px] text-muted-foreground font-mono -translate-y-1/2">
+                      <span className="w-8 text-right pr-2 bg-card">0</span>
+                    </div>
                   </div>
-                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
-                    <span className="w-6 text-right pr-2">25</span>
-                  </div>
-                  <div className="border-b border-border/60 w-full flex items-end text-[9px] text-muted-foreground font-mono pb-0.5">
-                    <span className="w-6 text-right pr-2">0</span>
-                  </div>
-                </div>
 
-                {/* Bars */}
-                <div className="h-32 flex items-end justify-between gap-1 z-10 pl-6 pr-2 border-b border-border/70">
-                  {APP_CONFIG_DATA.map((app, idx) => {
-                    const rolesHeight = (app.roles / 50) * 100;
-                    const recursosHeight = (app.recursos / 50) * 100;
-                    const isHovered = hoveredAppIdx === idx;
-                    const isDimmed = hoveredAppIdx !== null && !isHovered;
+                  {/* Bars */}
+                  <div className="absolute inset-0 flex items-end justify-between gap-1 z-10 pl-8 pr-2">
+                    {APP_CONFIG_DATA.map((app, idx) => {
+                      const rolesHeight = (app.roles / 50) * 100;
+                      const recursosHeight = (app.recursos / 50) * 100;
+                      const isHovered = hoveredAppIdx === idx;
+                      const isDimmed = hoveredAppIdx !== null && !isHovered;
 
-                    return (
-                      <div
-                        key={app.id}
-                        className="flex-1 flex flex-col items-center h-full justify-end relative cursor-pointer group px-1"
-                        onMouseEnter={() => setHoveredAppIdx(idx)}
-                        onMouseLeave={() => setHoveredAppIdx(null)}
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`${app.name}: ${app.roles} roles, ${app.recursos} recursos`}
-                      >
-                        {isHovered && (
-                          <ChartTooltip
-                            active={true}
-                            className="absolute -top-16 left-1/2 -translate-x-1/2 min-w-[160px] z-20"
-                          >
-                            <ChartTooltipContent
-                              title={app.name}
-                              label=""
-                              value=""
-                              indicatorColor={app.color}
-                              subvalue={`${app.roles} roles · ${app.recursos} recursos configurados`}
+                      return (
+                        <div
+                          key={app.id}
+                          className="flex-1 flex flex-col items-center h-full justify-end relative cursor-pointer group px-1"
+                          onMouseEnter={() => setHoveredAppIdx(idx)}
+                          onMouseLeave={() => setHoveredAppIdx(null)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`${app.name}: ${app.roles} roles, ${app.recursos} recursos`}
+                        >
+                          {isHovered && (
+                            <ChartTooltip
+                              active={true}
+                              className="absolute -top-16 left-1/2 -translate-x-1/2 min-w-[160px] z-20"
+                            >
+                              <ChartTooltipContent
+                                title={app.name}
+                                label=""
+                                value=""
+                                indicatorColor={app.color}
+                                subvalue={`${app.roles} roles · ${app.recursos} recursos configurados`}
+                              />
+                            </ChartTooltip>
+                          )}
+
+                          <div className={cn("flex items-end gap-1.5 w-full h-full justify-center", isDimmed && "opacity-45")}>
+                            <div
+                              className={cn(
+                                "w-3.5 rounded-t-sm transition-all duration-200",
+                                isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
+                              )}
+                              style={{
+                                height: `${rolesHeight}%`,
+                                backgroundColor: "var(--info)",
+                              }}
                             />
-                          </ChartTooltip>
-                        )}
-
-                        <div className={cn("flex items-end gap-1.5 w-full h-full justify-center", isDimmed && "opacity-45")}>
-                          <div
-                            className={cn(
-                              "w-3 rounded-t-sm transition-all duration-200",
-                              isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
-                            )}
-                            style={{
-                              height: `${rolesHeight}%`,
-                              backgroundColor: "var(--info)",
-                            }}
-                          />
-                          <div
-                            className={cn(
-                              "w-3 rounded-t-sm transition-all duration-200",
-                              isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
-                            )}
-                            style={{
-                              height: `${recursosHeight}%`,
-                              backgroundColor: "var(--warning)",
-                            }}
-                          />
+                            <div
+                              className={cn(
+                                "w-3.5 rounded-t-sm transition-all duration-200",
+                                isHovered ? "scale-y-[1.03] shadow-xs" : "opacity-90 hover:opacity-100",
+                              )}
+                              style={{
+                                height: `${recursosHeight}%`,
+                                backgroundColor: "var(--warning)",
+                              }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* X-Axis labels */}
-                <div className="flex justify-between gap-1 text-[11px] font-semibold text-muted-foreground pt-2 pl-6 pr-2">
+                <div className="flex justify-between gap-1 text-[11px] font-semibold text-muted-foreground pt-4 pl-8 pr-2">
                   {APP_CONFIG_DATA.map((app, idx) => (
                     <div key={app.id} className="flex-1 flex justify-center">
                       <span
