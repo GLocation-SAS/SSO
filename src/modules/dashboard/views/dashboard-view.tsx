@@ -92,6 +92,34 @@ const RECENT_CHANGES_SUMMARY = [
   { id: "permisos", group: "Permisos", count: 9, lastTime: "07:20 AM", icon: Key, color: "bg-success/10 text-success border-success/20" }
 ];
 
+const MOCK_EVENTS = {
+  usuarios: [
+    { time: "10:24 AM", title: "Usuario desactivado", desc: "Lucía Toapanta fue marcada como inactiva." },
+    { time: "09:50 AM", title: "Usuario actualizado", desc: "Se modificaron los datos del usuario Carlos Andrade." },
+    { time: "08:35 AM", title: "Sede asignada", desc: "Se asignó Sede Central al usuario María López." }
+  ],
+  roles: [
+    { time: "09:40 AM", title: "Rol actualizado", desc: "Se actualizaron los permisos del rol Rector." },
+    { time: "09:15 AM", title: "Aplicación asociada", desc: "El rol fue asociado al Portal Educativo." },
+    { time: "08:10 AM", title: "Rol creado", desc: "Se creó el rol de Asistente de Finanzas." }
+  ],
+  recursos: [
+    { time: "08:02 AM", title: "Recurso creado", desc: "Se creó el recurso Módulo de Notas." },
+    { time: "07:50 AM", title: "Recurso asociado a rol", desc: "El recurso fue asignado al rol Docente." },
+    { time: "07:45 AM", title: "Recurso actualizado", desc: "Se modificaron las propiedades del Dashboard." }
+  ],
+  asignaciones: [
+    { time: "07:45 AM", title: "Usuario asociado a aplicación", desc: "Se asignó Sistema de Notas al usuario Juan." },
+    { time: "07:30 AM", title: "Rol asignado", desc: "Se asignó rol Docente en Sistema de Notas." },
+    { time: "07:15 AM", title: "Asignación modificada", desc: "Se actualizó la vigencia de la asignación." }
+  ],
+  permisos: [
+    { time: "07:20 AM", title: "Permiso de ver agregado", desc: "Se otorgó permiso de lectura en Módulo de Notas." },
+    { time: "07:10 AM", title: "Permiso de eliminar retirado", desc: "Se removió acceso de eliminación en Reportes." },
+    { time: "07:05 AM", title: "Permiso de crear agregado", desc: "Se otorgó acceso de escritura en Estudiantes." }
+  ]
+};
+
 
 const ROLE_DISTRIBUTION = [
   { id: "docente", name: "Docente", count: 560, pct: 45, color: "var(--primary)", resources: 8, status: "Activo" },
@@ -118,6 +146,7 @@ const ACCESS_HISTORY = [
 ];
 
 export function DashboardView() {
+  const [openCategoryId, setOpenCategoryId] = React.useState<string | null>(null);
   const [hoveredRoleId, setHoveredRoleId] = React.useState<string | null>(null);
   const [hoveredAppIdx, setHoveredAppIdx] = React.useState<number | null>(null);
   const [hoveredDayIdx, setHoveredDayIdx] = React.useState<number | null>(null);
@@ -361,67 +390,82 @@ export function DashboardView() {
                   return (
                     <div
                       key={change.id}
-                      className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-surface shadow-2xs hover:bg-muted/30 hover:border-border transition-all duration-150 text-left"
+                      className={cn(
+                        "flex flex-col rounded-xl border transition-all duration-300 bg-surface text-left overflow-hidden",
+                        openCategoryId === change.id ? "border-border shadow-sm" : "border-border/60 shadow-2xs hover:bg-muted/30 hover:border-border"
+                      )}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={cn("size-9 rounded-lg flex items-center justify-center shrink-0 border", change.color)}>
-                          <Icon className="size-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <h4 className="text-sm font-bold text-foreground leading-snug">
-                            {change.group}
-                          </h4>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-xs font-semibold text-muted-foreground">
-                              {displayCount} cambios
-                            </span>
-                            {change.details && (
-                              <>
-                                <span className="text-muted-foreground/40 text-[10px]">•</span>
-                                <span className="text-xs text-muted-foreground truncate max-w-[120px]">{change.details}</span>
-                              </>
-                            )}
+                      {/* Cabecera / Trigger */}
+                      <button
+                        className="flex items-center justify-between gap-3 p-3 w-full text-left outline-none cursor-pointer"
+                        onClick={() => setOpenCategoryId(openCategoryId === change.id ? null : change.id)}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn("size-9 rounded-lg flex items-center justify-center shrink-0 border", change.color)}>
+                            <Icon className="size-4" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <h4 className="text-sm font-bold text-foreground leading-snug truncate">
+                              {change.group}
+                            </h4>
+                            <div className="flex items-center gap-1.5 mt-0.5 truncate">
+                              <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                                {displayCount} cambios
+                              </span>
+                              {change.details && (
+                                <>
+                                  <span className="text-muted-foreground/40 text-[10px] shrink-0">•</span>
+                                  <span className="text-xs text-muted-foreground truncate">{change.details}</span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        <span className="font-mono text-[11px] font-semibold text-muted-foreground">
-                          {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Actualizado`}
-                        </span>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <button className="text-[11px] font-bold text-primary hover:underline outline-none text-right">
-                              Ver detalle
-                            </button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[600px] gap-0 p-0 overflow-hidden">
-                            <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
-                              <DialogTitle className="text-xl font-heading text-primary">Cambios en {change.group.toLowerCase()}</DialogTitle>
-                              <DialogDescription className="text-sm text-muted-foreground">
-                                {change.details ? `${change.details} · ` : ""}{activeFilter} · {displayCount} cambios registrados
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="flex flex-col p-6 max-h-[60vh] overflow-y-auto">
-                              <div className="flex gap-4 items-start pb-4 border-b border-border/50 mb-4">
-                                <div className="w-20 shrink-0 text-left">
-                                  <span className="font-mono text-xs font-semibold text-muted-foreground">{change.lastTime}</span>
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <span className="text-sm font-bold text-foreground">Registro actualizado</span>
-                                  <span className="text-sm text-muted-foreground">Se modificó un registro en {change.group.toLowerCase()}.</span>
-                                </div>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <span className="font-mono text-[11px] font-semibold text-muted-foreground">
+                            {activeFilter === "Hoy" || activeFilter === "Ayer" ? `Último: ${change.lastTime}` : `Actualizado`}
+                          </span>
+                          <span className={cn(
+                            "text-[11px] font-bold transition-colors hover:underline flex items-center gap-0.5",
+                            openCategoryId === change.id ? "text-muted-foreground" : "text-primary"
+                          )}>
+                            {openCategoryId === change.id ? "Ocultar detalle ↑" : "Ver detalle ↓"}
+                          </span>
+                        </div>
+                      </button>
+
+                      {/* Contenido Expandido */}
+                      <div
+                        className={cn(
+                          "transition-all duration-300 ease-in-out bg-surface",
+                          openCategoryId === change.id ? "max-h-[500px] opacity-100 border-t border-border/50" : "max-h-0 opacity-0 border-transparent"
+                        )}
+                      >
+                        <div className="p-4 flex flex-col gap-4">
+                          {(MOCK_EVENTS[change.id as keyof typeof MOCK_EVENTS] || []).slice(0, displayCount).map((ev, i) => (
+                            <div key={i} className="flex gap-4 items-start">
+                              <div className="w-14 shrink-0 text-left pt-0.5">
+                                <span className="font-mono text-[10px] font-medium text-muted-foreground">{ev.time}</span>
+                              </div>
+                              <div className="flex flex-col flex-1 min-w-0">
+                                <span className="text-xs font-bold text-foreground leading-snug truncate">{ev.title}</span>
+                                <span className="text-[11px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">{ev.desc}</span>
                               </div>
                             </div>
-                            <DialogFooter className="flex items-center sm:justify-between w-full p-4 border-t border-border/50 bg-muted/10">
-                              <DialogClose asChild>
-                                <Button variant="ghost" size="sm">Cerrar</Button>
-                              </DialogClose>
-                              <Button variant="primary" size="sm" asChild>
-                                <Link href="/auditoria">Ver auditoría completa <ArrowRight className="size-4 ml-1.5" /></Link>
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                          ))}
+
+                          {displayCount > 3 && (
+                            <div className="text-[11px] text-muted-foreground font-medium pl-18 pt-1">
+                              + {displayCount - 3} cambios anteriores
+                            </div>
+                          )}
+
+                          <div className="pt-3 mt-1 border-t border-border/40 pl-18">
+                            <Link href="/auditoria" className="text-[11px] font-bold text-primary hover:text-primary-300 transition-colors flex items-center gap-1 group/link w-fit">
+                              Ver todos los cambios de {change.group.toLowerCase()} <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" />
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
