@@ -89,7 +89,7 @@ const RECENT_CHANGES_SUMMARY = [
   { id: "roles", group: "Roles", details: "Sistema de Notas", count: 5, lastTime: "09:40 AM", icon: ShieldCheck, color: "bg-info/10 text-info border-info/20" },
   { id: "recursos", group: "Recursos", details: "Sistema de Notas", count: 12, lastTime: "08:02 AM", icon: Layers, color: "bg-warning/10 text-warning border-warning/20" },
   { id: "asignaciones", group: "Asignaciones de acceso", count: 6, lastTime: "07:45 AM", icon: Network, color: "bg-success/10 text-success border-success/20" },
-  { id: "permisos", group: "Permisos", count: 9, lastTime: "07:20 AM", icon: Key, color: "bg-warning/10 text-warning border-warning/20" }
+  { id: "permisos", group: "Permisos", count: 9, lastTime: "07:20 AM", icon: Key, color: "bg-success/10 text-success border-success/20" }
 ];
 
 
@@ -233,7 +233,7 @@ export function DashboardView() {
               label="Asignaciones de acceso"
               value="8.421"
               color="success-400"
-              comparison="Relaciones configuradas"
+              comparison="Relaciones usuario, sede, rol y aplicación"
               icon={<Key />}
             />
           </div>
