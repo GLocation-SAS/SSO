@@ -469,7 +469,7 @@ export function SidebarShowcase() {
               Expandido
             </h3>
             <Button
-              variant="link"
+              variant="ghost"
               type="button"
               onClick={() => setCollapsed(!collapsed)}
               className="text-xs text-primary hover:underline font-medium p-0 h-auto"
