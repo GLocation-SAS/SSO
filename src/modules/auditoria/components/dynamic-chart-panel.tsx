@@ -244,6 +244,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
   const segments = items.map((item) => {
     const strokeDasharray = `${(item.pct / 100) * circumference} ${circumference}`;
     const strokeDashoffset = -((accumulatedPct / 100) * circumference);
+    // eslint-disable-next-line react-hooks/immutability
     accumulatedPct += item.pct;
     return { ...item, strokeDasharray, strokeDashoffset };
   });

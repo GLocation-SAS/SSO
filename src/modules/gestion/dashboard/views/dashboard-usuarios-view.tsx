@@ -129,6 +129,7 @@ function SvgDonut({
           if (slice.percentage <= 0) return null;
           const strokeDash = (slice.percentage / 100) * circumference;
           const strokeOffset = (accumulatedPercentage / 100) * circumference;
+          // eslint-disable-next-line react-hooks/immutability
           accumulatedPercentage += slice.percentage;
 
           return (
