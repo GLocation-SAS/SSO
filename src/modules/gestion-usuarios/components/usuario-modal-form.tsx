@@ -20,6 +20,7 @@ import {
   ComboboxItem,
 } from "@/components/ui/combobox";
 import { Multiselect } from "@/components/ui/multiselect";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Stepper, Step } from "@/components/ui/stepper";
 import {
   Table,
@@ -44,7 +45,15 @@ import {
   Briefcase,
   IdCard,
   AlertCircle,
+  ChevronDown,
+  FileText,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   InputGroup,
   InputGroupInput,
@@ -70,21 +79,10 @@ interface UsuarioModalFormProps {
   onSave: (usuario: UsuarioItem) => void;
 }
 
-const createStepIcon = (num: number) => {
-  const StepIcon = ({ className }: { className?: string }) => (
-    <span className={cn("text-xs font-bold leading-none select-none", className)}>
-      {num}
-    </span>
-  );
-  StepIcon.displayName = `StepIcon${num}`;
-  return StepIcon;
-};
-
 const stepperSteps: Step[] = [
-  { id: "identificacion", title: "Identificación", icon: createStepIcon(1) },
-  { id: "datos-sedes", title: "Datos y Sedes", icon: createStepIcon(2) },
-  { id: "accesos", title: "Accesos", icon: createStepIcon(3) },
-  { id: "resumen", title: "Resumen", icon: createStepIcon(4) },
+  { id: "datos-personales", title: "Datos Personales", icon: User },
+  { id: "sedes-accesos", title: "Sedes y Accesos", icon: ShieldCheck },
+  { id: "resumen", title: "Resumen", icon: FileText },
 ];
 
 export function UsuarioModalForm({
@@ -120,9 +118,28 @@ export function UsuarioModalForm({
   // Estado temporal de selectores para agregar acceso dentro del Paso 4
   const [sedeCurrentApp, setSedeCurrentApp] = React.useState<Record<string, string>>({});
   const [sedeCurrentRol, setSedeCurrentRol] = React.useState<Record<string, string>>({});
+  const [collapsedSedes, setCollapsedSedes] = React.useState<Record<string, boolean>>({});
 
   // Errores de validación
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: "default" | "success" | "danger" | "warning" | "info";
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    confirmText: "Confirmar",
+    cancelText: "Cancelar",
+    variant: "warning",
+    onConfirm: () => { },
+  });
 
   // Sincronización inicial
   React.useEffect(() => {
@@ -159,6 +176,7 @@ export function UsuarioModalForm({
       setErrors({});
       setSedeCurrentApp({});
       setSedeCurrentRol({});
+      setCollapsedSedes({});
     }
   }, [open, usuarioToEdit]);
 
@@ -186,7 +204,6 @@ export function UsuarioModalForm({
       } else if (identificacion.trim().length < 8) {
         newErrors.identificacion = "El documento debe contener al menos 8 caracteres.";
       }
-    } else if (stepIndex === 1) {
       if (!nombre.trim()) newErrors.nombre = "El nombre es obligatorio.";
       if (!apellidos.trim()) newErrors.apellidos = "Los apellidos son obligatorios.";
       if (!correo.trim()) {
@@ -195,10 +212,10 @@ export function UsuarioModalForm({
         newErrors.correo = "Ingresa un correo electrónico válido.";
       }
       if (!estado) newErrors.estado = "El estado es obligatorio.";
+    } else if (stepIndex === 1) {
       if (selectedSedes.length === 0) {
         newErrors.sedes = "Debes seleccionar al menos una sede.";
       }
-    } else if (stepIndex === 2) {
       if (asignaciones.length === 0) {
         newErrors.asignaciones = "Debes asignar al menos un acceso al usuario.";
       }
@@ -256,7 +273,20 @@ export function UsuarioModalForm({
   };
 
   const handleRemoveAccess = (asigId: string) => {
-    setAsignaciones((prev) => prev.filter((a) => a.id !== asigId));
+    const asig = asignaciones.find((a) => a.id === asigId);
+    if (!asig) return;
+    
+    setConfirmDialog({
+      open: true,
+      title: "¿Quitar acceso?",
+      description: `Estás a punto de eliminar el acceso a ${asig.app} para el rol de ${asig.rol}.`,
+      confirmText: "Quitar",
+      variant: "danger",
+      onConfirm: () => {
+        setAsignaciones((prev) => prev.filter((a) => a.id !== asigId));
+        toast.info(`Acceso a ${asig.app} removido.`);
+      }
+    });
   };
 
   const handleSave = () => {
@@ -337,9 +367,14 @@ export function UsuarioModalForm({
       <DialogContent
         size="xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
+        onInteractOutside={(e) => {
+          if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
+            e.preventDefault();
+          }
+        }}
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
           <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
             {isEditing ? "Editar usuario" : "Crear usuario"}
           </DialogTitle>
@@ -349,7 +384,7 @@ export function UsuarioModalForm({
         </DialogHeader>
 
         {/* STEPPER TOP BAR */}
-        <div className="px-6 py-4 border-b border-border bg-muted/20 shrink-0">
+        <div className="px-6 py-4 border-b border-border bg-background shrink-0">
           <Stepper
             steps={stepperSteps}
             activeStep={activeStep}
@@ -365,9 +400,9 @@ export function UsuarioModalForm({
 
         {/* CONTENT WITH INNER SCROLL */}
         <div className="overflow-y-auto flex-1 p-6">
-          {/* PASO 1: IDENTIFICACIÓN */}
+          {/* PASO 1: DATOS PERSONALES */}
           {activeStep === 0 && (
-            <div className="space-y-4 max-w-xl mx-auto py-2">
+            <div className="space-y-6 max-w-2xl mx-auto py-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Tipo de documento */}
                 <div className="space-y-1.5">
@@ -437,12 +472,7 @@ export function UsuarioModalForm({
                   )}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* PASO 2: DATOS BÁSICOS Y SEDES */}
-          {activeStep === 1 && (
-            <div className="space-y-6 max-w-2xl mx-auto py-2">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Nombre */}
@@ -615,9 +645,14 @@ export function UsuarioModalForm({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Sección de Sedes dentro del mismo paso */}
-              <div className="pt-3 border-t border-border/60 space-y-3">
+          {/* PASO 2: SEDES Y ACCESOS */}
+          {activeStep === 1 && (
+            <div className="space-y-6 max-w-3xl mx-auto py-2">
+              {/* Sección de Sedes */}
+              <div className="space-y-3">
                 <div className="space-y-0.5">
                   <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <Building2 className="size-4 text-primary" />
@@ -683,13 +718,10 @@ export function UsuarioModalForm({
                   )}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* PASO 3: ACCESOS */}
-          {activeStep === 2 && (
-            <div className="space-y-5 max-w-3xl mx-auto py-2">
-              <div className="space-y-1">
+              {/* Sección de Accesos */}
+              <div className="pt-3 border-t border-border/60 space-y-5">
+                <div className="space-y-1">
                 <h3 className="text-sm font-bold text-foreground">
                   Asignación de accesos
                 </h3>
@@ -705,7 +737,7 @@ export function UsuarioModalForm({
 
               {selectedSedes.length === 0 ? (
                 <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
-                  Regresa al paso anterior y selecciona al menos una sede.
+                  Selecciona al menos una sede para asignar accesos.
                 </div>
               ) : (
                 <div className="space-y-5">
@@ -720,28 +752,52 @@ export function UsuarioModalForm({
                     return (
                       <div
                         key={sedeNombre}
-                        className="rounded-xl border border-border bg-surface overflow-hidden shadow-xs"
+                        className="rounded-xl border border-border bg-background overflow-hidden shadow-xs"
                       >
                         {/* Header de la Card de Sede */}
-                        <div className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between">
+                        <div 
+                          className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors"
+                          onClick={() => setCollapsedSedes(prev => ({ ...prev, [sedeNombre]: !prev[sedeNombre] }))}
+                        >
                           <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                             <Building2 className="size-4 text-primary shrink-0" />
                             <span>{sedeNombre}</span>
                           </div>
-                          <Badge
-                            tone="neutral"
-                            appearance="soft"
-                            className="text-xs font-semibold"
-                          >
-                            {sedeAsignaciones.length}{" "}
-                            {sedeAsignaciones.length === 1
-                              ? "asignación"
-                              : "asignaciones"}
-                          </Badge>
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              tone="neutral"
+                              appearance="soft"
+                              className="text-xs font-semibold"
+                            >
+                              {sedeAsignaciones.length}{" "}
+                              {sedeAsignaciones.length === 1
+                                ? "asignación"
+                                : "asignaciones"}
+                            </Badge>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <div className="p-1 rounded-md hover:bg-muted-foreground/10 transition-colors flex items-center justify-center">
+                                    <ChevronDown 
+                                      className={cn(
+                                        "size-4 text-muted-foreground transition-transform duration-200",
+                                        collapsedSedes[sedeNombre] ? "-rotate-90" : "rotate-0"
+                                      )} 
+                                    />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">{collapsedSedes[sedeNombre] ? "Desplegar sede" : "Ocultar sede"}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
 
-                        {/* Selectores de Aplicación y Rol */}
-                        <div className="p-4 bg-background border-b border-border/60">
+                        {!collapsedSedes[sedeNombre] && (
+                          <>
+                            {/* Selectores de Aplicación y Rol */}
+                            <div className="p-4 bg-background border-b border-border/60">
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                             <div className="md:col-span-5 space-y-1">
                               <label className="text-[11px] font-semibold text-foreground">
@@ -820,7 +876,10 @@ export function UsuarioModalForm({
                               </Combobox>
                             </div>
 
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 space-y-1">
+                              <label className="text-[11px] font-semibold text-transparent block select-none">
+                                Acción
+                              </label>
                               <Button
                                 variant="primary"
                                 size="sm"
@@ -836,22 +895,22 @@ export function UsuarioModalForm({
                         </div>
 
                         {/* Listado de asignaciones de la Sede */}
-                        <div className="p-0">
+                        <div className="px-4 pb-4 bg-background">
                           {sedeAsignaciones.length === 0 ? (
-                            <p className="p-4 text-xs text-muted-foreground text-center italic">
+                            <p className="p-4 text-xs text-muted-foreground text-center italic border border-dashed border-border/60 rounded-lg">
                               Sin accesos agregados en esta sede aún.
                             </p>
                           ) : (
                             <Table>
                               <TableHeader>
-                                <TableRow className="border-b border-border/60 bg-muted/20">
-                                  <TableHead className="text-xs font-semibold h-8 text-foreground pl-4">
+                                <TableRow className="bg-primary hover:bg-primary/90 border-0 *:first:rounded-l-lg *:last:rounded-r-lg">
+                                  <TableHead className="text-xs font-semibold h-8 text-primary-foreground pl-4">
                                     Aplicación
                                   </TableHead>
-                                  <TableHead className="text-xs font-semibold h-8 text-foreground">
+                                  <TableHead className="text-xs font-semibold h-8 text-primary-foreground">
                                     Rol
                                   </TableHead>
-                                  <TableHead className="text-xs font-semibold h-8 text-right pr-4 text-foreground w-20">
+                                  <TableHead className="text-xs font-semibold h-8 text-right pr-4 text-primary-foreground w-20">
                                     Acciones
                                   </TableHead>
                                 </TableRow>
@@ -860,7 +919,7 @@ export function UsuarioModalForm({
                                 {sedeAsignaciones.map((asig) => (
                                   <TableRow
                                     key={asig.id}
-                                    className="border-b border-border/40 hover:bg-muted/10 last:border-b-0"
+                                    className="bg-muted/30 hover:bg-muted/50 border-0 *:first:rounded-l-lg *:last:rounded-r-lg"
                                   >
                                     <TableCell className="py-2 pl-4 text-xs font-semibold text-foreground">
                                       {asig.app}
@@ -869,14 +928,23 @@ export function UsuarioModalForm({
                                       {asig.rol}
                                     </TableCell>
                                     <TableCell className="py-2 pr-4 text-right">
-                                      <Button
-                                        variant="ghost"
-                                        size="icon-xs"
-                                        onClick={() => handleRemoveAccess(asig.id)}
-                                        className="text-muted-foreground hover:text-danger"
-                                      >
-                                        <Trash2 className="size-3.5" />
-                                      </Button>
+                                      <TooltipProvider>
+                                        <Tooltip delayDuration={300}>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon-xs"
+                                              onClick={() => handleRemoveAccess(asig.id)}
+                                              className="text-muted-foreground hover:text-danger"
+                                            >
+                                              <Trash2 className="size-3.5" />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p className="text-xs">Eliminar asignación</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -884,16 +952,19 @@ export function UsuarioModalForm({
                             </Table>
                           )}
                         </div>
+                          </>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* PASO 4: RESUMEN */}
-          {activeStep === 3 && (
+          {/* PASO 3: RESUMEN */}
+          {activeStep === 2 && (
             <div className="space-y-6 max-w-3xl mx-auto py-2">
               <div className="space-y-1">
                 <h3 className="text-sm font-bold text-foreground">
@@ -910,7 +981,7 @@ export function UsuarioModalForm({
                   1. Datos del usuario
                 </h4>
 
-                <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
+                <div className="rounded-xl border border-border bg-background p-4 divide-y divide-border/60 text-sm">
                   <div className="flex items-center justify-between py-2 first:pt-0">
                     <span className="text-xs text-muted-foreground">Nombre completo</span>
                     <span className="font-semibold text-foreground">
@@ -968,7 +1039,7 @@ export function UsuarioModalForm({
                     return (
                       <div
                         key={sedeNombre}
-                        className="rounded-xl border border-border bg-surface p-4 space-y-2.5"
+                        className="rounded-xl border border-border bg-background p-4 space-y-2.5"
                       >
                         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                           <Building2 className="size-4 text-primary shrink-0" />
@@ -1004,18 +1075,18 @@ export function UsuarioModalForm({
           )}
         </div>
 
-        {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
+          <Button
+            variant="neutral"
+            onClick={() => onOpenChange(false)}
+          >
+            Cancelar
+          </Button>
+
           <div className="flex items-center gap-2">
-            <Button
-              variant="neutral"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancelar
-            </Button>
             {activeStep > 0 && (
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={handlePrev}
                 className="gap-1.5"
               >
@@ -1023,9 +1094,6 @@ export function UsuarioModalForm({
                 <span>Anterior</span>
               </Button>
             )}
-          </div>
-
-          <div>
             {activeStep < stepperSteps.length - 1 ? (
               <Button
                 variant="primary"
@@ -1048,6 +1116,16 @@ export function UsuarioModalForm({
           </div>
         </DialogFooter>
       </DialogContent>
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText={confirmDialog.confirmText}
+        cancelText={confirmDialog.cancelText}
+        variant={confirmDialog.variant}
+        onConfirm={confirmDialog.onConfirm}
+      />
     </Dialog>
   );
 }

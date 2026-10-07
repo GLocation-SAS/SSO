@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { MinedecSpinner } from "@/components/ui/minedec-spinner";
 import { getAssetPath } from "@/lib/assets";
 import {
@@ -270,7 +271,7 @@ export function DashboardUsuariosView() {
         {/* 1. CONTENEDOR LATERAL IZQUIERDO: EXCLUSIVAMENTE PARA FOTO          */}
         {/* ─────────────────────────────────────────────────────────────────── */}
         <div className="w-full lg:w-[340px] xl:w-[400px] 2xl:w-[440px] shrink-0 self-stretch rounded-xl border border-border/80 bg-muted/10 overflow-hidden relative group min-h-[460px] lg:min-h-full flex flex-col">
-          <input
+          <Input
             type="file"
             ref={fileInputRef}
             onChange={handlePhotoUpload}

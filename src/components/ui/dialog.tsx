@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon, AlertTriangle, X, Info, Check } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type DialogVariant = "default" | "success" | "danger" | "warning" | "info" | null | undefined
 
@@ -161,20 +167,29 @@ function DialogContent({
           )}
 
           {showCloseButton && (
-            <DialogPrimitive.Close
-              data-slot="dialog-close"
-              asChild
-              className="absolute top-4 right-4 z-20"
-            >
-              <Button
-                variant="ghost"
-                className="rounded-full size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all cursor-pointer"
-                size="icon"
-              >
-                <XIcon className="size-4" />
-                <span className="sr-only">Cerrar</span>
-              </Button>
-            </DialogPrimitive.Close>
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <DialogPrimitive.Close
+                    data-slot="dialog-close"
+                    asChild
+                    className="absolute top-4 right-4 z-20"
+                  >
+                    <Button
+                      variant="ghost"
+                      className="rounded-full size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all cursor-pointer"
+                      size="icon"
+                    >
+                      <XIcon className="size-4" />
+                      <span className="sr-only">Cerrar</span>
+                    </Button>
+                  </DialogPrimitive.Close>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={4}>
+                  <p className="text-xs">Cerrar</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </DialogPrimitive.Content>
       </DialogPortal>

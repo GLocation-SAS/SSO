@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Table,
   TableHeader,
@@ -80,6 +81,7 @@ export function UsuarioModalAccess({
 
   // Estado local para agregar asignaciones
   const [isAdding, setIsAdding] = React.useState(false);
+  const [editingAsigId, setEditingAsigId] = React.useState<string | null>(null);
   const [selectedSede, setSelectedSede] = React.useState("");
   const [selectedApp, setSelectedApp] = React.useState("");
   const [selectedRol, setSelectedRol] = React.useState("");
@@ -87,10 +89,29 @@ export function UsuarioModalAccess({
   // Estado de colapso de sedes (por defecto todas abiertas)
   const [expandedSedes, setExpandedSedes] = React.useState<Record<string, boolean>>({});
 
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: "default" | "success" | "danger" | "warning" | "info";
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    confirmText: "Confirmar",
+    cancelText: "Cancelar",
+    variant: "warning",
+    onConfirm: () => { },
+  });
+
   // Reset form when dialog opens
   React.useEffect(() => {
     if (open) {
       setIsAdding(false);
+      setEditingAsigId(null);
       setSelectedSede("");
       setSelectedApp("");
       setSelectedRol("");
@@ -115,7 +136,7 @@ export function UsuarioModalAccess({
     return ROLES_POR_APLICACION[selectedApp] || [];
   }, [selectedApp]);
 
-  const handleAddAssignment = () => {
+  const handleSaveAssignment = () => {
     if (!selectedSede || !selectedApp || !selectedRol) {
       toast.error("Por favor selecciona Sede, Aplicación y Rol.");
       return;
@@ -123,38 +144,75 @@ export function UsuarioModalAccess({
 
     const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === selectedSede);
     const sedeId = sedeInfo?.id || `sede-${Date.now()}`;
+    let sedesCopy = JSON.parse(JSON.stringify(usuario.sedes)) as typeof usuario.sedes;
 
-    const newAssignment: UsuarioSedeRolAplicacion = {
-      id: `asig-${Date.now()}`,
-      usuarioId: usuario.id,
-      sedeId,
-      sedeNombre: selectedSede,
-      rolAplicacionId: `ra-${Date.now()}`,
-      aplicacionNombre: selectedApp,
-      rolNombre: selectedRol,
-      estado: "Activo",
-      fechaAsignacion: new Date().toLocaleDateString("es-EC", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }),
-      permisos: [],
-    };
+    if (editingAsigId) {
+      // Remover de la sede antigua si cambió, o simplemente borrarlo para re-insertarlo
+      sedesCopy = sedesCopy.map((s) => ({
+        ...s,
+        asignaciones: s.asignaciones.filter((a) => a.id !== editingAsigId)
+      })).filter((s) => s.asignaciones.length > 0);
 
-    const sedesCopy = [...usuario.sedes];
-    const existingSedeIndex = sedesCopy.findIndex((s) => s.sedeNombre === selectedSede);
-
-    if (existingSedeIndex >= 0) {
-      sedesCopy[existingSedeIndex] = {
-        ...sedesCopy[existingSedeIndex],
-        asignaciones: [...sedesCopy[existingSedeIndex].asignaciones, newAssignment],
-      };
-    } else {
-      sedesCopy.push({
+      const targetSedeIndex = sedesCopy.findIndex((s) => s.sedeNombre === selectedSede);
+      
+      const updatedAsig: UsuarioSedeRolAplicacion = {
+        id: editingAsigId,
+        usuarioId: usuario.id,
         sedeId,
         sedeNombre: selectedSede,
-        asignaciones: [newAssignment],
-      });
+        rolAplicacionId: `ra-${Date.now()}`,
+        aplicacionNombre: selectedApp,
+        rolNombre: selectedRol,
+        estado: "Activo",
+        fechaAsignacion: new Date().toLocaleDateString("es-EC", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+        permisos: [],
+      };
+
+      if (targetSedeIndex >= 0) {
+        sedesCopy[targetSedeIndex].asignaciones.push(updatedAsig);
+      } else {
+        sedesCopy.push({
+          sedeId,
+          sedeNombre: selectedSede,
+          asignaciones: [updatedAsig],
+        });
+      }
+
+      toast.success(`Acceso a ${selectedApp} actualizado correctamente.`);
+    } else {
+      const newAssignment: UsuarioSedeRolAplicacion = {
+        id: `asig-${Date.now()}`,
+        usuarioId: usuario.id,
+        sedeId,
+        sedeNombre: selectedSede,
+        rolAplicacionId: `ra-${Date.now()}`,
+        aplicacionNombre: selectedApp,
+        rolNombre: selectedRol,
+        estado: "Activo",
+        fechaAsignacion: new Date().toLocaleDateString("es-EC", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+        permisos: [],
+      };
+
+      const existingSedeIndex = sedesCopy.findIndex((s) => s.sedeNombre === selectedSede);
+
+      if (existingSedeIndex >= 0) {
+        sedesCopy[existingSedeIndex].asignaciones.push(newAssignment);
+      } else {
+        sedesCopy.push({
+          sedeId,
+          sedeNombre: selectedSede,
+          asignaciones: [newAssignment],
+        });
+      }
+      toast.success(`Acceso a ${selectedApp} asignado en ${selectedSede}.`);
     }
 
     const updatedUser: UsuarioItem = {
@@ -163,48 +221,70 @@ export function UsuarioModalAccess({
     };
 
     onSave?.(updatedUser);
-    toast.success(`Acceso a ${selectedApp} asignado en ${selectedSede}.`);
 
     // Reset inline form
     setSelectedSede("");
     setSelectedApp("");
     setSelectedRol("");
+    setEditingAsigId(null);
     setIsAdding(false);
   };
 
   const handleToggleAsigStatus = (asig: UsuarioSedeRolAplicacion) => {
-    const newStatus = asig.estado === "Activo" ? "Inactivo" : "Activo";
-    const sedesCopy = usuario.sedes.map((s) => ({
-      ...s,
-      asignaciones: s.asignaciones.map((a) =>
-        a.id === asig.id ? { ...a, estado: newStatus as "Activo" | "Inactivo" } : a
-      ),
-    }));
+    const isActivo = asig.estado === "Activo";
+    const newStatus = isActivo ? "Inactivo" : "Activo";
+    
+    setConfirmDialog({
+      open: true,
+      title: isActivo ? "¿Inactivar acceso?" : "¿Activar acceso?",
+      description: isActivo 
+        ? `Estás a punto de inactivar el acceso a ${asig.aplicacionNombre}.` 
+        : `Estás a punto de activar el acceso a ${asig.aplicacionNombre}.`,
+      confirmText: isActivo ? "Inactivar" : "Activar",
+      variant: isActivo ? "warning" : "success",
+      onConfirm: () => {
+        const sedesCopy = usuario.sedes.map((s) => ({
+          ...s,
+          asignaciones: s.asignaciones.map((a) =>
+            a.id === asig.id ? { ...a, estado: newStatus as "Activo" | "Inactivo" } : a
+          ),
+        }));
 
-    const updatedUser: UsuarioItem = {
-      ...usuario,
-      sedes: sedesCopy,
-    };
+        const updatedUser: UsuarioItem = {
+          ...usuario,
+          sedes: sedesCopy,
+        };
 
-    onSave?.(updatedUser);
-    toast.success(`Acceso a ${asig.aplicacionNombre} marcado como ${newStatus}.`);
+        onSave?.(updatedUser);
+        toast.success(`Acceso a ${asig.aplicacionNombre} marcado como ${newStatus}.`);
+      }
+    });
   };
 
   const handleRemoveAsig = (asig: UsuarioSedeRolAplicacion) => {
-    const sedesCopy = usuario.sedes
-      .map((s) => ({
-        ...s,
-        asignaciones: s.asignaciones.filter((a) => a.id !== asig.id),
-      }))
-      .filter((s) => s.asignaciones.length > 0);
+    setConfirmDialog({
+      open: true,
+      title: "¿Quitar acceso?",
+      description: `Estás a punto de eliminar el acceso a ${asig.aplicacionNombre}. Esta acción no se puede deshacer.`,
+      confirmText: "Quitar",
+      variant: "danger",
+      onConfirm: () => {
+        const sedesCopy = usuario.sedes
+          .map((s) => ({
+            ...s,
+            asignaciones: s.asignaciones.filter((a) => a.id !== asig.id),
+          }))
+          .filter((s) => s.asignaciones.length > 0);
 
-    const updatedUser: UsuarioItem = {
-      ...usuario,
-      sedes: sedesCopy,
-    };
+        const updatedUser: UsuarioItem = {
+          ...usuario,
+          sedes: sedesCopy,
+        };
 
-    onSave?.(updatedUser);
-    toast.info(`Acceso a ${asig.aplicacionNombre} removido.`);
+        onSave?.(updatedUser);
+        toast.info(`Acceso a ${asig.aplicacionNombre} removido.`);
+      }
+    });
   };
 
   const totalAsignaciones = usuario.sedes.reduce(
@@ -217,6 +297,11 @@ export function UsuarioModalAccess({
       <DialogContent
         size="xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-background"
+        onInteractOutside={(e) => {
+          if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
+            e.preventDefault();
+          }
+        }}
       >
         {/* HEADER */}
         <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
@@ -249,7 +334,13 @@ export function UsuarioModalAccess({
             <Button
               variant="primary"
               size="default"
-              onClick={() => setIsAdding((prev) => !prev)}
+              onClick={() => {
+                setEditingAsigId(null);
+                setSelectedSede("");
+                setSelectedApp("");
+                setSelectedRol("");
+                setIsAdding(true);
+              }}
               className="gap-2 text-xs font-semibold shadow-sm shrink-0"
             >
               <Plus className="size-4" />
@@ -263,12 +354,15 @@ export function UsuarioModalAccess({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                   <ShieldCheck className="size-4" />
-                  Nueva asignación de acceso
+                  {editingAsigId ? "Edición de acceso" : "Nueva asignación de acceso"}
                 </span>
                 <Button
                   variant="ghost"
                   size="icon-xs"
-                  onClick={() => setIsAdding(false)}
+                  onClick={() => {
+                    setIsAdding(false);
+                    setEditingAsigId(null);
+                  }}
                   className="rounded-full"
                 >
                   <X className="size-3.5" />
@@ -375,7 +469,10 @@ export function UsuarioModalAccess({
                 <Button
                   variant="neutral"
                   size="sm"
-                  onClick={() => setIsAdding(false)}
+                  onClick={() => {
+                    setIsAdding(false);
+                    setEditingAsigId(null);
+                  }}
                   className="text-xs"
                 >
                   Cancelar
@@ -383,11 +480,11 @@ export function UsuarioModalAccess({
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handleAddAssignment}
+                  onClick={handleSaveAssignment}
                   disabled={!selectedSede || !selectedApp || !selectedRol}
                   className="text-xs"
                 >
-                  Agregar acceso
+                  {editingAsigId ? "Guardar Cambios" : "Agregar acceso"}
                 </Button>
               </div>
             </div>
@@ -409,32 +506,32 @@ export function UsuarioModalAccess({
                     key={sedeKey}
                     className="rounded-xl border border-border overflow-hidden bg-background"
                   >
-                    {/* Header Sede con Tooltip */}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={() => toggleSedeExpand(sedeKey)}
-                            className="w-full bg-background hover:bg-muted/15 transition-colors px-4 py-3 border-b border-border flex items-center justify-between text-left cursor-pointer"
-                            aria-expanded={isExpanded}
-                          >
-                            <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                              <Building2 className="size-4 text-primary shrink-0" />
-                              <span>{sede.sedeNombre}</span>
-                            </div>
+                    {/* Header Sede sin Tooltip global */}
+                    <button
+                      type="button"
+                      onClick={() => toggleSedeExpand(sedeKey)}
+                      className="w-full bg-background hover:bg-muted/15 transition-colors px-4 py-3 border-b border-border flex items-center justify-between text-left cursor-pointer"
+                      aria-expanded={isExpanded}
+                    >
+                      <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                        <Building2 className="size-4 text-primary shrink-0" />
+                        <span>{sede.sedeNombre}</span>
+                      </div>
 
-                            <div className="flex items-center gap-3">
-                              <Badge
-                                tone="neutral"
-                                appearance="soft"
-                                className="text-xs font-semibold"
-                              >
-                                {sede.asignaciones.length}{" "}
-                                {sede.asignaciones.length === 1
-                                  ? "asignación"
-                                  : "asignaciones"}
-                              </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          tone="neutral"
+                          appearance="soft"
+                          className="text-xs font-semibold"
+                        >
+                          {sede.asignaciones.length}{" "}
+                          {sede.asignaciones.length === 1
+                            ? "asignación"
+                            : "asignaciones"}
+                        </Badge>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
                               <div className="p-1 rounded-md hover:bg-muted/30 transition-colors">
                                 {isExpanded ? (
                                   <ChevronUp className="size-4 text-muted-foreground" />
@@ -442,14 +539,14 @@ export function UsuarioModalAccess({
                                   <ChevronDown className="size-4 text-muted-foreground" />
                                 )}
                               </div>
-                            </div>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          {isExpanded ? "Ocultar información" : "Expandir información"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {isExpanded ? "Ocultar sede" : "Desplegar sede"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </button>
 
                     {/* Tabla de asignaciones de la sede */}
                     {isExpanded && (
@@ -516,7 +613,17 @@ export function UsuarioModalAccess({
                                               variant="ghost"
                                               size="icon"
                                               onClick={() => {
-                                                toast.info(`Editar asignación de ${asig.aplicacionNombre}`);
+                                                setEditingAsigId(asig.id);
+                                                setSelectedSede(asig.sedeNombre);
+                                                setSelectedApp(asig.aplicacionNombre);
+                                                setSelectedRol(asig.rolNombre);
+                                                setIsAdding(true);
+                                                
+                                                // Scroll automatically to top
+                                                const container = document.getElementById("dialog-content-scroll");
+                                                if (container) {
+                                                  container.scrollTo({ top: 0, behavior: "smooth" });
+                                                }
                                               }}
                                               aria-label="Editar acceso"
                                               className="size-7 text-muted-foreground hover:text-primary hover:bg-primary/10"
@@ -585,7 +692,7 @@ export function UsuarioModalAccess({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}
@@ -597,6 +704,17 @@ export function UsuarioModalAccess({
           </span>
         </DialogFooter>
       </DialogContent>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText={confirmDialog.confirmText}
+        cancelText={confirmDialog.cancelText}
+        variant={confirmDialog.variant}
+        onConfirm={confirmDialog.onConfirm}
+      />
     </Dialog>
   );
 }

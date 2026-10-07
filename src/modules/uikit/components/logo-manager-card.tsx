@@ -359,7 +359,7 @@ export function LogoManagerCard({
                       onCancel={(id) => handleRemoveFile(id, 'light')}
                     />
                     {previewLightUrl && (
-                      <div className="h-[120px] bg-[#F8F9FA] rounded-xl border border-border flex items-center justify-center p-2 shadow-inner">
+                      <div className="h-[120px] bg-muted rounded-xl border border-border flex items-center justify-center p-2 shadow-inner">
                         <img src={previewLightUrl} alt="Light Preview" className="max-h-full max-w-full object-contain" />
                       </div>
                     )}
@@ -397,7 +397,7 @@ export function LogoManagerCard({
                       onCancel={(id) => handleRemoveFile(id, 'dark')}
                     />
                     {previewDarkUrl && (
-                      <div className="h-[120px] bg-[#1A1F35] rounded-xl border border-[#2C3459] flex items-center justify-center p-2 shadow-inner">
+                      <div className="h-[120px] bg-primary-900 rounded-xl border border-primary-800 flex items-center justify-center p-2 shadow-inner">
                         <img src={previewDarkUrl} alt="Dark Preview" className="max-h-full max-w-full object-contain" />
                       </div>
                     )}
@@ -441,7 +441,7 @@ export function LogoManagerCard({
           <div className="py-4 grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fondos claros</span>
-              <div className="h-[100px] bg-[#F8F9FA] rounded-xl border border-border flex items-center justify-center p-2">
+              <div className="h-[100px] bg-muted rounded-xl border border-border flex items-center justify-center p-2">
                 {previewLightUrl ? (
                   <img src={previewLightUrl} alt="Light" className="max-h-full max-w-full object-contain" />
                 ) : (
@@ -451,11 +451,11 @@ export function LogoManagerCard({
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fondos oscuros</span>
-              <div className="h-[100px] bg-[#1A1F35] rounded-xl border border-[#2C3459] flex items-center justify-center p-2">
+              <div className="h-[100px] bg-primary-900 rounded-xl border border-primary-800 flex items-center justify-center p-2">
                 {previewDarkUrl ? (
                   <img src={previewDarkUrl} alt="Dark" className="max-h-full max-w-full object-contain" />
                 ) : (
-                  <span className="text-xs text-[#6B708A]">Sin cambios</span>
+                  <span className="text-xs text-muted-foreground">Sin cambios</span>
                 )}
               </div>
             </div>

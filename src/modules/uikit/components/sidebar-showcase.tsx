@@ -77,11 +77,12 @@ function SidebarNavItem({
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => hasChildren && setOpen(!open)}
               className={cn(
-                "w-full flex items-center transition-all duration-150 outline-none",
+                "w-full flex items-center transition-all duration-150 outline-none h-auto",
                 collapsed ? "justify-center p-2 rounded-lg" : "gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-left",
                 item.active
                   ? "bg-primary/10 text-primary"
@@ -104,7 +105,7 @@ function SidebarNavItem({
                   )}
                 </>
               )}
-            </button>
+            </Button>
           </TooltipTrigger>
           {collapsed && (
             <TooltipContent side="right" align="center" className="z-[100]">
@@ -129,10 +130,11 @@ function SidebarNavItem({
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
                         className={cn(
-                          "flex items-center rounded-md transition-all duration-200 outline-none",
+                          "flex items-center rounded-md transition-all duration-200 outline-none h-auto",
                           collapsed
                             ? "justify-center p-2 opacity-60 hover:opacity-100 hover:bg-muted/50" // Lower hierarchy, centered icon
                             : "w-full gap-2 px-2 py-1.5 text-xs font-medium text-left",
@@ -143,7 +145,7 @@ function SidebarNavItem({
                       >
                         <ChildIcon className={cn("shrink-0", collapsed ? "size-4" : "size-3.5")} />
                         {!collapsed && <span className="truncate">{child.label}</span>}
-                      </button>
+                      </Button>
                     </TooltipTrigger>
                     {collapsed && (
                       <TooltipContent side="right" align="center" className="z-[100]">
@@ -183,9 +185,9 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
         <>
           {/* ── Institutional header ── */}
           <div className="bg-primary px-3 py-2 flex items-center justify-end shrink-0 min-h-[38px]">
-            <button type="button" className="p-1 rounded-md text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors shrink-0">
+            <Button variant="ghost" type="button" className="p-1 h-auto rounded-md text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors shrink-0">
               <PanelLeft className="size-4" />
-            </button>
+            </Button>
           </div>
 
           {/* ── Logo row ── */}
@@ -229,9 +231,9 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" className="p-1.5 rounded-md hover:bg-muted text-muted-foreground transition-colors shrink-0">
+                <Button variant="ghost" type="button" className="p-1.5 h-auto rounded-md hover:bg-muted text-muted-foreground transition-colors shrink-0">
                   <PanelLeft className="size-4" />
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side={collapsed ? "right" : "bottom"} align="center" className="z-[100]">
                 {collapsed ? "Expandir menú" : "Colapsar menú"}
@@ -269,10 +271,11 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
             </div>
           ) : (
             <div className="px-3 py-2 mb-2">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 className={cn(
-                  "relative flex w-full items-center p-1 rounded-full border border-sidebar-border/50",
+                  "relative flex w-full h-auto items-center p-1 rounded-full border border-sidebar-border/50",
                   "bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors duration-300"
                 )}
                 aria-label="Alternar tema"
@@ -301,7 +304,7 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
                   <Moon className="size-4" />
                   Oscuro
                 </div>
-              </button>
+              </Button>
             </div>
           )
         )}
@@ -320,9 +323,9 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
               </div>
             )}
             {!collapsed && (
-              <button type="button" className="p-1 rounded-md text-muted-foreground hover:text-danger transition-colors shrink-0">
+              <Button variant="ghost" type="button" className="p-1 h-auto rounded-md text-muted-foreground hover:text-danger transition-colors shrink-0">
                 <LogOut className="size-3.5" />
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -465,13 +468,14 @@ export function SidebarShowcase() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Expandido
             </h3>
-            <button
+            <Button
+              variant="link"
               type="button"
               onClick={() => setCollapsed(!collapsed)}
-              className="text-xs text-primary hover:underline font-medium"
+              className="text-xs text-primary hover:underline font-medium p-0 h-auto"
             >
               {collapsed ? "Expandir" : "Colapsar"} →
-            </button>
+            </Button>
           </div>
           <div className="border border-border rounded-xl overflow-hidden shadow-sm" style={{ height: 560 }}>
             <SidebarPreview collapsed={collapsed} variant={variant} navItems={currentNavItems} config={sidebarConfig} />

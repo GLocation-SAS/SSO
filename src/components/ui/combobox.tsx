@@ -137,7 +137,7 @@ function ComboboxContent({
         alignOffset={alignOffset}
         anchor={anchor}
         collisionAvoidance={collisionAvoidance}
-        className="isolate z-[100]"
+        className="isolate z-[100] pointer-events-auto"
       >
         <ComboboxPrimitive.Popup
           data-slot="combobox-content"

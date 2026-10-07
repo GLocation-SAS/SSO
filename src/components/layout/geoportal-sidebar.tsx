@@ -26,12 +26,17 @@ import {
   LayoutDashboard,
   BarChart3,
   Users,
+  AppWindow,
   ChevronRight,
   PanelLeft,
   X,
   Sun,
   Moon,
   LogOut,
+  ShieldCheck,
+  History,
+  LogIn,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/routing";
@@ -81,6 +86,36 @@ const navSections: NavSection[] = [
         label: "Resumen de gestión",
         href: "/gestion/dashboard",
         icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    title: "Gestión de aplicaciones",
+    items: [
+      {
+        label: "Aplicaciones",
+        href: "/aplicaciones",
+        icon: AppWindow,
+      },
+    ],
+  },
+  {
+    title: "Auditoría",
+    items: [
+      {
+        label: "Logs de gestión",
+        href: "/auditoria/logs-gestion",
+        icon: History,
+      },
+      {
+        label: "Ingresos a aplicaciones",
+        href: "/auditoria/ingresos-aplicaciones",
+        icon: LogIn,
+      },
+      {
+        label: "Actividad de usuarios",
+        href: "/auditoria/actividad-usuarios",
+        icon: Activity,
       },
     ],
   },

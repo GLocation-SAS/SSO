@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -196,24 +197,24 @@ export function UsuarioModalDetail({
             <TabsContent value="accesos" className="mt-0 space-y-4 outline-none">
               {/* Resumen de contadores */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
+                <Card variant="panel" className="p-3.5 text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Sedes</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {usuario.sedes.length}
                   </span>
-                </div>
-                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
+                </Card>
+                <Card variant="panel" className="p-3.5 text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Aplicaciones</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {aplicacionesUnicas.length}
                   </span>
-                </div>
-                <div className="p-3.5 rounded-xl border border-border bg-background text-center">
+                </Card>
+                <Card variant="panel" className="p-3.5 text-center">
                   <span className="text-xs text-muted-foreground block mb-0.5">Roles asignados</span>
                   <span className="text-xl font-heading font-bold text-foreground">
                     {totalAsignaciones}
                   </span>
-                </div>
+                </Card>
               </div>
 
               {/* Lista por Sedes */}
@@ -333,28 +334,13 @@ export function UsuarioModalDetail({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex flex-row items-center justify-end w-full">
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}
           >
             Cerrar
           </Button>
-          <div className="flex items-center gap-2">
-            {onEdit && (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  onOpenChange(false);
-                  onEdit(usuario);
-                }}
-                className="gap-2"
-              >
-                <Edit className="size-4" />
-                <span>Editar usuario</span>
-              </Button>
-            )}
-          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -225,11 +225,18 @@ export function UsuariosView() {
   };
 
   const handleSaveUser = (savedUser: UsuarioItem) => {
-    if (formUser) {
-      setUsuarios((prev) => prev.map((u) => (u.id === savedUser.id ? savedUser : u)));
-    } else {
-      setUsuarios((prev) => [savedUser, ...prev]);
-    }
+    setUsuarios((prev) => {
+      const exists = prev.find((u) => u.id === savedUser.id);
+      if (exists) {
+        return prev.map((u) => (u.id === savedUser.id ? savedUser : u));
+      }
+      return [savedUser, ...prev];
+    });
+    
+    // Si algún modal está abierto, actualizamos su estado para que refleje los cambios en vivo
+    if (formUser?.id === savedUser.id) setFormUser(savedUser);
+    if (accessUser?.id === savedUser.id) setAccessUser(savedUser);
+    if (detailUser?.id === savedUser.id) setDetailUser(savedUser);
   };
 
   const handlePasswordSuccess = (usuarioId: string) => {

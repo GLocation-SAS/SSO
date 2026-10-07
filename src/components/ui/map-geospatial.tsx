@@ -246,17 +246,17 @@ export function BasemapSelector({
       title: "ESTÁNDAR",
       maps: [
         { id: "calle", label: "Calle", bg: "bg-surface border-2 border-primary/10" },
-        { id: "satelite", label: "Satélite", bg: "bg-[#2b3a32]" },
-        { id: "relieve", label: "Relieve", bg: "bg-[#d3e5c7]" },
+        { id: "satelite", label: "Satélite", bg: "bg-success-800 text-white" },
+        { id: "relieve", label: "Relieve", bg: "bg-success-200" },
       ]
     },
     {
       title: "GOOGLE",
       maps: [
-        { id: "google-calle", label: "Google Calle", bg: "bg-[#fcf7ed] border border-border" },
-        { id: "google-satelite", label: "Google Satélite", bg: "bg-[#253229]" },
-        { id: "google-hibrido", label: "Google Híbrido", bg: "bg-[#38423d]" },
-        { id: "google-terreno", label: "Google Terreno", bg: "bg-[#e2e8db]" },
+        { id: "google-calle", label: "Google Calle", bg: "bg-warning-100 border border-border" },
+        { id: "google-satelite", label: "Google Satélite", bg: "bg-success-900 text-white" },
+        { id: "google-hibrido", label: "Google Híbrido", bg: "bg-success-700 text-white" },
+        { id: "google-terreno", label: "Google Terreno", bg: "bg-muted" },
       ]
     }
   ]

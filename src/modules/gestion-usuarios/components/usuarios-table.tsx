@@ -23,7 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid } from "lucide-react";
+import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid, MoreVertical } from "lucide-react";
 import { UsuarioItem } from "../data/usuarios-data";
 import {
   Pagination,
@@ -201,20 +201,19 @@ export function UsuariosTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[180px] min-w-[170px] dark:text-white pl-6">Usuario</TableHead>
-              <TableHead className="w-[150px] min-w-[140px] dark:text-white">Tipo de documento</TableHead>
-              <TableHead className="w-[140px] min-w-[130px] dark:text-white">N.º de documento</TableHead>
-              <TableHead className="w-[200px] min-w-[180px] dark:text-white">Correo</TableHead>
-              <TableHead className="w-[240px] min-w-[220px] dark:text-white">Accesos</TableHead>
-              <TableHead className="w-[110px] min-w-[100px] text-center dark:text-white">Estado</TableHead>
-              <TableHead className="w-[140px] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
-              <TableHead className="w-[190px] min-w-[190px] text-right dark:text-white pr-6">Acciones</TableHead>
+              <TableHead className="w-[20%] min-w-[180px] dark:text-white pl-6">Usuario</TableHead>
+              <TableHead className="w-[15%] min-w-[130px] dark:text-white">Documento</TableHead>
+              <TableHead className="w-[22%] min-w-[200px] dark:text-white">Correo</TableHead>
+              <TableHead className="w-[18%] min-w-[160px] dark:text-white">Accesos</TableHead>
+              <TableHead className="w-[10%] min-w-[100px] text-center dark:text-white">Estado</TableHead>
+              <TableHead className="w-[10%] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
+              <TableHead className="w-[5%] min-w-[90px] text-right dark:text-white pr-6">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedUsuarios.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No se encontraron usuarios.
                 </TableCell>
               </TableRow>
@@ -226,7 +225,7 @@ export function UsuariosTable({
                     <TableCell className="pl-6">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="font-semibold text-sm text-foreground truncate block max-w-[190px] cursor-default">
+                          <span className="font-semibold text-sm text-foreground truncate block w-full cursor-default">
                             {usr.nombre} {usr.apellidos}
                           </span>
                         </TooltipTrigger>
@@ -236,23 +235,23 @@ export function UsuariosTable({
                       </Tooltip>
                     </TableCell>
 
-                    {/* 2. Tipo de documento */}
+                    {/* 2. Documento (Tipo + Número) */}
                     <TableCell>
-                      <span className="text-sm text-foreground">{usr.tipoDocumento || "Cédula"}</span>
-                    </TableCell>
-
-                    {/* 3. N.º de documento */}
-                    <TableCell>
-                      <span className="text-sm font-medium text-foreground">
-                        {usr.documentoIdentificacion || usr.identificacion || "—"}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">
+                          {usr.documentoIdentificacion || usr.identificacion || "—"}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {usr.tipoDocumento || "Cédula"}
+                        </span>
+                      </div>
                     </TableCell>
 
                     {/* 4. Correo */}
                     <TableCell>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="text-sm text-foreground truncate block max-w-[200px] cursor-default">
+                          <span className="text-sm text-foreground truncate block w-full cursor-default">
                             {usr.email || usr.correo || "—"}
                           </span>
                         </TooltipTrigger>
@@ -344,46 +343,48 @@ export function UsuariosTable({
                           <TooltipContent side="top">Gestionar accesos</TooltipContent>
                         </Tooltip>
 
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onChangePassword(usr)}
-                              aria-label="Cambiar clave"
-                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            >
+                        <DropdownMenu>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label="Ver más acciones"
+                                  className="size-8 text-muted-foreground hover:text-foreground"
+                                >
+                                  <MoreVertical className="size-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">Ver más acciones</TooltipContent>
+                          </Tooltip>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => onChangePassword(usr)} className="gap-2 cursor-pointer">
                               <Key className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Cambiar clave</TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onToggleStatus(usr)}
-                              aria-label={usr.estado === "Activo" ? "Inactivar usuario" : "Activar usuario"}
+                              <span>Cambiar clave</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => onToggleStatus(usr)} 
                               className={cn(
-                                "size-8 text-muted-foreground",
-                                usr.estado === "Activo"
-                                  ? "hover:text-danger hover:bg-danger/10"
-                                  : "hover:text-success hover:bg-success/10"
+                                "gap-2 cursor-pointer",
+                                usr.estado === "Activo" ? "text-danger focus:bg-danger/10 focus:text-danger" : "text-success focus:bg-success/10 focus:text-success"
                               )}
                             >
                               {usr.estado === "Activo" ? (
-                                <PowerOff className="size-4" />
+                                <>
+                                  <PowerOff className="size-4" />
+                                  <span>Inactivar usuario</span>
+                                </>
                               ) : (
-                                <Power className="size-4" />
+                                <>
+                                  <Power className="size-4" />
+                                  <span>Activar usuario</span>
+                                </>
                               )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            {usr.estado === "Activo" ? "Inactivar" : "Activar"}
-                          </TooltipContent>
-                        </Tooltip>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
