@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Plus, Download, ChevronDown, FileText, FileSpreadsheet, ImageIcon, Loader2 } from "lucide-react";
 import {
@@ -213,9 +214,12 @@ export function AplicacionesView() {
           {/* Cabecera */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
-                Gestión de aplicaciones
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+                  Gestión de aplicaciones
+                </h1>
+                <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
+              </div>
               <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
                 Administra las aplicaciones disponibles y su configuración de acceso.
               </p>
