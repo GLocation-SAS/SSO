@@ -275,6 +275,7 @@ export function AplicacionesView() {
 
           {/* Barra de Filtros */}
           <AplicacionesFilterBar
+            aplicaciones={aplicaciones}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             selectedEstado={selectedEstado}
@@ -335,7 +336,7 @@ export function AplicacionesView() {
             ? "Inactivar aplicación"
             : "Activar aplicación"
         }
-        variant={appToToggle?.estado === "Activa" ? "danger" : "success"}
+        variant={appToToggle?.estado === "Activa" ? "warning" : "success"}
         onConfirm={handleConfirmToggleStatus}
       />
     </div>

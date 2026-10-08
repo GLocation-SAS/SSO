@@ -217,7 +217,7 @@ export function AplicacionModalDetail({
                 }}
                 className={
                   aplicacion.estado === "Activa"
-                    ? "text-danger hover:text-danger hover:bg-danger/10 border-danger/30 text-xs"
+                    ? "text-warning hover:text-warning hover:bg-warning/10 border-warning/30 text-xs"
                     : "text-success hover:text-success hover:bg-success/10 border-success/30 text-xs"
                 }
               >

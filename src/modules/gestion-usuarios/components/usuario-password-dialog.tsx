@@ -90,7 +90,7 @@ export function UsuarioPasswordDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="default" className="sm:max-w-md bg-background">
+      <DialogContent variant="default" className="sm:max-w-md bg-surface">
         <TooltipProvider delayDuration={150}>
           <DialogHeader>
             <DialogTitle className="text-lg font-heading font-bold text-foreground">
@@ -114,7 +114,7 @@ export function UsuarioPasswordDialog({
                       {usuario.nombre} {usuario.apellidos}
                     </h4>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent variant="info" side="top">
                     <p>{usuario.nombre} {usuario.apellidos}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -143,7 +143,7 @@ export function UsuarioPasswordDialog({
                       {usuario.correo}
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent variant="info" side="top">
                     <p>{usuario.correo}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -170,8 +170,8 @@ export function UsuarioPasswordDialog({
                       <Info className="size-3.5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs">Mínimo 8 caracteres, alfanumérico con mayúsculas y símbolos</p>
+                  <TooltipContent variant="info" side="top">
+                    <p className="text-xs">Mí­nimo 8 caracteres, alfanumérico con mayúsculas y sí­mbolos</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -210,7 +210,7 @@ export function UsuarioPasswordDialog({
                 </p>
               ) : (
                 <span className="text-[11px] text-muted-foreground">
-                  Mínimo 8 caracteres, alfanumérico con mayúsculas y símbolos.
+                  Mí­nimo 8 caracteres, alfanumérico con mayúsculas y sí­mbolos.
                 </span>
               )}
             </div>

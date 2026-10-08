@@ -27,11 +27,11 @@ const dialogVariants = cva(
   {
     variants: {
       variant: {
-        default: "rounded-2xl border border-border bg-background shadow-xl p-6",
-        success: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-success/15",
-        danger: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-danger/15",
-        warning: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-warning/15",
-        info: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-info/15",
+        default: "rounded-2xl border border-border bg-surface shadow-xl p-6",
+        success: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-success/15",
+        danger: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-danger/15",
+        warning: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-warning/15",
+        info: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-info/15",
       },
       size: {
         sm: "max-w-sm",

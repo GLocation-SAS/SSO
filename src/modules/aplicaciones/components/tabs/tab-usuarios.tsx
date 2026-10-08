@@ -381,7 +381,7 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
                             }}
                             className={
                               usr.estado === "Activo"
-                                ? "text-danger cursor-pointer flex items-center gap-2"
+                                ? "text-warning cursor-pointer flex items-center gap-2"
                                 : "text-success cursor-pointer flex items-center gap-2"
                             }
                           >
@@ -427,7 +427,7 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
               : "Activar acceso"
           }
           variant={
-            selectedUserToToggle?.estado === "Activo" ? "danger" : "success"
+            selectedUserToToggle?.estado === "Activo" ? "warning" : "success"
           }
           onConfirm={handleToggleUserStatus}
         />

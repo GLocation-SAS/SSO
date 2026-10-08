@@ -125,10 +125,10 @@ export function RolModalPermissions({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-background"
+        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-surface"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-lg bg-info/15 text-info flex items-center justify-center shrink-0">
               <ShieldCheck className="size-5" />
@@ -150,7 +150,7 @@ export function RolModalPermissions({
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-5 bg-background">
+        <div className="overflow-y-auto flex-1 p-6 space-y-5 bg-surface">
           {/* Métricas y Acciones Rápidas */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-border bg-surface shadow-2xs">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -200,25 +200,15 @@ export function RolModalPermissions({
           </div>
 
           {/* MATRIZ DE PERMISOS */}
-          <div className="rounded-xl border border-border overflow-hidden bg-surface shadow-2xs">
+          <div className="overflow-x-auto pt-2">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-primary/30 dark:border-primary-800/60">
-                  <TableHead className="font-semibold text-white dark:text-white py-3 pl-6 w-[45%]">
-                    Recurso Institucional
-                  </TableHead>
-                  <TableHead className="text-center font-semibold text-white dark:text-white py-3 w-[13%]">
-                    Ver
-                  </TableHead>
-                  <TableHead className="text-center font-semibold text-white dark:text-white py-3 w-[13%]">
-                    Crear
-                  </TableHead>
-                  <TableHead className="text-center font-semibold text-white dark:text-white py-3 w-[13%]">
-                    Editar
-                  </TableHead>
-                  <TableHead className="text-center font-semibold text-white dark:text-white py-3 w-[13%]">
-                    Eliminar
-                  </TableHead>
+                <TableRow>
+                  <TableHead className="w-[45%]">Recurso Institucional</TableHead>
+                  <TableHead className="text-center w-[13%]">Ver</TableHead>
+                  <TableHead className="text-center w-[13%]">Crear</TableHead>
+                  <TableHead className="text-center w-[13%]">Editar</TableHead>
+                  <TableHead className="text-center w-[13%]">Eliminar</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -226,18 +216,10 @@ export function RolModalPermissions({
                   const isSubRecurso = Boolean(item.recursoPadre);
 
                   return (
-                    <TableRow
-                      key={item.recursoId}
-                      className={cn(
-                        "transition-colors border-b border-border/60",
-                        isSubRecurso
-                          ? "bg-muted/10 dark:bg-muted/20 hover:bg-muted/25 dark:hover:bg-muted/40"
-                          : "hover:bg-primary/5 dark:hover:bg-muted/70"
-                      )}
-                    >
+                    <TableRow key={item.recursoId}>
                       {/* Recurso */}
-                      <TableCell className="pl-6 h-auto py-2.5">
-                        <div className="flex items-center gap-2.5 py-1">
+                      <TableCell className="h-auto">
+                        <div className={cn("flex items-center gap-2.5", isSubRecurso && "pl-6")}>
                           {isSubRecurso ? (
                             <div className="flex items-center gap-1.5 text-muted-foreground pl-3 shrink-0">
                               <CornerDownRight className="size-3.5 text-primary dark:text-primary-300" />
@@ -348,7 +330,7 @@ export function RolModalPermissions({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between sm:justify-between">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}

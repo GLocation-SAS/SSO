@@ -199,9 +199,10 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
           <TableBody>
             {recursos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground dark:text-neutral-300">
-                  No hay recursos configurados para esta aplicación.
-                </TableCell>
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground dark:text-neutral-300">
+                    No hay recursos configurados para esta aplicación.
+                  </TableCell>
               </TableRow>
             ) : (
               recursos.map((rec) => {
@@ -211,6 +212,7 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                   <TableRow
                     key={rec.id}
                     className={cn(
+                      isSubRecurso && "bg-muted/10 hover:bg-muted/20"
                       isSubRecurso
                         ? "bg-muted/10 dark:bg-muted/25 hover:bg-muted/20 dark:hover:bg-muted/45"
                         : "border-l-4 border-l-primary/60 dark:border-l-primary dark:bg-muted/65"
@@ -220,231 +222,243 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                     <TableCell className="pl-6">
                       <div className="flex items-start gap-2.5 py-1">
                         {isSubRecurso ? (
-                          <div className="flex items-center gap-1.5 text-muted-foreground dark:text-neutral-300 pl-4 shrink-0 mt-0.5">
-                            <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
-                            <FileCode className="size-4 text-muted-foreground dark:text-neutral-300" />
-                          </div>
-                        ) : (
-                          <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0 mt-0.5">
-                            <Folder className="size-4" />
-                          </div>
+                          <div className="flex items-center gap-1.5 text-muted-foreground pl-4 shrink-0 mt-0.5">
+                            <CornerDownRight className="size-4 text-primary" />
+                            <FileCode className="size-4 text-muted-foreground" />
+                            <div className="flex items-center gap-1.5 text-muted-foreground dark:text-neutral-300 pl-4 shrink-0 mt-0.5">
+                              <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
+                              <FileCode className="size-4 text-muted-foreground dark:text-neutral-300" />
+                            </div>
+                            ) : (
+                            <div className="size-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                              <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0 mt-0.5">
+                                <Folder className="size-4" />
+                              </div>
                         )}
-                        <div className="flex flex-col min-w-0">
-                          <span
-                            className={cn(
-                              "text-sm truncate",
-                              isSubRecurso
-                                ? "font-medium text-foreground dark:text-neutral-100"
-                                : "font-bold font-heading text-foreground dark:text-white"
-                            )}
-                          >
-                            {rec.nombre}
-                          </span>
-                          <span className="text-xs text-muted-foreground dark:text-neutral-300 line-clamp-1">
-                            {rec.descripcion}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
+                              <div className="flex flex-col min-w-0">
+                                <span
+                                  className={cn(
+                                    "text-sm truncate",
+                                    isSubRecurso
+                                      ? "font-medium text-foreground"
+                                      : "font-bold font-heading text-foreground"
+                                        ? "font-medium text-foreground dark:text-neutral-100"
+                                        : "font-bold font-heading text-foreground dark:text-white"
+                                  )}
+                                >
+                                  {rec.nombre}
+                                </span>
+                                <span className="text-xs text-muted-foreground line-clamp-1">
+                                  <span className="text-xs text-muted-foreground dark:text-neutral-300 line-clamp-1">
+                                    {rec.descripcion}
+                                  </span>
+                              </div>
+                            </div>
+                          </TableCell>
 
                     {/* 2. Recurso Padre */}
-                    <TableCell>
-                      {rec.recursoPadreNombre ? (
-                        <div className="flex items-center gap-1.5 text-xs text-foreground dark:text-neutral-200 font-medium">
-                          <Folder className="size-3.5 text-muted-foreground dark:text-neutral-400 shrink-0" />
-                          <span>{rec.recursoPadreNombre}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground dark:text-neutral-400 italic">
-                          Raíz (Principal)
-                        </span>
+                        <TableCell>
+                          {rec.recursoPadreNombre ? (
+                            <div className="flex items-center gap-1.5 text-xs text-foreground font-medium">
+                              <Folder className="size-3.5 text-muted-foreground shrink-0" />
+                              <div className="flex items-center gap-1.5 text-xs text-foreground dark:text-neutral-200 font-medium">
+                                <Folder className="size-3.5 text-muted-foreground dark:text-neutral-400 shrink-0" />
+                                <span>{rec.recursoPadreNombre}</span>
+                              </div>
+                              ) : (
+                              <span className="text-xs text-muted-foreground italic">
+                                <span className="text-xs text-muted-foreground dark:text-neutral-400 italic">
+                                  Raíz (Principal)
+                                </span>
                       )}
-                    </TableCell>
+                              </TableCell>
 
-                    {/* 3. Roles con Acceso */}
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1.5 max-w-[320px]">
-                        {rec.rolesConAcceso.map((rol) => (
-                          <Badge
-                            key={rol}
-                            tone="primary"
-                            appearance="soft"
-                            size="sm"
-                            className="text-[10px] font-medium dark:bg-primary-900/40 dark:text-primary-200"
-                          >
-                            <ShieldCheck className="size-3" />
-                            {rol}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
+                              {/* 3. Roles con Acceso */}
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1.5 max-w-[320px]">
+                                  {rec.rolesConAcceso.map((rol) => (
+                                    <Badge
+                                      key={rol}
+                                      tone="primary"
+                                      appearance="soft"
+                                      size="sm"
+                                      className="text-[10px] font-medium"
+                                      className="text-[10px] font-medium dark:bg-primary-900/40 dark:text-primary-200"
+                                    >
+                                      <ShieldCheck className="size-3" />
+                                      {rol}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </TableCell>
 
-                    {/* 4. Estado */}
-                    <TableCell className="text-center">
-                      <Badge
-                        tone={rec.estado === "Activo" ? "success" : "neutral"}
-                        appearance="soft"
-                        size="sm"
-                      >
-                        {rec.estado}
-                      </Badge>
-                    </TableCell>
+                              {/* 4. Estado */}
+                              <TableCell className="text-center">
+                                <Badge
+                                  tone={rec.estado === "Activo" ? "success" : "neutral"}
+                                  appearance="soft"
+                                  size="sm"
+                                >
+                                  {rec.estado}
+                                </Badge>
+                              </TableCell>
 
-                    {/* 5. Acciones */}
-                    <TableCell className="text-right pr-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-foreground dark:hover:text-white"
-                          >
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem
-                            onClick={() => handleToggleRecurso(rec)}
-                            className={cn(
-                              "cursor-pointer flex items-center gap-2",
-                              rec.estado === "Activo"
-                                ? "text-danger"
-                                : "text-success"
-                            )}
-                          >
-                            {rec.estado === "Activo" ? (
-                              <>
-                                <PowerOff className="size-4" />
-                                <span>Inactivar</span>
-                              </>
-                            ) : (
-                              <>
-                                <Power className="size-4" />
-                                <span>Activar</span>
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
+                              {/* 5. Acciones */}
+                              <TableCell className="text-right pr-6">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-8 text-muted-foreground hover:text-foreground"
+                                      className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-foreground dark:hover:text-white"
+                                    >
+                                      <MoreVertical className="size-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-40">
+                                    <DropdownMenuItem
+                                      onClick={() => handleToggleRecurso(rec)}
+                                      className={cn(
+                                        "cursor-pointer flex items-center gap-2",
+                                        rec.estado === "Activo"
+                                          ? "text-danger"
+                                          : "text-success"
+                                      )}
+                                    >
+                                      {rec.estado === "Activo" ? (
+                                        <>
+                                          <PowerOff className="size-4" />
+                                          <span>Inactivar</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Power className="size-4" />
+                                          <span>Activar</span>
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
               })
             )}
-          </TableBody>
-        </Table>
-      </div>
+                        </TableBody>
+                      </Table>
+                    </div>
 
-      {/* Modal para Crear Recurso */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent size="lg" className="p-0 gap-0 overflow-hidden">
-          <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 text-left">
-            <div className="flex items-center gap-3">
-              <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <FolderTree className="size-5" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-heading font-bold text-foreground">
-                  Registrar recurso en {aplicacion.nombre}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                  Agrega una vista, submódulo o servicio dentro del árbol jerárquico.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
+                    {/* Modal para Crear Recurso */}
+                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                      <DialogContent size="lg" className="p-0 gap-0 overflow-hidden">
+                        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                              <FolderTree className="size-5" />
+                            </div>
+                            <div>
+                              <DialogTitle className="text-lg font-heading font-bold text-foreground">
+                                Registrar recurso en {aplicacion.nombre}
+                              </DialogTitle>
+                              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                                Agrega una vista, submódulo o servicio dentro del árbol jerárquico.
+                              </DialogDescription>
+                            </div>
+                          </div>
+                        </DialogHeader>
 
-          <form onSubmit={handleCreateRecurso} className="p-6 space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Nombre del recurso <span className="text-danger">*</span>
-              </label>
-              <Input
-                placeholder="Ej. Docentes, Trayectoria, Acciones de personal"
-                value={nuevoNombre}
-                onChange={(e) => {
-                  setNuevoNombre(e.target.value);
-                  setError(null);
-                }}
-                className="text-sm"
-              />
-            </div>
+                        <form onSubmit={handleCreateRecurso} className="p-6 space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-foreground">
+                              Nombre del recurso <span className="text-danger">*</span>
+                            </label>
+                            <Input
+                              placeholder="Ej. Docentes, Trayectoria, Acciones de personal"
+                              value={nuevoNombre}
+                              onChange={(e) => {
+                                setNuevoNombre(e.target.value);
+                                setError(null);
+                              }}
+                              className="text-sm"
+                            />
+                          </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Recurso padre (Jerarquía)
-              </label>
-              <Combobox
-                value={padreSeleccionado}
-                onValueChange={(val) => {
-                  if (val) setPadreSeleccionado(val);
-                }}
-              >
-                <ComboboxInput
-                  placeholder="Seleccionar padre o raíz"
-                  showClear={false}
-                  size="sm"
-                  className="w-full text-xs"
-                />
-                <ComboboxContent className="min-w-full">
-                  <ComboboxList>
-                    <ComboboxItem value="Ninguno (Raíz)">
-                      Ninguno (Es un recurso Raíz)
-                    </ComboboxItem>
-                    {posiblesPadres.map((p) => (
-                      <ComboboxItem key={p.id} value={p.nombre}>
-                        {p.nombre}
-                      </ComboboxItem>
-                    ))}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-              <p className="text-[11px] text-muted-foreground">
-                Si seleccionas un padre, este recurso se agrupará como un submódulo.
-              </p>
-            </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-foreground">
+                              Recurso padre (Jerarquía)
+                            </label>
+                            <Combobox
+                              value={padreSeleccionado}
+                              onValueChange={(val) => {
+                                if (val) setPadreSeleccionado(val);
+                              }}
+                            >
+                              <ComboboxInput
+                                placeholder="Seleccionar padre o raíz"
+                                showClear={false}
+                                size="sm"
+                                className="w-full text-xs"
+                              />
+                              <ComboboxContent className="min-w-full">
+                                <ComboboxList>
+                                  <ComboboxItem value="Ninguno (Raíz)">
+                                    Ninguno (Es un recurso Raíz)
+                                  </ComboboxItem>
+                                  {posiblesPadres.map((p) => (
+                                    <ComboboxItem key={p.id} value={p.nombre}>
+                                      {p.nombre}
+                                    </ComboboxItem>
+                                  ))}
+                                </ComboboxList>
+                              </ComboboxContent>
+                            </Combobox>
+                            <p className="text-[11px] text-muted-foreground">
+                              Si seleccionas un padre, este recurso se agrupará como un submódulo.
+                            </p>
+                          </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Descripción funcional <span className="text-danger">*</span>
-              </label>
-              <Textarea
-                placeholder="Describe la información que gestiona o contiene este recurso..."
-                rows={3}
-                value={nuevaDescripcion}
-                onChange={(e) => {
-                  setNuevaDescripcion(e.target.value);
-                  setError(null);
-                }}
-                className="text-sm"
-              />
-            </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-foreground">
+                              Descripción funcional <span className="text-danger">*</span>
+                            </label>
+                            <Textarea
+                              placeholder="Describe la información que gestiona o contiene este recurso..."
+                              rows={3}
+                              value={nuevaDescripcion}
+                              onChange={(e) => {
+                                setNuevaDescripcion(e.target.value);
+                                setError(null);
+                              }}
+                              className="text-sm"
+                            />
+                          </div>
 
-            {error && (
-              <p className="text-[11px] text-danger flex items-center gap-1.5">
-                <AlertCircle className="size-3.5 shrink-0" />
-                {error}
-              </p>
-            )}
+                          {error && (
+                            <p className="text-[11px] text-danger flex items-center gap-1.5">
+                              <AlertCircle className="size-3.5 shrink-0" />
+                              {error}
+                            </p>
+                          )}
 
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsCreateOpen(false)}
-                className="text-xs"
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" className="gap-1.5 text-xs">
-                <Check className="size-4" />
-                <span>Registrar recurso</span>
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+                          <DialogFooter className="pt-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => setIsCreateOpen(false)}
+                              className="text-xs"
+                            >
+                              Cancelar
+                            </Button>
+                            <Button type="submit" variant="primary" className="gap-1.5 text-xs">
+                              <Check className="size-4" />
+                              <span>Registrar recurso</span>
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                );
+              }
 

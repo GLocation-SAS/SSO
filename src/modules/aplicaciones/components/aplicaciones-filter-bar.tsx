@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Search } from "@/components/ui/search";
 import {
   Combobox,
   ComboboxInput,
@@ -11,8 +10,10 @@ import {
   ComboboxItem,
 } from "@/components/ui/combobox";
 import { DataChip } from "@/components/ui/data-display";
+import { AplicacionItem } from "../data/aplicaciones-data";
 
 interface AplicacionesFilterBarProps {
+  aplicaciones: AplicacionItem[];
   searchTerm: string;
   onSearchChange: (value: string) => void;
   selectedEstado: string;
@@ -22,6 +23,7 @@ interface AplicacionesFilterBarProps {
 }
 
 export function AplicacionesFilterBar({
+  aplicaciones,
   searchTerm,
   onSearchChange,
   selectedEstado,
@@ -41,16 +43,31 @@ export function AplicacionesFilterBar({
   return (
     <div className="flex flex-col gap-4 mb-6">
       <div className="flex flex-wrap items-end gap-3.5 w-full">
-        {/* SearchInput principal */}
+        {/* Combobox de Búsqueda de aplicación */}
         <div className="flex-1 min-w-[280px] max-w-[450px]">
-          <Search
-            placeholder="Buscar aplicación..."
+          <Combobox
             value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onClear={() => onSearchChange("")}
-            size="sm"
-            className="w-full text-xs"
-          />
+            onValueChange={(val) => {
+              if (val !== null) onSearchChange(val);
+            }}
+          >
+            <ComboboxInput
+              placeholder="Buscar o seleccionar aplicación..."
+              showClear={true}
+              size="sm"
+              className="w-full text-xs"
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+            <ComboboxContent className="min-w-full">
+              <ComboboxList>
+                {aplicaciones.map((app) => (
+                  <ComboboxItem key={app.id} value={app.nombre}>
+                    {app.nombre}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </div>
 
         {/* Filtro por Estado */}

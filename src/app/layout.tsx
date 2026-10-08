@@ -1,5 +1,4 @@
 import { Montserrat, Barlow } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 import { cn } from "@/lib/utils";
@@ -89,10 +88,9 @@ export default async function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body>
+      <head>
         <script
           id="theme-script"
-          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -109,6 +107,8 @@ export default async function RootLayout({
             `,
           }}
         />
+      </head>
+      <body>
         <NextIntlClientProvider
           locale="es"
           messages={messages}

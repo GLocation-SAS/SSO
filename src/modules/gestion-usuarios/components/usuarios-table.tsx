@@ -10,6 +10,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { InteractiveCard } from "@/components/ui/data-display";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -86,12 +87,12 @@ function AccesosCell({
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
-          <div className="flex items-center gap-1.5 text-white/80">
-            <Building2 className="size-3.5 text-white/80 shrink-0" />
+        <TooltipContent variant="info" side="top" className="flex flex-col items-start gap-1">
+          <div className="flex items-center gap-1.5 opacity-80">
+            <Building2 className="size-3.5 shrink-0" />
             <span className="font-semibold text-[11px]">Sede</span>
           </div>
-          <p className="text-xs font-medium text-white">{primarySede}</p>
+          <p className="text-xs font-medium">{primarySede}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -105,12 +106,12 @@ function AccesosCell({
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
-          <div className="flex items-center gap-1.5 text-white/80">
-            <LayoutGrid className="size-3.5 text-white/80 shrink-0" />
+        <TooltipContent variant="info" side="top" className="flex flex-col items-start gap-1">
+          <div className="flex items-center gap-1.5 opacity-80">
+            <LayoutGrid className="size-3.5 shrink-0" />
             <span className="font-semibold text-[11px]">Aplicación</span>
           </div>
-          <p className="text-xs font-medium text-white">{primaryApp}</p>
+          <p className="text-xs font-medium">{primaryApp}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -124,12 +125,12 @@ function AccesosCell({
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="flex flex-col items-start gap-1 text-white">
-          <div className="flex items-center gap-1.5 text-white/80">
-            <ShieldCheck className="size-3.5 text-white/80 shrink-0" />
+        <TooltipContent variant="info" side="top" className="flex flex-col items-start gap-1">
+          <div className="flex items-center gap-1.5 opacity-80">
+            <ShieldCheck className="size-3.5 shrink-0" />
             <span className="font-semibold text-[11px]">Rol</span>
           </div>
-          <p className="text-xs font-medium text-white">{primaryRol}</p>
+          <p className="text-xs font-medium">{primaryRol}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -147,7 +148,7 @@ function AccesosCell({
                 +{remainingCount} {remainingCount === 1 ? "asignación" : "asignaciones"}
               </Badge>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs p-2.5 flex flex-col items-start gap-1.5 text-white">
+            <TooltipContent variant="info" side="top" className="max-w-xs p-2.5 flex flex-col items-start gap-1.5">
               <p className="font-semibold text-[11px] text-white">Asignaciones adicionales:</p>
               <div className="space-y-1.5 w-full">
                 {allAsignaciones.slice(1).map((asig, idx) => (
@@ -195,10 +196,103 @@ export function UsuariosTable({
     currentPage * itemsPerPage
   );
 
+  const renderActions = (usr: UsuarioItem) => (
+    <div className="inline-flex items-center justify-end gap-1">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onViewDetail(usr)}
+            aria-label="Ver detalle"
+            className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+          >
+            <Eye className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent variant="info" side="top">Ver detalle</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(usr)}
+            aria-label="Editar usuario"
+            className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+          >
+            <Edit className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent variant="info" side="top">Editar usuario</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onManageAccess(usr)}
+            aria-label="Gestionar accesos"
+            className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+          >
+            <ShieldCheck className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent variant="info" side="top">Gestionar accesos</TooltipContent>
+      </Tooltip>
+
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Ver más acciones"
+                className="size-8 text-muted-foreground hover:text-foreground"
+              >
+                <MoreVertical className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent variant="info" side="top">Ver más acciones</TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => onChangePassword(usr)} className="gap-2 cursor-pointer">
+            <Key className="size-4" />
+            <span>Cambiar clave</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => onToggleStatus(usr)} 
+            className={cn(
+              "gap-2 cursor-pointer",
+              usr.estado === "Activo" ? "text-warning focus:bg-warning/10 focus:text-warning" : "text-success focus:bg-success/10 focus:text-success"
+            )}
+          >
+            {usr.estado === "Activo" ? (
+              <>
+                <PowerOff className="size-4" />
+                <span>Inactivar usuario</span>
+              </>
+            ) : (
+              <>
+                <Power className="size-4" />
+                <span>Activar usuario</span>
+              </>
+            )}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
   return (
     <TooltipProvider delayDuration={150}>
       <div id="usuarios-table-container" className="flex flex-col gap-4">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[20%] min-w-[180px] dark:text-white pl-6">Usuario</TableHead>
@@ -229,7 +323,7 @@ export function UsuariosTable({
                             {usr.nombre} {usr.apellidos}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent variant="info" side="top">
                           <p>{usr.nombre} {usr.apellidos}</p>
                         </TooltipContent>
                       </Tooltip>
@@ -255,7 +349,7 @@ export function UsuariosTable({
                             {usr.email || usr.correo || "—"}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent variant="info" side="top">
                           <p>{usr.email || usr.correo || "—"}</p>
                         </TooltipContent>
                       </Tooltip>
@@ -297,95 +391,7 @@ export function UsuariosTable({
 
                     {/* 8. Acciones visibles */}
                     <TableCell className="text-right pr-6 whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onViewDetail(usr)}
-                              aria-label="Ver detalle"
-                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <Eye className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Ver detalle</TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onEdit(usr)}
-                              aria-label="Editar usuario"
-                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <Edit className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Editar usuario</TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onManageAccess(usr)}
-                              aria-label="Gestionar accesos"
-                              className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <ShieldCheck className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Gestionar accesos</TooltipContent>
-                        </Tooltip>
-
-                        <DropdownMenu>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label="Ver más acciones"
-                                  className="size-8 text-muted-foreground hover:text-foreground"
-                                >
-                                  <MoreVertical className="size-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">Ver más acciones</TooltipContent>
-                          </Tooltip>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => onChangePassword(usr)} className="gap-2 cursor-pointer">
-                              <Key className="size-4" />
-                              <span>Cambiar clave</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => onToggleStatus(usr)} 
-                              className={cn(
-                                "gap-2 cursor-pointer",
-                                usr.estado === "Activo" ? "text-danger focus:bg-danger/10 focus:text-danger" : "text-success focus:bg-success/10 focus:text-success"
-                              )}
-                            >
-                              {usr.estado === "Activo" ? (
-                                <>
-                                  <PowerOff className="size-4" />
-                                  <span>Inactivar usuario</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Power className="size-4" />
-                                  <span>Activar usuario</span>
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      {renderActions(usr)}
                     </TableCell>
                   </TableRow>
                 );
@@ -393,6 +399,66 @@ export function UsuariosTable({
             )}
           </TableBody>
         </Table>
+        </div>
+
+      {/* Mobile Card Row (Responsive) */}
+      <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        {paginatedUsuarios.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground border border-border rounded-xl bg-surface">
+            No se encontraron usuarios.
+          </div>
+        ) : (
+          paginatedUsuarios.map((usr) => (
+            <InteractiveCard
+              key={usr.id}
+              className="flex flex-col gap-3 text-left"
+              color="default"
+              hideChevron
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-foreground">{usr.nombre} {usr.apellidos}</span>
+                  <span className="text-xs text-muted-foreground">{usr.email || usr.correo || "-"}</span>
+                </div>
+                <Badge
+                  appearance="soft"
+                  variant={usr.estado === "Activo" ? "success" : "default"}
+                  className={cn(
+                    "shrink-0",
+                    usr.estado === "Activo"
+                      ? "bg-success/10 text-success border-transparent"
+                      : "bg-muted text-muted-foreground border-transparent"
+                  )}
+                >
+                  {usr.estado}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground font-semibold">Documento</span>
+                  <span className="text-foreground">{usr.documentoIdentificacion || usr.identificacion || "-"}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground font-semibold">Registro</span>
+                  <span className="text-foreground">{usr.fechaCreacion}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
+                <span className="text-xs text-muted-foreground font-semibold">Sedes y Accesos</span>
+                <div className="bg-muted/30 p-2 rounded-md">
+                  <AccesosCell usr={usr} />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                {renderActions(usr)}
+              </div>
+            </InteractiveCard>
+          ))
+        )}
+      </div>
 
       {/* Paginación */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

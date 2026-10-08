@@ -102,10 +102,10 @@ export function AplicacionesTable({
               <TableHead className="w-[300px] min-w-[280px] dark:text-white pl-6">
                 Aplicación
               </TableHead>
-              <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+              <TableHead className="w-[120px] min-w-[110px] text-left dark:text-white">
                 Estado
               </TableHead>
-              <TableHead className="w-[130px] min-w-[120px] text-center dark:text-white">
+              <TableHead className="w-[130px] min-w-[120px] text-left dark:text-white">
                 Usuarios
               </TableHead>
               <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
@@ -160,7 +160,7 @@ export function AplicacionesTable({
                                 {app.descripcion}
                               </p>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs">
+                            <TooltipContent side="top" className="max-w-xs" variant="info">
                               <p>{app.descripcion}</p>
                             </TooltipContent>
                           </Tooltip>
@@ -169,7 +169,7 @@ export function AplicacionesTable({
                     </TableCell>
 
                     {/* 2. Estado */}
-                    <TableCell className="text-center">
+                    <TableCell className="text-left">
                       <Badge
                         tone={app.estado === "Activa" ? "success" : "neutral"}
                         appearance="soft"
@@ -184,7 +184,7 @@ export function AplicacionesTable({
                     </TableCell>
 
                     {/* 3. Usuarios */}
-                    <TableCell className="text-center">
+                    <TableCell className="text-left">
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
                         <Users className="size-3.5 text-primary dark:text-primary-300" />
                         <span>{app.usuariosCount.toLocaleString("es-EC")}</span>
@@ -230,7 +230,7 @@ export function AplicacionesTable({
                               <Eye className="size-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side="top">Ver detalle</TooltipContent>
+                          <TooltipContent side="top" variant="info">Ver detalle</TooltipContent>
                         </Tooltip>
 
                         {/* Editar Directo */}
@@ -246,7 +246,7 @@ export function AplicacionesTable({
                               <Edit className="size-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side="top">Editar</TooltipContent>
+                          <TooltipContent side="top" variant="info">Editar</TooltipContent>
                         </Tooltip>
 
                         {/* Menú Contextual */}
@@ -269,7 +269,7 @@ export function AplicacionesTable({
                               </a>
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side="top">Abrir URL</TooltipContent>
+                          <TooltipContent side="top" variant="info">Abrir URL</TooltipContent>
                         </Tooltip>
 
                         {/* Cambiar Estado */}
@@ -283,7 +283,7 @@ export function AplicacionesTable({
                               className={cn(
                                 "size-8",
                                 app.estado === "Activa"
-                                  ? "text-danger hover:text-danger hover:bg-danger/10"
+                                  ? "text-warning hover:text-warning hover:bg-warning/10"
                                   : "text-success hover:text-success hover:bg-success/10"
                               )}
                             >
@@ -294,7 +294,7 @@ export function AplicacionesTable({
                               )}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side="top">
+                          <TooltipContent side="top" variant="info">
                             {app.estado === "Activa" ? "Inactivar" : "Activar"}
                           </TooltipContent>
                         </Tooltip>
