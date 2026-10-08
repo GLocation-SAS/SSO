@@ -262,189 +262,170 @@ export function RolDetailView({ appId, rolId }: RolDetailViewProps) {
         <div className="border border-border rounded-xl overflow-hidden bg-surface">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[380px] pl-6 dark:text-white">
-                  <TableRow className="border-b border-primary/30 dark:border-primary-800/60">
-                    <TableHead className="w-[380px] pl-6 text-white dark:text-white font-semibold">
-                      Recurso institucional
-                    </TableHead>
-                    <TableHead className="w-[110px] text-center dark:text-white">
-                      <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
-                        Ver
-                      </TableHead>
-                      <TableHead className="w-[110px] text-center dark:text-white">
-                        <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
-                          Crear
-                        </TableHead>
-                        <TableHead className="w-[110px] text-center dark:text-white">
-                          <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
-                            Editar
-                          </TableHead>
-                          <TableHead className="w-[110px] text-center dark:text-white">
-                            <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
-                              Eliminar
-                            </TableHead>
-                            <TableHead className="w-[140px] text-right dark:text-white pr-6">
-                              <TableHead className="w-[140px] text-right text-white dark:text-white font-semibold pr-6">
-                                Acción rápida
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {matriz.map((item) => {
-                              const isSubRecurso = Boolean(item.recursoPadre);
-                              const allSelected =
-                                item.permisos.ver &&
-                                item.permisos.crear &&
-                                item.permisos.editar &&
-                                item.permisos.eliminar;
+              <TableRow className="border-b border-primary/30 dark:border-primary-800/60">
+                <TableHead className="w-[380px] pl-6 text-white dark:text-white font-semibold">
+                  Recurso institucional
+                </TableHead>
+                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                  Ver
+                </TableHead>
+                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                  Crear
+                </TableHead>
+                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                  Editar
+                </TableHead>
+                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                  Eliminar
+                </TableHead>
+                <TableHead className="w-[140px] text-right text-white dark:text-white font-semibold pr-6">
+                  Acción rápida
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {matriz.map((item) => {
+                const isSubRecurso = Boolean(item.recursoPadre);
+                const allSelected =
+                  item.permisos.ver &&
+                  item.permisos.crear &&
+                  item.permisos.editar &&
+                  item.permisos.eliminar;
 
-                              return (
-                                <TableRow
-                                  key={item.recursoId}
-                                  className={cn(
-                                    isSubRecurso && "bg-muted/10 hover:bg-muted/20"
+                return (
+                  <TableRow
+                    key={item.recursoId}
+                    className={cn(
                       "transition-colors border-b border-border/60",
-                                    isSubRecurso
-                                      ? "bg-muted/10 dark:bg-muted/20 hover:bg-muted/25 dark:hover:bg-muted/40"
-                                      : "hover:bg-primary/5 dark:hover:bg-muted/70"
-                                  )}
-                                >
-                                  {/* Recurso */}
-                                  <TableCell className="pl-6">
-                                    <TableCell className="pl-6 h-auto py-3">
-                                      <div className="flex items-center gap-2.5 py-1">
-                                        {isSubRecurso ? (
-                                          <div className="flex items-center gap-1.5 text-muted-foreground pl-4 shrink-0">
-                                            <CornerDownRight className="size-4 text-primary" />
-                                            <FileCode className="size-4 text-muted-foreground" />
-                                            <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
-                                            <FileCode className="size-4 text-muted-foreground dark:text-neutral-400" />
-                                          </div>
-                                        ) : (
-                                          <div className="size-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                                            <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 border border-transparent dark:border-primary-700/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0">
-                                              <Folder className="size-4" />
-                                            </div>
+                      isSubRecurso
+                        ? "bg-muted/10 dark:bg-muted/20 hover:bg-muted/25 dark:hover:bg-muted/40"
+                        : "hover:bg-primary/5 dark:hover:bg-muted/70"
+                    )}
+                  >
+                    {/* Recurso */}
+                    <TableCell className="pl-6 h-auto py-3">
+                      <div className="flex items-center gap-2.5 py-1">
+                        {isSubRecurso ? (
+                          <div className="flex items-center gap-1.5 text-muted-foreground pl-4 shrink-0">
+                            <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
+                            <FileCode className="size-4 text-muted-foreground dark:text-neutral-400" />
+                          </div>
+                        ) : (
+                          <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 border border-transparent dark:border-primary-700/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0">
+                            <Folder className="size-4" />
+                          </div>
                         )}
-                                            <div className="flex flex-col">
-                                              <span
-                                                className={cn(
-                                                  "text-sm",
-                                                  isSubRecurso
-                                                    ? "font-medium text-foreground"
-                                                    : "font-bold font-heading text-foreground"
-                                                      ? "font-medium text-foreground dark:text-neutral-200"
-                                                      : "font-bold font-heading text-foreground dark:text-white"
-                                                )}
-                                              >
-                                                {item.recursoNombre}
-                                              </span>
-                                              {item.recursoPadre && (
-                                                <span className="text-[11px] text-muted-foreground">
-                                                  <span className="text-[11px] text-muted-foreground dark:text-neutral-400">
-                                                    Submódulo de {item.recursoPadre}
-                                                  </span>
+                        <div className="flex flex-col">
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isSubRecurso
+                                ? "font-medium text-foreground dark:text-neutral-200"
+                                : "font-bold font-heading text-foreground dark:text-white"
+                            )}
+                          >
+                            {item.recursoNombre}
+                          </span>
+                          {item.recursoPadre && (
+                            <span className="text-[11px] text-muted-foreground dark:text-neutral-400">
+                              Submódulo de {item.recursoPadre}
+                            </span>
                           )}
-                                                </div>
+                        </div>
                       </div>
-                                          </TableCell>
+                    </TableCell>
 
                     {/* Ver */}
-                                        <TableCell className="text-center">
-                                          <TableCell className="text-center h-auto py-3">
-                                            <div className="flex justify-center">
-                                              <Checkbox
-                                                checked={item.permisos.ver}
-                                                className="dark:border-neutral-500"
-                                                onCheckedChange={(checked) =>
-                                                  handleTogglePermiso(
-                                                    item.recursoId,
-                                                    "ver",
-                                                    Boolean(checked)
-                                                  )
-                                                }
-                                                aria-label={`Permiso Ver para ${item.recursoNombre}`}
-                                              />
-                                            </div>
-                                          </TableCell>
+                    <TableCell className="text-center h-auto py-3">
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={item.permisos.ver}
+                          className="dark:border-neutral-500"
+                          onCheckedChange={(checked) =>
+                            handleTogglePermiso(
+                              item.recursoId,
+                              "ver",
+                              Boolean(checked)
+                            )
+                          }
+                          aria-label={`Permiso Ver para ${item.recursoNombre}`}
+                        />
+                      </div>
+                    </TableCell>
 
-                                          {/* Crear */}
-                                          <TableCell className="text-center">
-                                            <TableCell className="text-center h-auto py-3">
-                                              <div className="flex justify-center">
-                                                <Checkbox
-                                                  checked={item.permisos.crear}
-                                                  className="dark:border-neutral-500"
-                                                  onCheckedChange={(checked) =>
-                                                    handleTogglePermiso(
-                                                      item.recursoId,
-                                                      "crear",
-                                                      Boolean(checked)
-                                                    )
-                                                  }
-                                                  aria-label={`Permiso Crear para ${item.recursoNombre}`}
-                                                />
-                                              </div>
-                                            </TableCell>
+                    {/* Crear */}
+                    <TableCell className="text-center h-auto py-3">
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={item.permisos.crear}
+                          className="dark:border-neutral-500"
+                          onCheckedChange={(checked) =>
+                            handleTogglePermiso(
+                              item.recursoId,
+                              "crear",
+                              Boolean(checked)
+                            )
+                          }
+                          aria-label={`Permiso Crear para ${item.recursoNombre}`}
+                        />
+                      </div>
+                    </TableCell>
 
-                                            {/* Editar */}
-                                            <TableCell className="text-center">
-                                              <TableCell className="text-center h-auto py-3">
-                                                <div className="flex justify-center">
-                                                  <Checkbox
-                                                    checked={item.permisos.editar}
-                                                    className="dark:border-neutral-500"
-                                                    onCheckedChange={(checked) =>
-                                                      handleTogglePermiso(
-                                                        item.recursoId,
-                                                        "editar",
-                                                        Boolean(checked)
-                                                      )
-                                                    }
-                                                    aria-label={`Permiso Editar para ${item.recursoNombre}`}
-                                                  />
-                                                </div>
-                                              </TableCell>
+                    {/* Editar */}
+                    <TableCell className="text-center h-auto py-3">
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={item.permisos.editar}
+                          className="dark:border-neutral-500"
+                          onCheckedChange={(checked) =>
+                            handleTogglePermiso(
+                              item.recursoId,
+                              "editar",
+                              Boolean(checked)
+                            )
+                          }
+                          aria-label={`Permiso Editar para ${item.recursoNombre}`}
+                        />
+                      </div>
+                    </TableCell>
 
-                                              {/* Eliminar */}
-                                              <TableCell className="text-center">
-                                                <TableCell className="text-center h-auto py-3">
-                                                  <div className="flex justify-center">
-                                                    <Checkbox
-                                                      checked={item.permisos.eliminar}
-                                                      className="dark:border-neutral-500"
-                                                      onCheckedChange={(checked) =>
-                                                        handleTogglePermiso(
-                                                          item.recursoId,
-                                                          "eliminar",
-                                                          Boolean(checked)
-                                                        )
-                                                      }
-                                                      aria-label={`Permiso Eliminar para ${item.recursoNombre}`}
-                                                    />
-                                                  </div>
-                                                </TableCell>
+                    {/* Eliminar */}
+                    <TableCell className="text-center h-auto py-3">
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={item.permisos.eliminar}
+                          className="dark:border-neutral-500"
+                          onCheckedChange={(checked) =>
+                            handleTogglePermiso(
+                              item.recursoId,
+                              "eliminar",
+                              Boolean(checked)
+                            )
+                          }
+                          aria-label={`Permiso Eliminar para ${item.recursoNombre}`}
+                        />
+                      </div>
+                    </TableCell>
 
-                                                {/* Acción rápida */}
-                                                <TableCell className="text-right pr-6">
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleToggleAllForRecurso(item.recursoId)}
-                                                    className="h-7 text-[11px] text-muted-foreground hover:text-foreground"
-                                                  >
-                                                    {allSelected ? "Desmarcar todo" : "Todos"}
-                                                  </Button>
-                                                </TableCell>
-                                              </TableRow>
-                                              );
+                    {/* Acción rápida */}
+                    <TableCell className="text-right pr-6">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleAllForRecurso(item.recursoId)}
+                        className="h-7 text-[11px] text-muted-foreground hover:text-foreground"
+                      >
+                        {allSelected ? "Desmarcar todo" : "Todos"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
               })}
-                                            </TableBody>
-                                          </Table>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  );
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
