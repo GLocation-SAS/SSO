@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -26,6 +27,7 @@ import {
   Layers,
   Power,
   PowerOff,
+  Plus,
 } from "lucide-react";
 import { Link } from "@/routing";
 import { AplicacionItem } from "../data/aplicaciones-data";
@@ -86,9 +88,20 @@ export function AplicacionModalDetail({
       >
         {/* HEADER */}
         <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 items-start text-left">
-          <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
-            Detalle de la aplicación
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <IconComponent className="size-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+                Detalle de la aplicación
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Consulta los datos institucionales, roles, recursos y usuarios
+                asociados.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
@@ -109,13 +122,26 @@ export function AplicacionModalDetail({
                       variant="neutral"
                       size="default"
                       rightIcon={<ExternalLink className="size-3.5" />}
-                      onClick={() => window.open(aplicacion.urlAcceso, '_blank', 'noopener,noreferrer')}
+                      onClick={() =>
+                        window.open(
+                          aplicacion.urlAcceso,
+                          "_blank",
+                          "noopener,noreferrer",
+                        )
+                      }
                     >
                       Acceder al portal
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent variant="info" side="top" className="max-w-xs text-center">
-                    <p>Esta acción te llevará fuera del SSO hacia el portal de {aplicacion.nombre}</p>
+                  <TooltipContent
+                    variant="info"
+                    side="top"
+                    className="max-w-xs text-center"
+                  >
+                    <p>
+                      Esta acción te llevará fuera del SSO hacia el portal de{" "}
+                      {aplicacion.nombre}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -138,46 +164,97 @@ export function AplicacionModalDetail({
                   {aplicacion.estado}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground max-w-2xl">
-                {aplicacion.descripcion}
-              </p>
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5 cursor-help group w-fit mt-1">
+                      <p className="text-xs text-muted-foreground line-clamp-2 max-w-2xl">
+                        {aplicacion.descripcion}
+                      </p>
+                      {aplicacion.descripcion && (
+                        <div className="size-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 text-primary transition-colors">
+                          <Plus className="size-3" />
+                        </div>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="max-w-xs"
+                    variant="info"
+                  >
+                    <p className="text-sm">{aplicacion.descripcion}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <div className="flex flex-wrap items-center gap-3 pt-1.5 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Users className="size-3.5 text-primary" />
-                  <strong className="text-foreground">{aplicacion.usuariosCount}</strong> usuarios
+                  <strong className="text-foreground">
+                    {aplicacion.usuariosCount}
+                  </strong>{" "}
+                  usuarios
                 </span>
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="size-3.5 text-info" />
-                  <strong className="text-foreground">{aplicacion.rolesCount}</strong> roles
+                  <strong className="text-foreground">
+                    {aplicacion.rolesCount}
+                  </strong>{" "}
+                  roles
                 </span>
                 <span className="flex items-center gap-1">
                   <FolderTree className="size-3.5 text-warning-600" />
-                  <strong className="text-foreground">{aplicacion.recursosCount}</strong> recursos
+                  <strong className="text-foreground">
+                    {aplicacion.recursosCount}
+                  </strong>{" "}
+                  recursos
                 </span>
               </div>
             </div>
           </InteractiveCard>
 
           {/* Tabs Navigation */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col">
-            <TabsList variant="line" className="w-full justify-start border-b border-border mb-4">
-              <TabsTrigger value="resumen" className="px-6 py-2.5 text-xs font-semibold">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full flex flex-col"
+          >
+            <TabsList
+              variant="line"
+              className="w-full justify-start border-b border-border mb-4"
+            >
+              <TabsTrigger
+                value="resumen"
+                className="px-6 py-2.5 text-xs font-semibold"
+              >
                 Resumen
               </TabsTrigger>
-              <TabsTrigger value="usuarios" className="px-6 py-2.5 text-xs font-semibold">
+              <TabsTrigger
+                value="usuarios"
+                className="px-6 py-2.5 text-xs font-semibold"
+              >
                 Usuarios ({aplicacion.usuariosCount})
               </TabsTrigger>
-              <TabsTrigger value="roles" className="px-6 py-2.5 text-xs font-semibold">
+              <TabsTrigger
+                value="roles"
+                className="px-6 py-2.5 text-xs font-semibold"
+              >
                 Roles ({aplicacion.rolesCount})
               </TabsTrigger>
-              <TabsTrigger value="recursos" className="px-6 py-2.5 text-xs font-semibold">
+              <TabsTrigger
+                value="recursos"
+                className="px-6 py-2.5 text-xs font-semibold"
+              >
                 Recursos ({aplicacion.recursosCount})
               </TabsTrigger>
             </TabsList>
 
             {/* TAB 1: RESUMEN */}
             <TabsContent value="resumen" className="mt-0 outline-none">
-              <TabResumen aplicacion={aplicacion} onNavigateTab={setActiveTab} />
+              <TabResumen
+                aplicacion={aplicacion}
+                onNavigateTab={setActiveTab}
+              />
             </TabsContent>
 
             {/* TAB 2: USUARIOS */}

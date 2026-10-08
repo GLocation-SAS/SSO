@@ -43,6 +43,7 @@ import {
   Calendar,
   ChevronRight,
   AlertTriangle,
+  Plus,
 } from "lucide-react";
 import {
   RolItem,
@@ -90,7 +91,7 @@ export function RolModalDetail({
 
   const toggleExpand = (id: string) => {
     setExpandedPadres((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
     );
   };
 
@@ -128,7 +129,8 @@ export function RolModalDetail({
                     Detalle del rol
                   </DialogTitle>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Consulta de configuración institucional, alcance y matriz de permisos por recurso.
+                    Consulta de configuración institucional, alcance y matriz de
+                    permisos por recurso.
                   </p>
                 </div>
               </div>
@@ -159,7 +161,10 @@ export function RolModalDetail({
             className="cursor-default border-border/70"
             borderless={false}
             shadowless={true}
-            decorativeIcon={React.createElement(getAppIcon(rol.aplicacionCodigo), { className: "size-full" })}
+            decorativeIcon={React.createElement(
+              getAppIcon(rol.aplicacionCodigo),
+              { className: "size-full" },
+            )}
             rightElement={
               <div className="flex flex-col items-end gap-1.5">
                 <Badge
@@ -193,13 +198,17 @@ export function RolModalDetail({
               </div>
 
               <p className="text-xs text-muted-foreground max-w-2xl">
-                {rol.descripcion || "Sin descripción proporcionada para este rol."}
+                {rol.descripcion ||
+                  "Sin descripción proporcionada para este rol."}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Users className="size-3.5 text-primary" />
-                  <strong className="text-foreground">{rol.usuariosCount}</strong> usuarios asignados
+                  <strong className="text-foreground">
+                    {rol.usuariosCount}
+                  </strong>{" "}
+                  usuarios asignados
                 </span>
                 <span className="flex items-center gap-1.5">
                   <FolderTree className="size-3.5 text-info" />
@@ -221,11 +230,15 @@ export function RolModalDetail({
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Permisos efectivos asignados a este rol dentro de{" "}
-                  <strong className="text-foreground">{rol.aplicacionNombre}</strong>.
+                  <strong className="text-foreground">
+                    {rol.aplicacionNombre}
+                  </strong>
+                  .
                 </p>
               </div>
               <Badge tone="info" appearance="soft" size="sm">
-                {activeResourcesWithPermissions.length} de {appResources.length} recursos
+                {activeResourcesWithPermissions.length} de {appResources.length}{" "}
+                recursos
               </Badge>
             </div>
 
@@ -238,8 +251,9 @@ export function RolModalDetail({
                   Sin recursos ni permisos configurados
                 </p>
                 <p className="text-xs text-muted-foreground max-w-md">
-                  Este rol aún no tiene acceso asignado a ningún módulo o recurso de{" "}
-                  {rol.aplicacionNombre}. Haz clic en «Editar rol» para configurar su matriz de permisos.
+                  Este rol aún no tiene acceso asignado a ningún módulo o
+                  recurso de {rol.aplicacionNombre}. Haz clic en «Editar rol»
+                  para configurar su matriz de permisos.
                 </p>
                 <Button
                   variant="primary"
@@ -280,16 +294,28 @@ export function RolModalDetail({
                 </TableHeader>
                 <TableBody>
                   {(() => {
-                    const rootResources = activeResourcesWithPermissions.filter(r => r.nivel === 0);
-                    const childResourcesByPadreNombre = activeResourcesWithPermissions.filter(r => r.nivel > 0).reduce((acc, r) => {
-                      const pName = r.padreNombre || "Desconocido";
-                      if (!acc[pName]) acc[pName] = [];
-                      acc[pName].push(r);
-                      return acc;
-                    }, {} as Record<string, typeof activeResourcesWithPermissions>);
+                    const rootResources = activeResourcesWithPermissions.filter(
+                      (r) => r.nivel === 0,
+                    );
+                    const childResourcesByPadreNombre =
+                      activeResourcesWithPermissions
+                        .filter((r) => r.nivel > 0)
+                        .reduce(
+                          (acc, r) => {
+                            const pName = r.padreNombre || "Desconocido";
+                            if (!acc[pName]) acc[pName] = [];
+                            acc[pName].push(r);
+                            return acc;
+                          },
+                          {} as Record<
+                            string,
+                            typeof activeResourcesWithPermissions
+                          >,
+                        );
 
                     return rootResources.map((rootItem) => {
-                      const children = childResourcesByPadreNombre[rootItem.nombre] || [];
+                      const children =
+                        childResourcesByPadreNombre[rootItem.nombre] || [];
                       const hasChildren = children.length > 0;
                       const isExpanded = expandedPadres.includes(rootItem.id);
 
@@ -298,7 +324,7 @@ export function RolModalDetail({
                           <TableRow
                             className={cn(
                               "border-l-4 border-l-primary hover:bg-muted/40 transition-colors",
-                              isExpanded ? "bg-muted/30" : "bg-muted/10"
+                              isExpanded ? "bg-muted/30" : "bg-muted/10",
                             )}
                           >
                             <TableCell className="pl-4 py-2.5">
@@ -311,14 +337,23 @@ export function RolModalDetail({
                                           <Button
                                             type="button"
                                             variant="ghost"
-                                            onClick={() => toggleExpand(rootItem.id)}
+                                            onClick={() =>
+                                              toggleExpand(rootItem.id)
+                                            }
                                             className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
                                           >
-                                            <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
+                                            <ChevronRight
+                                              className={cn(
+                                                "size-4 transition-transform duration-300",
+                                                isExpanded && "rotate-90",
+                                              )}
+                                            />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top">
-                                          <p className="text-xs">Desplegar acciones y submódulos</p>
+                                          <p className="text-xs">
+                                            Desplegar acciones y submódulos
+                                          </p>
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>
@@ -339,7 +374,11 @@ export function RolModalDetail({
                                             {rootItem.descripcion}
                                           </span>
                                         </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-xs" variant="info">
+                                        <TooltipContent
+                                          side="top"
+                                          className="max-w-xs"
+                                          variant="info"
+                                        >
                                           <p>{rootItem.descripcion}</p>
                                         </TooltipContent>
                                       </Tooltip>
@@ -417,104 +456,109 @@ export function RolModalDetail({
                             </TableCell>
                           </TableRow>
 
-                          {isExpanded && children.map(childItem => (
-                            <TableRow
-                              key={childItem.id}
-                              className="hover:bg-muted/40 transition-colors bg-surface"
-                            >
-                              <TableCell className="pl-4 py-2.5">
-                                <div className="flex items-start gap-2 pl-6">
-                                  <CornerDownRight className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-xs text-foreground">
-                                      {childItem.nombre}
-                                    </span>
-                                    {childItem.descripcion && (
-                                      <TooltipProvider delayDuration={150}>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
-                                              {childItem.descripcion}
-                                            </span>
-                                          </TooltipTrigger>
-                                          <TooltipContent side="top" className="max-w-xs" variant="info">
-                                            <p>{childItem.descripcion}</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
+                          {isExpanded &&
+                            children.map((childItem) => (
+                              <TableRow
+                                key={childItem.id}
+                                className="hover:bg-muted/40 transition-colors bg-surface"
+                              >
+                                <TableCell className="pl-4 py-2.5">
+                                  <div className="flex items-start gap-2 pl-6">
+                                    <CornerDownRight className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                                    <div className="flex flex-col min-w-0">
+                                      <span className="text-xs text-foreground">
+                                        {childItem.nombre}
+                                      </span>
+                                      {childItem.descripcion && (
+                                        <TooltipProvider delayDuration={150}>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
+                                                {childItem.descripcion}
+                                              </span>
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                              side="top"
+                                              className="max-w-xs"
+                                              variant="info"
+                                            >
+                                              <p>{childItem.descripcion}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      )}
+                                    </div>
+                                  </div>
+                                </TableCell>
+
+                                <TableCell className="text-center py-2.5">
+                                  <Badge
+                                    tone="success"
+                                    appearance="soft"
+                                    size="sm"
+                                    className="font-medium text-[10px] px-1.5 py-0"
+                                  >
+                                    Habilitado
+                                  </Badge>
+                                </TableCell>
+
+                                <TableCell className="text-center py-2.5">
+                                  <div className="flex justify-center items-center">
+                                    {childItem.permisos.ver ? (
+                                      <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
+                                        <Check className="size-3" />
+                                      </span>
+                                    ) : (
+                                      <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
+                                        <X className="size-3" />
+                                      </span>
                                     )}
                                   </div>
-                                </div>
-                              </TableCell>
+                                </TableCell>
 
-                              <TableCell className="text-center py-2.5">
-                                <Badge
-                                  tone="success"
-                                  appearance="soft"
-                                  size="sm"
-                                  className="font-medium text-[10px] px-1.5 py-0"
-                                >
-                                  Habilitado
-                                </Badge>
-                              </TableCell>
+                                <TableCell className="text-center py-2.5">
+                                  <div className="flex justify-center items-center">
+                                    {childItem.permisos.crear ? (
+                                      <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
+                                        <Check className="size-3" />
+                                      </span>
+                                    ) : (
+                                      <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
+                                        <X className="size-3" />
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
 
-                              <TableCell className="text-center py-2.5">
-                                <div className="flex justify-center items-center">
-                                  {childItem.permisos.ver ? (
-                                    <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
-                                      <Check className="size-3" />
-                                    </span>
-                                  ) : (
-                                    <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
-                                      <X className="size-3" />
-                                    </span>
-                                  )}
-                                </div>
-                              </TableCell>
+                                <TableCell className="text-center py-2.5">
+                                  <div className="flex justify-center items-center">
+                                    {childItem.permisos.editar ? (
+                                      <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
+                                        <Check className="size-3" />
+                                      </span>
+                                    ) : (
+                                      <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
+                                        <X className="size-3" />
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
 
-                              <TableCell className="text-center py-2.5">
-                                <div className="flex justify-center items-center">
-                                  {childItem.permisos.crear ? (
-                                    <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
-                                      <Check className="size-3" />
-                                    </span>
-                                  ) : (
-                                    <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
-                                      <X className="size-3" />
-                                    </span>
-                                  )}
-                                </div>
-                              </TableCell>
-
-                              <TableCell className="text-center py-2.5">
-                                <div className="flex justify-center items-center">
-                                  {childItem.permisos.editar ? (
-                                    <span className="size-5 rounded-full bg-success/15 text-success flex items-center justify-center">
-                                      <Check className="size-3" />
-                                    </span>
-                                  ) : (
-                                    <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
-                                      <X className="size-3" />
-                                    </span>
-                                  )}
-                                </div>
-                              </TableCell>
-
-                              <TableCell className="text-center py-2.5 pr-4">
-                                <div className="flex justify-center items-center">
-                                  {childItem.permisos.eliminar ? (
-                                    <span className="size-5 rounded-full bg-danger/15 text-danger flex items-center justify-center">
-                                      <Check className="size-3" />
-                                    </span>
-                                  ) : (
-                                    <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
-                                      <X className="size-3" />
-                                    </span>
-                                  )}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                <TableCell className="text-center py-2.5 pr-4">
+                                  <div className="flex justify-center items-center">
+                                    {childItem.permisos.eliminar ? (
+                                      <span className="size-5 rounded-full bg-danger/15 text-danger flex items-center justify-center">
+                                        <Check className="size-3" />
+                                      </span>
+                                    ) : (
+                                      <span className="size-5 rounded-full bg-muted/40 text-muted-foreground flex items-center justify-center">
+                                        <X className="size-3" />
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
                         </React.Fragment>
                       );
                     });
@@ -555,3 +599,4 @@ export function RolModalDetail({
     </Dialog>
   );
 }
+

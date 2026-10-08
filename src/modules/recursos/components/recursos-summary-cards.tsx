@@ -3,6 +3,7 @@
 import * as React from "react";
 import { InteractiveCard } from "@/components/ui/data-display";
 import { FolderTree, CheckCircle2, XCircle, AppWindow } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export type RecursoSummaryFilterType = "total" | "activos" | "inactivos" | "apps";
 
@@ -37,9 +38,9 @@ export function RecursosSummaryCards({
       percentage: undefined,
       microText: "Recursos registrados",
       icon: FolderTree,
-      color: "warning" as const,
-      iconContainer: "bg-warning/15 text-warning-700 dark:text-warning-300",
-      activeBg: "bg-warning-100/90 dark:bg-warning-900/50",
+      color: "primary" as const,
+      iconContainer: "bg-primary/15 text-primary",
+      activeBg: "bg-primary-100/90 dark:bg-muted/30",
     },
     {
       id: "activos" as const,
@@ -70,9 +71,9 @@ export function RecursosSummaryCards({
       percentage: undefined,
       microText: "Sistemas con catálogo activo",
       icon: AppWindow,
-      color: "info" as const,
-      iconContainer: "bg-info/15 text-info-700 dark:text-info-300",
-      activeBg: "bg-info-100/90 dark:bg-info-900/50",
+      color: "secondary" as const,
+      iconContainer: "bg-secondary/15 text-secondary-700 dark:text-secondary-300",
+      activeBg: "bg-secondary-100/90 dark:bg-secondary-900/50",
     },
   ];
 
@@ -95,24 +96,32 @@ export function RecursosSummaryCards({
             iconContainerClassName={c.iconContainer}
             activeInnerBgClassName={c.activeBg}
             onClick={() => onSelectFilter(c.id)}
-            className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200"
-          >
-            <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/40">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-heading text-foreground">
-                  {c.value}
-                </span>
-                {c.percentage !== undefined && (
-                  <span className="text-xs font-medium text-muted-foreground">
-                    ({c.percentage}%)
+            icon={<Icon className="size-5" />}
+            decorativeIcon={<Icon className="size-full opacity-10" />}
+            className={
+              "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110" +
+              (isActive ? " bg-primary/5" : " bg-surface hover:bg-muted/40")
+            }
+            rightElement={
+              <div className="flex flex-col items-end justify-center gap-1 py-2.5">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-3xl font-bold font-heading tracking-tight text-foreground">
+                    {c.value.toLocaleString("es-EC")}
                   </span>
+                  {c.percentage !== undefined && (
+                    <Badge tone={c.color} appearance="soft" size="sm" className="px-1.5 py-0 h-5">
+                      {c.percentage}%
+                    </Badge>
+                  )}
+                </div>
+                {isActive ? (
+                  <CheckCircle2 className="size-4 text-primary shrink-0 animate-in fade-in zoom-in-95 duration-200" />
+                ) : (
+                  <div className="h-4" />
                 )}
               </div>
-              <div className="size-8 rounded-lg flex items-center justify-center shrink-0">
-                <Icon className="size-4 opacity-80" />
-              </div>
-            </div>
-          </InteractiveCard>
+            }
+          />
         );
       })}
     </div>

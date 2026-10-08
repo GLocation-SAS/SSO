@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Plus,
@@ -16,6 +17,9 @@ import {
   FileSpreadsheet,
   FolderTree,
   AlertTriangle,
+  Loader2,
+  ImageIcon,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -54,6 +58,9 @@ export function RecursosView() {
   const [isConfirmToggleOpen, setIsConfirmToggleOpen] = React.useState(false);
   const [recursoToDelete, setRecursoToDelete] = React.useState<RecursoItem | null>(null);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
+
+  // Estado de exportación
+  const [isExportingImage, setIsExportingImage] = React.useState(false);
 
   // Métricas para summary cards
   const totalCount = recursos.length;
@@ -241,17 +248,147 @@ export function RecursosView() {
       ];
     });
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `recursos_mineduc_${Date.now()}.csv`);
-    document.body.appendChild(link);
+    link.href = url;
+    link.download = `recursos_mineduc_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
-    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     toast.success("Listado de recursos exportado en formato CSV.");
+  };
+
+  // Exportar PDF
+  const handleExportPDF = () => {
+    toast.info("Generando reporte PDF...", {
+      description: "Preparando documento institucional para descarga.",
+    });
+    setTimeout(() => {
+      window.print();
+    }, 400);
+  };
+
+  // Exportar Imagen de Tabla
+  const handleExportTableImage = async () => {
+    try {
+      setIsExportingImage(true);
+      const container = document.getElementById("recursos-table-container");
+      if (!container) throw new Error("Contenedor de tabla no encontrado.");
+
+      const width = Math.max(container.scrollWidth || 1200, 1100);
+      const rowHeight = 44;
+      const headerHeight = 110;
+      const displayed = filteredRecursos.slice(0, 15);
+      const totalHeight = headerHeight + displayed.length * rowHeight + 60;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width * 2;
+      canvas.height = totalHeight * 2;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No se pudo inicializar canvas.");
+
+      ctx.scale(2, 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, totalHeight);
+
+      ctx.fillStyle = "#024a87";
+      ctx.fillRect(0, 0, width, 8);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 18px Inter, system-ui, sans-serif";
+      ctx.fillText("Ministerio de Educación — Reporte de Recursos", 24, 40);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "12px Inter, system-ui, sans-serif";
+      const fechaStr = new Date().toLocaleDateString("es-EC", {
+        year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+      ctx.fillText(`Generado el ${fechaStr} | Sistema SSO MINEDUC`, 24, 60);
+
+      const colX = { rec: 24, app: 300, desc: 500, roles: 800, est: 980 };
+      const tableY = 90;
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(20, tableY, width - 40, 36);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "bold 12px Inter, system-ui, sans-serif";
+      ctx.fillText("Recurso", colX.rec, tableY + 23);
+      ctx.fillText("Aplicación", colX.app, tableY + 23);
+      ctx.fillText("Descripción", colX.desc, tableY + 23);
+      ctx.fillText("Roles Asociados", colX.roles, tableY + 23);
+      ctx.fillText("Estado", colX.est, tableY + 23);
+
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(20, tableY + 36);
+      ctx.lineTo(width - 20, tableY + 36);
+      ctx.stroke();
+
+      displayed.forEach((r, idx) => {
+        const yRow = tableY + 36 + idx * rowHeight;
+        
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(20, yRow + rowHeight);
+        ctx.lineTo(width - 20, yRow + rowHeight);
+        ctx.stroke();
+
+        const textY = yRow + 26;
+
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 11px Inter, system-ui, sans-serif";
+        const nom = r.nombre;
+        ctx.fillText(nom.length > 35 ? nom.slice(0, 34) + "…" : nom, colX.rec, textY);
+
+        ctx.fillStyle = "#475569";
+        ctx.font = "11px Inter, system-ui, sans-serif";
+        const app = r.aplicacionNombre;
+        ctx.fillText(app.length > 25 ? app.slice(0, 24) + "…" : app, colX.app, textY);
+
+        const desc = r.descripcion || "Sin descripción";
+        ctx.fillText(desc.length > 40 ? desc.slice(0, 39) + "…" : desc, colX.desc, textY);
+
+        const rolesCount = (mockRolesPorRecurso[r.id] || []).length;
+        ctx.fillStyle = rolesCount > 0 ? "#0369a1" : "#d97706";
+        ctx.fillText(`${rolesCount} roles asignados`, colX.roles, textY);
+
+        const isActivo = r.estado === "Activo";
+        ctx.fillStyle = isActivo ? "#ecfdf5" : "#f1f5f9";
+        const badgeX = colX.est;
+        const badgeY = textY - 14;
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, 60, 20, 10);
+        ctx.fill();
+
+        ctx.fillStyle = isActivo ? "#10b981" : "#94a3b8";
+        ctx.beginPath();
+        ctx.arc(badgeX + 10, badgeY + 10, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isActivo ? "#065f46" : "#475569";
+        ctx.font = "bold 10px Inter, system-ui, sans-serif";
+        ctx.fillText(r.estado, badgeX + 18, textY - 1);
+      });
+
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png", 1.0));
+      if (!blob) throw new Error("Fallo al crear Blob");
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `recursos-${new Date().toISOString().slice(0, 10)}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Foto de la tabla exportada");
+    } catch {
+      toast.error("Error al exportar imagen");
+    } finally {
+      setIsExportingImage(false);
+    }
   };
 
   return (
@@ -270,9 +407,6 @@ export function RecursosView() {
                   <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">
                     Recursos
                   </h1>
-                  <Badge tone="warning" appearance="soft" size="sm">
-                    Mockup en desarrollo
-                  </Badge>
                 </div>
                 <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
                   Administra los recursos disponibles para las aplicaciones y su asignación a roles.
@@ -281,26 +415,66 @@ export function RecursosView() {
             </div>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
-              {/* Menú de Exportación */}
+              {/* Menú de Exportación según UI Kit */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="gap-2 flex-1 sm:flex-none text-xs"
-                  >
-                    <Download className="size-4" />
+                  <Button variant="outline" className="gap-2 flex-1 sm:flex-none text-xs">
+                    {isExportingImage ? (
+                      <Loader2 className="size-4 animate-spin text-primary" />
+                    ) : (
+                      <Download className="size-4" />
+                    )}
                     Exportar
                     <ChevronDown className="size-3.5 opacity-60 ml-0.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-2 space-y-1">
-                  <DropdownMenuItem
-                    onClick={handleExportCSV}
-                    className="cursor-pointer flex items-center gap-2 text-xs"
-                  >
-                    <FileSpreadsheet className="size-4 text-success" />
-                    <span>Exportar en CSV</span>
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-72 p-3 space-y-2">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-foreground">Menú de Exportación</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">
+                      Menú desplegable de selección rápida de formatos según permisos institucionales.
+                    </p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportTableImage}
+                      disabled={isExportingImage}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <ImageIcon className="size-4 text-primary shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">Foto / PNG</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Tabla visual</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportPDF}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <FileText className="size-4 text-danger shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">PDF</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Documento</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportCSV}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto col-span-2"
+                    >
+                      <FileSpreadsheet className="size-4 text-success shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">CSV</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Datos planos</span>
+                      </div>
+                    </Button>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -386,7 +560,7 @@ export function RecursosView() {
             ? "Sí, desactivar"
             : "Sí, activar"
         }
-        variant={recursoToToggle?.estado === "Activo" ? "warning" : "default"}
+        variant={recursoToToggle?.estado === "Activo" ? "warning" : "success"}
         onConfirm={handleConfirmToggleStatus}
       />
 

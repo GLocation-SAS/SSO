@@ -42,6 +42,7 @@ import {
   AppWindow,
   Info,
   ShieldAlert,
+  Plus,
 } from "lucide-react";
 import {
   RecursoItem,
@@ -90,7 +91,8 @@ export function RecursoModalDetail({
 }: RecursoModalDetailProps) {
   if (!recurso) return null;
 
-  const rolesAsociados: RolAsociadoRecurso[] = mockRolesPorRecurso[recurso.id] || [];
+  const rolesAsociados: RolAsociadoRecurso[] =
+    mockRolesPorRecurso[recurso.id] || [];
   const isActivo = recurso.estado === "Activo";
 
   return (
@@ -112,19 +114,11 @@ export function RecursoModalDetail({
                     Detalle del recurso
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                    Información técnica, aplicación contenedora y roles con permisos asignados.
+                    Información técnica, aplicación contenedora y roles con
+                    permisos asignados.
                   </DialogDescription>
                 </div>
               </div>
-
-              <Badge
-                tone={isActivo ? "success" : "neutral"}
-                appearance="soft"
-                size="md"
-                className="text-xs font-semibold px-2.5 py-0.5"
-              >
-                {recurso.estado}
-              </Badge>
             </div>
           </DialogHeader>
 
@@ -162,7 +156,12 @@ export function RecursoModalDetail({
                   </span>
                   <div className="flex items-center gap-2">
                     <div className="size-5 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      {React.createElement(getAppIcon(recurso.aplicacionIcono || recurso.aplicacionId), { className: "size-3" })}
+                      {React.createElement(
+                        getAppIcon(
+                          recurso.aplicacionIcono || recurso.aplicacionId,
+                        ),
+                        { className: "size-3" },
+                      )}
                     </div>
                     <span className="text-xs font-semibold text-foreground">
                       {recurso.aplicacionNombre}
@@ -186,7 +185,9 @@ export function RecursoModalDetail({
                   <p className="text-sm font-semibold text-foreground">
                     {rolesAsociados.length}{" "}
                     <span className="text-xs text-muted-foreground font-normal">
-                      {rolesAsociados.length === 1 ? "rol configurado" : "roles configurados"}
+                      {rolesAsociados.length === 1
+                        ? "rol configurado"
+                        : "roles configurados"}
                     </span>
                   </p>
                 </div>
@@ -198,7 +199,8 @@ export function RecursoModalDetail({
                   Descripción
                 </span>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {recurso.descripcion || "No se ha registrado una descripción detallada para este recurso."}
+                  {recurso.descripcion ||
+                    "No se ha registrado una descripción detallada para este recurso."}
                 </p>
               </div>
 
@@ -206,28 +208,25 @@ export function RecursoModalDetail({
               <div className="pt-2 border-t border-border/50 flex flex-wrap items-center gap-6 text-[11px] text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="size-3 text-muted-foreground/70" />
-                  <span>Fecha de creación: <strong>{recurso.fechaCreacion}</strong></span>
+                  <span>
+                    Fecha de creación: <strong>{recurso.fechaCreacion}</strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="size-3 text-muted-foreground/70" />
-                  <span>Última actualización: <strong>{recurso.ultimaActualizacion}</strong></span>
+                  <span>
+                    Última actualización:{" "}
+                    <strong>{recurso.ultimaActualizacion}</strong>
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* SECCIÓN: Roles Asociados */}
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="size-4 text-primary" />
-                  <h3 className="text-sm font-heading font-semibold text-foreground">
-                    Roles asociados y matriz de permisos
-                  </h3>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Permisos granulares configurados en la arquitectura para este recurso
-                </p>
-              </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Roles asociados y matriz de permisos
+              </h3>
 
               {rolesAsociados.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-8 text-center flex flex-col items-center justify-center gap-2.5 bg-muted/10">
@@ -238,159 +237,178 @@ export function RecursoModalDetail({
                     Sin roles asociados todavía
                   </h4>
                   <p className="text-xs text-muted-foreground max-w-md">
-                    Este recurso está creado en el catálogo pero ningún rol tiene permisos asignados sobre él. Puedes asignar permisos a roles desde el módulo de <strong>Gestión de Roles</strong>.
+                    Este recurso está creado en el catálogo pero ningún rol
+                    tiene permisos asignados sobre él. Puedes asignar permisos a
+                    roles desde el módulo de <strong>Gestión de Roles</strong>.
                   </p>
                 </div>
               ) : (
-                <div className="border border-border rounded-lg overflow-hidden bg-surface">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/30">
-                        <TableHead className="min-w-[200px] text-xs font-semibold pl-4">
-                          Rol asociado
-                        </TableHead>
-                        <TableHead className="w-[140px] text-xs font-semibold text-left">
-                          Usuarios
-                        </TableHead>
-                        <TableHead className="w-[85px] text-center text-xs font-semibold">
-                          Ver
-                        </TableHead>
-                        <TableHead className="w-[85px] text-center text-xs font-semibold">
-                          Crear
-                        </TableHead>
-                        <TableHead className="w-[85px] text-center text-xs font-semibold">
-                          Editar
-                        </TableHead>
-                        <TableHead className="w-[85px] text-center text-xs font-semibold pr-4">
-                          Eliminar
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rolesAsociados.map((rol) => {
-                        const { ver, crear, editar, eliminar } = rol.permisos;
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="min-w-[200px] text-xs font-semibold pl-4">
+                        Rol asociado
+                      </TableHead>
+                      <TableHead className="w-[140px] text-xs font-semibold text-left">
+                        Usuarios
+                      </TableHead>
+                      <TableHead className="w-[85px] text-center text-xs font-semibold">
+                        Ver
+                      </TableHead>
+                      <TableHead className="w-[85px] text-center text-xs font-semibold">
+                        Crear
+                      </TableHead>
+                      <TableHead className="w-[85px] text-center text-xs font-semibold">
+                        Editar
+                      </TableHead>
+                      <TableHead className="w-[85px] text-center text-xs font-semibold pr-4">
+                        Eliminar
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rolesAsociados.map((rol) => {
+                      const { ver, crear, editar, eliminar } = rol.permisos;
 
-                        return (
-                          <TableRow key={rol.rolId} className="hover:bg-muted/30 transition-colors">
-                            {/* Rol */}
-                            <TableCell className="pl-4 py-3">
-                              <div className="flex flex-col min-w-0">
-                                <span className="font-semibold text-xs text-foreground">
-                                  {rol.rolNombre}
+                      return (
+                        <TableRow
+                          key={rol.rolId}
+                          className="hover:bg-muted/30 transition-colors"
+                        >
+                          {/* Rol */}
+                          <TableCell className="pl-4 py-3">
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-semibold text-xs text-foreground">
+                                {rol.rolNombre}
+                              </span>
+                              {rol.rolDescripcion && (
+                                <span className="text-[11px] text-muted-foreground line-clamp-1 max-w-[280px]">
+                                  {rol.rolDescripcion}
                                 </span>
-                                {rol.rolDescripcion && (
-                                  <span className="text-[11px] text-muted-foreground line-clamp-1 max-w-[280px]">
-                                    {rol.rolDescripcion}
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* Usuarios */}
+                          <TableCell className="py-3 text-left">
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Users className="size-3 text-muted-foreground/70" />
+                              <span>{rol.usuariosCount} usuarios</span>
+                            </div>
+                          </TableCell>
+
+                          {/* Permiso: Ver */}
+                          <TableCell className="py-3 text-center">
+                            {ver ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
+                                    <Check className="size-3.5 stroke-[2.5]" />
                                   </span>
-                                )}
-                              </div>
-                            </TableCell>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Ver: Habilitado
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
+                                    <X className="size-3 stroke-[2]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Ver: Denegado
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
 
-                            {/* Usuarios */}
-                            <TableCell className="py-3 text-left">
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Users className="size-3 text-muted-foreground/70" />
-                                <span>{rol.usuariosCount} usuarios</span>
-                              </div>
-                            </TableCell>
+                          {/* Permiso: Crear */}
+                          <TableCell className="py-3 text-center">
+                            {crear ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
+                                    <Check className="size-3.5 stroke-[2.5]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Crear: Habilitado
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
+                                    <X className="size-3 stroke-[2]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Crear: Denegado
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
 
-                            {/* Permiso: Ver */}
-                            <TableCell className="py-3 text-center">
-                              {ver ? (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
-                                      <Check className="size-3.5 stroke-[2.5]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Ver: Habilitado</TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
-                                      <X className="size-3 stroke-[2]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Ver: Denegado</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </TableCell>
+                          {/* Permiso: Editar */}
+                          <TableCell className="py-3 text-center">
+                            {editar ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
+                                    <Check className="size-3.5 stroke-[2.5]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Editar: Habilitado
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
+                                    <X className="size-3 stroke-[2]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Editar: Denegado
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
 
-                            {/* Permiso: Crear */}
-                            <TableCell className="py-3 text-center">
-                              {crear ? (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
-                                      <Check className="size-3.5 stroke-[2.5]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Crear: Habilitado</TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
-                                      <X className="size-3 stroke-[2]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Crear: Denegado</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </TableCell>
-
-                            {/* Permiso: Editar */}
-                            <TableCell className="py-3 text-center">
-                              {editar ? (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
-                                      <Check className="size-3.5 stroke-[2.5]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Editar: Habilitado</TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
-                                      <X className="size-3 stroke-[2]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Editar: Denegado</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </TableCell>
-
-                            {/* Permiso: Eliminar */}
-                            <TableCell className="py-3 text-center pr-4">
-                              {eliminar ? (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
-                                      <Check className="size-3.5 stroke-[2.5]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Eliminar: Habilitado</TooltipContent>
-                                </Tooltip>
-                              ) : (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
-                                      <X className="size-3 stroke-[2]" />
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">Permiso Eliminar: Denegado</TooltipContent>
-                                </Tooltip>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
+                          {/* Permiso: Eliminar */}
+                          <TableCell className="py-3 text-center pr-4">
+                            {eliminar ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-success/15 text-success-700 dark:text-success-300">
+                                    <Check className="size-3.5 stroke-[2.5]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Eliminar: Habilitado
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
+                                    <X className="size-3 stroke-[2]" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  Permiso Eliminar: Denegado
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               )}
             </div>
 
@@ -398,13 +416,16 @@ export function RecursoModalDetail({
             <div className="rounded-lg border border-border bg-muted/15 p-3 flex items-start gap-2.5">
               <Info className="size-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Para asociar este recurso a un nuevo rol o modificar sus permisos (ver, crear, editar, eliminar), ingrese al módulo de <strong>Roles</strong> y edite el rol correspondiente seleccionando este recurso dentro de su matriz de accesos.
+                Para asociar este recurso a un nuevo rol o modificar sus
+                permisos (ver, crear, editar, eliminar), ingrese al módulo de{" "}
+                <strong>Roles</strong> y edite el rol correspondiente
+                seleccionando este recurso dentro de su matriz de accesos.
               </p>
             </div>
           </div>
 
           {/* FOOTER */}
-          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between">
+          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex flex-row items-center justify-end w-full">
             <Button
               type="button"
               variant="neutral"
@@ -413,22 +434,9 @@ export function RecursoModalDetail({
             >
               Cerrar
             </Button>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={() => {
-                onOpenChange(false);
-                onEdit(recurso);
-              }}
-              className="gap-2 text-xs"
-            >
-              <Edit className="size-3.5" />
-              <span>Editar recurso</span>
-            </Button>
           </DialogFooter>
         </TooltipProvider>
       </DialogContent>
     </Dialog>
   );
 }
-

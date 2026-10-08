@@ -620,7 +620,7 @@ export function RolesView() {
           rolToToggle?.estado === "Activo" ? "Desactivar rol" : "Activar rol"
         }
         cancelText="Cancelar"
-        variant={rolToToggle?.estado === "Activo" ? "warning" : "default"}
+        variant={rolToToggle?.estado === "Activo" ? "warning" : "success"}
         onConfirm={handleConfirmToggleStatus}
       />
     </div>
