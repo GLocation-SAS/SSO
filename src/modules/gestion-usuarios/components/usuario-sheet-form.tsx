@@ -96,6 +96,19 @@ export function UsuarioSheetForm({
   // Errores
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
+  const resetForm = React.useCallback(() => {
+    setNombre("");
+    setApellidos("");
+    setTipoDocumento("Cédula");
+    setIdentificacion("");
+    setCorreo("");
+    setTelefono("");
+    setCargo("");
+    setEstado("Activo");
+    setSelectedSedes([]);
+    setAsignaciones([]);
+  }, []);
+
   React.useEffect(() => {
     if (open) {
       if (usuarioToEdit) {
@@ -120,20 +133,7 @@ export function UsuarioSheetForm({
       setCompletedSteps([]);
       setErrors({});
     }
-  }, [open, usuarioToEdit]);
-
-  const resetForm = () => {
-    setNombre("");
-    setApellidos("");
-    setTipoDocumento("Cédula");
-    setIdentificacion("");
-    setCorreo("");
-    setTelefono("");
-    setCargo("");
-    setEstado("Activo");
-    setSelectedSedes([]);
-    setAsignaciones([]);
-  };
+  }, [open, usuarioToEdit, resetForm]);
 
   const validateStep1 = () => {
     const errs: Record<string, string> = {};

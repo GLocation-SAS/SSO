@@ -92,7 +92,6 @@ export function RecursoModalDetail({
 
   const rolesAsociados: RolAsociadoRecurso[] = mockRolesPorRecurso[recurso.id] || [];
   const isActivo = recurso.estado === "Activo";
-  const AppIcon = getAppIcon(recurso.aplicacionIcono || recurso.aplicacionId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -163,7 +162,7 @@ export function RecursoModalDetail({
                   </span>
                   <div className="flex items-center gap-2">
                     <div className="size-5 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <AppIcon className="size-3" />
+                      {React.createElement(getAppIcon(recurso.aplicacionIcono || recurso.aplicacionId), { className: "size-3" })}
                     </div>
                     <span className="text-xs font-semibold text-foreground">
                       {recurso.aplicacionNombre}

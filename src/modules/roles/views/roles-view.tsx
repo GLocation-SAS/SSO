@@ -433,14 +433,9 @@ export function RolesView() {
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
-                  Gestión de roles
-                </h1>
-                <Badge tone="warning" appearance="soft" size="sm">
-                  Mockup en desarrollo
-                </Badge>
-              </div>
+              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
+                Gestión de roles
+              </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
                 Administra los roles de las aplicaciones y configura sus recursos y permisos.
               </p>

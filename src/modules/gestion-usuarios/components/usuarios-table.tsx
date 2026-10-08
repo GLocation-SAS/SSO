@@ -119,21 +119,11 @@ function AccesosCell({
       {/* 3. Rol */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-1.5 cursor-default">
-            {(() => {
-              const style = getRoleBadgeStyle(primaryRol);
-              return (
-                <Badge
-                  tone={style.tone}
-                  appearance={style.appearance}
-                  size="sm"
-                  className={cn("max-w-[210px] truncate text-[10px] tracking-normal", style.className)}
-                >
-                  <ShieldCheck className="size-3" />
-                  <span className="truncate">{primaryRol}</span>
-                </Badge>
-              );
-            })()}
+          <div className="flex items-center gap-1.5 cursor-default text-xs text-muted-foreground">
+            <ShieldCheck className="size-3.5 text-muted-foreground/80 shrink-0" />
+            <span className="font-semibold text-[11px] uppercase tracking-wide truncate max-w-[210px]">
+              {primaryRol}
+            </span>
           </div>
         </TooltipTrigger>
         <TooltipContent variant="info" side="top" className="flex flex-col items-start gap-1">

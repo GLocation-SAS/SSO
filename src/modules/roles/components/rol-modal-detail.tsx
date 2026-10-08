@@ -81,13 +81,13 @@ export function RolModalDetail({
   rol,
   onEdit,
 }: RolModalDetailProps) {
+  const [expandedPadres, setExpandedPadres] = React.useState<string[]>([]);
+
   if (!rol) return null;
 
-  const AppIcon = getAppIcon(rol.aplicacionCodigo);
   const isActivo = rol.estado === "Activo";
   const appResources = mockRecursosPorAppParaRoles[rol.aplicacionId] || [];
 
-  const [expandedPadres, setExpandedPadres] = React.useState<string[]>([]);
   const toggleExpand = (id: string) => {
     setExpandedPadres((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
@@ -159,7 +159,7 @@ export function RolModalDetail({
             className="cursor-default border-border/70"
             borderless={false}
             shadowless={true}
-            decorativeIcon={<AppIcon className="size-full" />}
+            decorativeIcon={React.createElement(getAppIcon(rol.aplicacionCodigo), { className: "size-full" })}
             rightElement={
               <div className="flex flex-col items-end gap-1.5">
                 <Badge
@@ -431,17 +431,17 @@ export function RolModalDetail({
                                     </span>
                                     {childItem.descripcion && (
                                       <TooltipProvider delayDuration={150}>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
-                                            {childItem.descripcion}
-                                          </span>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-xs" variant="info">
-                                          <p>{childItem.descripcion}</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
+                                              {childItem.descripcion}
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-xs" variant="info">
+                                            <p>{childItem.descripcion}</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     )}
                                   </div>
                                 </div>
