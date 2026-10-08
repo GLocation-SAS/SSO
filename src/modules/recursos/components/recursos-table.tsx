@@ -38,6 +38,9 @@ import {
   AppWindow,
   FolderCode,
   ChevronDown,
+  Power,
+  PowerOff,
+  Trash2,
 } from "lucide-react";
 import { RecursoItem, mockRolesPorRecurso } from "../data/recursos-data";
 import {
@@ -54,6 +57,8 @@ interface RecursosTableProps {
   recursos: RecursoItem[];
   onViewDetail: (recurso: RecursoItem) => void;
   onEdit: (recurso: RecursoItem) => void;
+  onToggleStatus?: (recurso: RecursoItem) => void;
+  onDelete?: (recurso: RecursoItem) => void;
   onResetFilters?: () => void;
 }
 
@@ -86,6 +91,8 @@ export function RecursosTable({
   recursos,
   onViewDetail,
   onEdit,
+  onToggleStatus,
+  onDelete,
   onResetFilters,
 }: RecursosTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -174,10 +181,10 @@ export function RecursosTable({
                       <div className="flex items-start gap-3">
                         <div
                           className={cn(
-                            "size-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
+                            "size-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 border transition-colors",
                             isActivo
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted text-muted-foreground"
+                              ? "bg-warning/10 dark:bg-warning-900/30 text-warning-700 dark:text-warning-300 border-warning/20"
+                              : "bg-muted text-muted-foreground border-border/50"
                           )}
                         >
                           <FolderTree className="size-4" />
@@ -217,45 +224,40 @@ export function RecursosTable({
 
                     {/* 3. Descripción */}
                     <TableCell className="py-3.5 text-left">
-                      <p className="text-xs text-muted-foreground line-clamp-2 max-w-[340px]">
-                        {rec.descripcion || "Sin descripción registrada."}
-                      </p>
+                      <TooltipProvider delayDuration={150}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <p className="text-xs text-muted-foreground line-clamp-2 max-w-[340px] cursor-help">
+                                {rec.descripcion || "Sin descripción registrada."}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs" variant="info">
+                              <p>{rec.descripcion || "Sin descripción registrada."}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                     </TableCell>
 
                     {/* 4. Roles asociados */}
                     <TableCell className="py-3.5 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <ShieldCheck
-                          className={cn(
-                            "size-3.5",
-                            sinRoles ? "text-warning-600" : "text-muted-foreground"
-                          )}
-                        />
-                        {sinRoles ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                tone="warning"
-                                appearance="soft"
-                                size="sm"
-                                className="font-medium text-[11px] px-2 py-0 cursor-default"
-                              >
-                                0 roles
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent variant="warning" side="top">
-                              Ningún rol tiene permisos asignados sobre este recurso
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-xs font-semibold text-foreground">
-                            {rolesCount}{" "}
-                            <span className="text-muted-foreground font-normal">
-                              {rolesCount === 1 ? "rol" : "roles"}
-                            </span>
-                          </span>
-                        )}
-                      </div>
+                      {sinRoles ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-warning/10 dark:bg-warning/20 border border-warning/20 dark:border-warning/30 text-xs font-semibold text-warning-700 dark:text-warning-400 cursor-help">
+                              <ShieldCheck className="size-3.5" />
+                              <span>0</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent variant="warning" side="top">
+                            Ningún rol tiene permisos asignados sobre este recurso
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
+                          <ShieldCheck className="size-3.5 text-secondary-600 dark:text-secondary-300" />
+                          <span>{rolesCount}</span>
+                        </div>
+                      )}
                     </TableCell>
 
                     {/* 5. Estado */}
@@ -270,44 +272,96 @@ export function RecursosTable({
                       </Badge>
                     </TableCell>
 
-                    {/* 6. Acciones VISIBLES (sin menú de 3 puntos) */}
+                    {/* 6. Acciones VISIBLES */}
                     <TableCell className="py-3.5 text-right pr-6">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onViewDetail(rec)}
-                              className="h-8 px-2.5 text-xs gap-1.5 border-border hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary"
-                              aria-label={`Ver detalle de ${rec.nombre}`}
-                            >
-                              <Eye className="size-3.5 text-muted-foreground" />
-                              <span className="hidden sm:inline">Ver detalle</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            Ver ficha completa y roles asociados
-                          </TooltipContent>
-                        </Tooltip>
-
+                      <div className="inline-flex items-center justify-end gap-1">
+                        {/* Ver Detalle */}
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
-                              size="sm"
-                              onClick={() => onEdit(rec)}
-                              className="h-8 px-2.5 text-xs gap-1.5 text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary"
-                              aria-label={`Editar recurso ${rec.nombre}`}
+                              size="icon"
+                              onClick={() => onViewDetail(rec)}
+                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                              aria-label={`Ver detalle de ${rec.nombre}`}
                             >
-                              <Edit className="size-3.5 text-primary" />
-                              <span className="hidden sm:inline">Editar</span>
+                              <Eye className="size-4" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent side="top">
-                            Editar información del recurso
+                          <TooltipContent side="top" variant="info">
+                            Ver detalle
                           </TooltipContent>
                         </Tooltip>
+
+                        {/* Editar */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onEdit(rec)}
+                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                              aria-label={`Editar recurso ${rec.nombre}`}
+                            >
+                              <Edit className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" variant="info">
+                            Editar recurso
+                          </TooltipContent>
+                        </Tooltip>
+
+                        {/* Activar / Desactivar */}
+                        {onToggleStatus && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onToggleStatus(rec)}
+                                aria-label={isActivo ? "Desactivar recurso" : "Activar recurso"}
+                                className={cn(
+                                  "size-8 transition-colors",
+                                  isActivo
+                                    ? "text-warning-600 hover:text-warning-700 hover:bg-warning/10"
+                                    : "text-success-700 dark:text-success-400 hover:bg-success/10"
+                                )}
+                              >
+                                {isActivo ? (
+                                  <PowerOff className="size-4" />
+                                ) : (
+                                  <Power className="size-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              variant={isActivo ? "warning" : "info"}
+                              side="top"
+                            >
+                              {isActivo ? "Desactivar recurso" : "Activar recurso"}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        {/* Eliminar */}
+                        {onDelete && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onDelete(rec)}
+                                aria-label={`Eliminar recurso ${rec.nombre}`}
+                                className="size-8 text-danger hover:text-danger-700 hover:bg-danger/10"
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" variant="danger">
+                              Eliminar recurso
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

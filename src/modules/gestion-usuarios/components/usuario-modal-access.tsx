@@ -469,7 +469,7 @@ export function UsuarioModalAccess({
               <div className="flex justify-end items-center gap-2 pt-2 border-t border-border/40">
                 <Button
                   variant="neutral"
-                  size="sm"
+                  size="default"
                   onClick={() => {
                     setIsAdding(false);
                     setEditingAsigId(null);
@@ -480,10 +480,10 @@ export function UsuarioModalAccess({
                 </Button>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="default"
                   onClick={handleSaveAssignment}
                   disabled={!selectedSede || !selectedApp || !selectedRol}
-                  className="text-xs"
+                  className="text-sm"
                 >
                   {editingAsigId ? "Guardar Cambios" : "Agregar acceso"}
                 </Button>

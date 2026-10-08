@@ -14,8 +14,11 @@ import {
   Download,
   ChevronDown,
   FileSpreadsheet,
+  FolderTree,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import {
   RecursoItem,
@@ -45,6 +48,12 @@ export function RecursosView() {
   const [recursoToEdit, setRecursoToEdit] = React.useState<RecursoItem | null>(null);
   const [detailRecurso, setDetailRecurso] = React.useState<RecursoItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+
+  // Confirmaciones
+  const [recursoToToggle, setRecursoToToggle] = React.useState<RecursoItem | null>(null);
+  const [isConfirmToggleOpen, setIsConfirmToggleOpen] = React.useState(false);
+  const [recursoToDelete, setRecursoToDelete] = React.useState<RecursoItem | null>(null);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = React.useState(false);
 
   // Métricas para summary cards
   const totalCount = recursos.length;
@@ -156,6 +165,51 @@ export function RecursosView() {
     setSelectedEstado("Todos");
   };
 
+  // Toggle Estado (Activar/Desactivar)
+  const handleRequestToggleStatus = (rec: RecursoItem) => {
+    setRecursoToToggle(rec);
+    setIsConfirmToggleOpen(true);
+  };
+
+  const handleConfirmToggleStatus = () => {
+    if (!recursoToToggle) return;
+    const newStatus = recursoToToggle.estado === "Activo" ? "Inactivo" : "Activo";
+    const updated = {
+      ...recursoToToggle,
+      estado: newStatus as "Activo" | "Inactivo",
+      ultimaActualizacion: new Date().toISOString().split("T")[0],
+    };
+    setRecursos((prev) =>
+      prev.map((r) => (r.id === recursoToToggle.id ? updated : r))
+    );
+    if (detailRecurso?.id === recursoToToggle.id) {
+      setDetailRecurso(updated);
+    }
+    setIsConfirmToggleOpen(false);
+    toast.success(
+      `Recurso "${recursoToToggle.nombre}" ahora está ${newStatus === "Activo" ? "activo" : "inactivo"}.`
+    );
+    setRecursoToToggle(null);
+  };
+
+  // Eliminar Recurso
+  const handleRequestDelete = (rec: RecursoItem) => {
+    setRecursoToDelete(rec);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!recursoToDelete) return;
+    setRecursos((prev) => prev.filter((r) => r.id !== recursoToDelete.id));
+    if (detailRecurso?.id === recursoToDelete.id) {
+      setIsDetailOpen(false);
+      setDetailRecurso(null);
+    }
+    setIsConfirmDeleteOpen(false);
+    toast.success(`Recurso "${recursoToDelete.nombre}" eliminado correctamente.`);
+    setRecursoToDelete(null);
+  };
+
   // Exportar a CSV
   const handleExportCSV = () => {
     const headers = [
@@ -207,18 +261,23 @@ export function RecursosView() {
         <div className="border border-border rounded-xl bg-surface p-6 shadow-sm flex flex-col gap-6">
           {/* Encabezado */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
-                  Recursos
-                </h1>
-                <Badge tone="warning" appearance="soft" size="sm">
-                  Mockup en desarrollo
-                </Badge>
+            <div className="flex items-start gap-3">
+              <div className="size-11 rounded-xl bg-warning/15 dark:bg-warning-950/40 text-warning-700 dark:text-warning-300 flex items-center justify-center shrink-0 border border-warning/20 shadow-xs mt-0.5">
+                <FolderTree className="size-6" />
               </div>
-              <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
-                Administra los recursos disponibles para las aplicaciones y su asignación a roles.
-              </p>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground">
+                    Recursos
+                  </h1>
+                  <Badge tone="warning" appearance="soft" size="sm">
+                    Mockup en desarrollo
+                  </Badge>
+                </div>
+                <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+                  Administra los recursos disponibles para las aplicaciones y su asignación a roles.
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
@@ -284,6 +343,8 @@ export function RecursosView() {
             recursos={filteredRecursos}
             onViewDetail={handleOpenDetail}
             onEdit={handleOpenEdit}
+            onToggleStatus={handleRequestToggleStatus}
+            onDelete={handleRequestDelete}
             onResetFilters={handleResetFilters}
           />
         </div>
@@ -304,6 +365,40 @@ export function RecursosView() {
         onOpenChange={setIsDetailOpen}
         recurso={detailRecurso}
         onEdit={handleOpenEdit}
+      />
+
+      {/* Diálogo de Confirmación: Cambiar Estado */}
+      <ConfirmDialog
+        open={isConfirmToggleOpen}
+        onOpenChange={setIsConfirmToggleOpen}
+        title={
+          recursoToToggle?.estado === "Activo"
+            ? "¿Desactivar recurso?"
+            : "¿Activar recurso?"
+        }
+        description={
+          recursoToToggle?.estado === "Activo"
+            ? `El recurso "${recursoToToggle?.nombre}" (${recursoToToggle?.codigo}) dejará de estar disponible para ser asignado en nuevos roles o permisos hasta que sea reactivado.`
+            : `El recurso "${recursoToToggle?.nombre}" (${recursoToToggle?.codigo}) volverá a estar disponible para su uso en roles y políticas.`
+        }
+        confirmText={
+          recursoToToggle?.estado === "Activo"
+            ? "Sí, desactivar"
+            : "Sí, activar"
+        }
+        variant={recursoToToggle?.estado === "Activo" ? "warning" : "default"}
+        onConfirm={handleConfirmToggleStatus}
+      />
+
+      {/* Diálogo de Confirmación: Eliminar Recurso */}
+      <ConfirmDialog
+        open={isConfirmDeleteOpen}
+        onOpenChange={setIsConfirmDeleteOpen}
+        title="¿Eliminar recurso definitivamente?"
+        description={`Esta acción eliminará el recurso "${recursoToDelete?.nombre}" (${recursoToDelete?.codigo}) y todas sus asociaciones a roles. Esta operación no se puede revertir.`}
+        confirmText="Sí, eliminar definitivamente"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

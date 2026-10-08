@@ -43,6 +43,7 @@ import {
   ShieldCheck,
   FolderTree,
   CornerDownRight,
+  ChevronRight,
   Folder,
   CheckSquare2,
   Square,
@@ -96,6 +97,7 @@ export function RolModalForm({
   // Form State - Sección B: Matriz de Recursos y Permisos
   const [matrixState, setMatrixState] = React.useState<Record<string, PermisoRowState>>({});
   const [resourceSearch, setResourceSearch] = React.useState("");
+  const [expandedPadres, setExpandedPadres] = React.useState<string[]>([]);
   const [errors, setErrors] = React.useState<{ nombre?: string; general?: string }>({});
 
   // Recursos de la aplicación actualmente seleccionada
@@ -141,6 +143,10 @@ export function RolModalForm({
           }
         });
         setMatrixState(initialMatrix);
+        const rootsWithChildren = resourcesForApp
+          .filter((r) => !r.padreId && resourcesForApp.some((c) => c.padreId === r.id))
+          .map((r) => r.id);
+        setExpandedPadres(rootsWithChildren);
       } else {
         // Modo Creación
         setNombre("");
@@ -162,6 +168,10 @@ export function RolModalForm({
           };
         });
         setMatrixState(initialMatrix);
+        const rootsWithChildren = resourcesForApp
+          .filter((r) => !r.padreId && resourcesForApp.some((c) => c.padreId === r.id))
+          .map((r) => r.id);
+        setExpandedPadres(rootsWithChildren);
       }
     }
   }, [open, rolToEdit]);
@@ -188,6 +198,10 @@ export function RolModalForm({
       };
     });
     setMatrixState(newMatrix);
+    const rootsWithChildren = newResources
+      .filter((r) => !r.padreId && newResources.some((c) => c.padreId === r.id))
+      .map((r) => r.id);
+    setExpandedPadres(rootsWithChildren);
     toast.info("Se actualizaron los recursos disponibles para la aplicación seleccionada.");
   };
 
@@ -268,17 +282,33 @@ export function RolModalForm({
     });
   };
 
-  // Filtrado de recursos en la matriz
-  const filteredResources = React.useMemo(() => {
-    if (!resourceSearch.trim()) return availableResources;
-    const term = resourceSearch.toLowerCase();
-    return availableResources.filter(
-      (r) =>
-        r.nombre.toLowerCase().includes(term) ||
-        r.descripcion.toLowerCase().includes(term) ||
-        (r.padreNombre && r.padreNombre.toLowerCase().includes(term))
+
+  // Toggle expandir / colapsar padre
+  const toggleExpandPadre = (padreId: string) => {
+    setExpandedPadres((prev) =>
+      prev.includes(padreId)
+        ? prev.filter((id) => id !== padreId)
+        : [...prev, padreId]
     );
-  }, [availableResources, resourceSearch]);
+  };
+
+  // Filtrado de recursos en la matriz respetando colapsables
+  const filteredResources = React.useMemo(() => {
+    if (resourceSearch.trim()) {
+      const term = resourceSearch.toLowerCase();
+      return availableResources.filter(
+        (r) =>
+          r.nombre.toLowerCase().includes(term) ||
+          r.descripcion.toLowerCase().includes(term) ||
+          (r.padreNombre && r.padreNombre.toLowerCase().includes(term))
+      );
+    }
+
+    return availableResources.filter((r) => {
+      if (!r.padreId) return true;
+      return expandedPadres.includes(r.padreId);
+    });
+  }, [availableResources, resourceSearch, expandedPadres]);
 
   // Total de recursos con acceso configurado
   const countConfigurados = React.useMemo(() => {
@@ -446,12 +476,16 @@ export function RolModalForm({
 
               {/* Descripción */}
               <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-semibold text-foreground">
-                  Descripción
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Descripción</span>
+                  <span className="text-[11px] font-normal text-muted-foreground">
+                    {descripcion.length}/100
+                  </span>
                 </label>
                 <InputGroup multiline>
                   <InputGroupTextarea
-                    value={descripcion}
+                    maxLength={100}
+                  value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
                     placeholder="Describe brevemente las facultades y el alcance de este rol institucional..."
                     rows={2}
@@ -627,33 +661,78 @@ export function RolModalForm({
                           !isChild && "bg-muted/10 font-medium"
                         )}
                       >
-                        {/* 1. Nombre del Recurso (con jerarquía visual) */}
+                        {/* 1. Nombre del Recurso (con expander jerárquico) */}
                         <TableCell className="pl-4 py-2.5">
-                          <div
-                            className={cn(
-                              "flex items-start gap-2",
-                              isChild && "pl-6"
-                            )}
-                          >
-                            {isChild ? (
-                              <CornerDownRight className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                            ) : (
-                              <Folder className="size-4 text-primary shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col min-w-0">
-                              <span
+                          {(() => {
+                            const hasChildren = availableResources.some((c) => c.padreId === recurso.id);
+                            const isExpanded = expandedPadres.includes(recurso.id);
+
+                            return (
+                              <div
                                 className={cn(
-                                  "text-xs text-foreground",
-                                  !isChild && "font-semibold"
+                                  "flex items-start gap-2",
+                                  isChild && "pl-7"
                                 )}
                               >
-                                {recurso.nombre}
-                              </span>
-                              <span className="text-[11px] text-muted-foreground line-clamp-1">
-                                {recurso.descripcion}
-                              </span>
-                            </div>
-                          </div>
+                                {isChild ? (
+                                  <CornerDownRight className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                                ) : (
+                                  <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                    {hasChildren ? (
+                                      <TooltipProvider delayDuration={150}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="icon"
+                                              onClick={() => toggleExpandPadre(recurso.id)}
+                                              className="size-5 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300"
+                                            >
+                                              <ChevronRight
+                                                className={cn(
+                                                  "size-3.5 transition-transform duration-300",
+                                                  isExpanded && "rotate-90"
+                                                )}
+                                              />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top">
+                                            <p className="text-xs">
+                                              {isExpanded ? "Colapsar recursos secundarios" : "Desplegar recursos secundarios"}
+                                            </p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    ) : (
+                                      <div className="size-5" />
+                                    )}
+                                    <Folder className="size-4 text-primary shrink-0" />
+                                  </div>
+                                )}
+                                <div className="flex flex-col min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "text-xs text-foreground",
+                                        !isChild && "font-semibold"
+                                      )}
+                                    >
+                                      {recurso.nombre}
+                                    </span>
+                                    {!isChild && hasChildren && (
+                                      <Badge tone="neutral" appearance="soft" size="sm" className="text-[10px] px-1.5 py-0 font-normal">
+                                        {availableResources.filter((c) => c.padreId === recurso.id).length} submódulos
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <span className="text-[11px] text-muted-foreground line-clamp-1">
+                                    {recurso.descripcion}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </TableCell>
 
                         {/* 2. Acceso Habilitado */}
@@ -763,7 +842,7 @@ export function RolModalForm({
               type="submit"
               form="rol-form"
               variant="primary"
-              className="text-xs gap-1.5"
+              className="text-sm gap-1.5"
             >
               <ShieldCheck className="size-4" />
               <span>{isEditing ? "Guardar cambios" : "Crear rol"}</span>

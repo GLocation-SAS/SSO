@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -97,23 +98,23 @@ export function RecursoModalDetail({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-surface"
+        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
       >
         <TooltipProvider delayDuration={150}>
           {/* HEADER */}
-          <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 text-left">
+          <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 text-left">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
-                <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <div className="size-10 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning-700 dark:text-warning-300 shrink-0">
                   <FolderTree className="size-5" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-heading font-bold text-foreground">
+                  <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
                     Detalle del recurso
                   </DialogTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                     Información técnica, aplicación contenedora y roles con permisos asignados.
-                  </p>
+                  </DialogDescription>
                 </div>
               </div>
 
@@ -129,7 +130,7 @@ export function RecursoModalDetail({
           </DialogHeader>
 
           {/* BODY */}
-          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1">
+          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-white dark:bg-zinc-950">
             {/* Panel de Metadatos del Recurso */}
             <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -149,7 +150,7 @@ export function RecursoModalDetail({
                     Código / Identificador
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-xs font-medium bg-muted/60 px-2 py-0.5 rounded border border-border">
+                    <span className="font-mono text-xs font-semibold bg-warning/10 text-warning-800 dark:text-warning-300 px-2 py-0.5 rounded border border-warning/20">
                       {recurso.codigo}
                     </span>
                   </div>
@@ -404,26 +405,26 @@ export function RecursoModalDetail({
           </div>
 
           {/* FOOTER */}
-          <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
+          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between">
             <Button
-              variant="outline"
-              size="sm"
+              type="button"
+              variant="neutral"
               onClick={() => onOpenChange(false)}
-              className="text-xs h-9 px-4"
+              className="text-xs"
             >
               Cerrar
             </Button>
             <Button
+              type="button"
               variant="primary"
-              size="sm"
               onClick={() => {
                 onOpenChange(false);
                 onEdit(recurso);
               }}
-              className="text-xs h-9 px-4 gap-1.5"
+              className="gap-2 text-xs"
             >
               <Edit className="size-3.5" />
-              Editar recurso
+              <span>Editar recurso</span>
             </Button>
           </DialogFooter>
         </TooltipProvider>

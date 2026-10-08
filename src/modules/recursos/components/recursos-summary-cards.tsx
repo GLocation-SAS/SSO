@@ -37,9 +37,9 @@ export function RecursosSummaryCards({
       percentage: undefined,
       microText: "Recursos registrados",
       icon: FolderTree,
-      color: "primary" as const,
-      iconContainer: "bg-primary/15 text-primary",
-      activeBg: "bg-primary-100/90 dark:bg-muted/30",
+      color: "warning" as const,
+      iconContainer: "bg-warning/15 text-warning-700 dark:text-warning-300",
+      activeBg: "bg-warning-100/90 dark:bg-warning-900/50",
     },
     {
       id: "activos" as const,

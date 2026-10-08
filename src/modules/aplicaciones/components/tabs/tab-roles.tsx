@@ -233,30 +233,17 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
 
           <form onSubmit={handleCreateRol} className="p-6 space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Nombre del rol <span className="text-danger">*</span>
-              </label>
-              <InputGroup>
-                <InputGroupInput
-                  placeholder="Ej. Gestor de Distrito, Auditor, Operador"
-                  value={nuevoNombre}
-                  onChange={(e) => {
-                    setNuevoNombre(e.target.value);
-                    setError(null);
-                  }}
-                  className="text-sm"
-                />
-              </InputGroup>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Descripción funcional <span className="text-danger">*</span>
-              </label>
-              <InputGroup className="h-auto">
+              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                            <span>Descripción</span>
+                            <span className="text-[11px] font-normal text-muted-foreground">
+                              {nuevaDescripcion.length}/100
+                            </span>
+                          </label>
+                          <InputGroup className="h-auto">
                 <InputGroupTextarea
                   placeholder="Describe qué funciones y facultades otorga este rol a los funcionarios..."
                   rows={3}
+                  maxLength={100}
                   value={nuevaDescripcion}
                   onChange={(e) => {
                     setNuevaDescripcion(e.target.value);

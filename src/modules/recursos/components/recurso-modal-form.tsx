@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ import {
   KeyRound,
   FileCode,
   Info,
+  Check,
+  Sparkles,
 } from "lucide-react";
 import {
   Tooltip,
@@ -173,35 +176,37 @@ export function RecursoModalForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-surface"
+        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
       >
         <TooltipProvider delayDuration={150}>
           {/* HEADER */}
-          <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 text-left">
+          <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 items-start text-left">
             <div className="flex items-center gap-3">
-              <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <div className="size-10 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning-700 dark:text-warning-300 shrink-0">
                 <FolderTree className="size-5" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-heading font-bold text-foreground">
+                <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
                   {isEditing ? "Editar recurso" : "Nuevo recurso"}
                 </DialogTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   {isEditing
-                    ? "Modifica la definición y metadatos del recurso en el catálogo global."
+                    ? "Modifica la definición y metadatos del recurso en el catálogo institucional."
                     : "Registra un nuevo recurso en el catálogo global de una aplicación."}
-                </p>
+                </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
           {/* BODY */}
-          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-surface">
+          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-white dark:bg-zinc-950">
             {/* Context Note */}
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-3">
-              <Info className="size-4 text-primary shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-warning/20 bg-warning/5 p-3.5 flex items-start gap-3">
+              <Sparkles className="size-4 text-warning-700 dark:text-warning-300 shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong className="text-foreground">Regla de arquitectura:</strong> Un recurso pertenece exclusivamente a una aplicación. Una vez registrado, los permisos sobre este recurso se configuran de manera independiente en la <strong>Gestión de Roles</strong>.
+                <strong className="text-foreground font-semibold">Trazabilidad de recursos:</strong>{" "}
+                Cada recurso pertenece exclusivamente a una aplicación. Una vez registrado, podrás asociarlo y configurar sus permisos granulares (ver, crear, editar, eliminar) desde la matriz en la{" "}
+                <span className="text-primary font-medium">Gestión de Roles</span>.
               </p>
             </div>
 
@@ -394,16 +399,16 @@ export function RecursoModalForm({
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Descripción</span>
                 <span className="text-[11px] font-normal text-muted-foreground">
-                  {descripcion.length}/250
+                  {descripcion.length}/100
                 </span>
               </label>
               <InputGroup multiline size="sm">
                 <InputGroupTextarea
+                  maxLength={100}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
                   placeholder="Explica qué funciones o endpoints comprende este recurso..."
                   rows={3}
-                  maxLength={250}
                 />
               </InputGroup>
               <p className="text-[11px] text-muted-foreground">
@@ -413,32 +418,33 @@ export function RecursoModalForm({
           </div>
 
           {/* FOOTER */}
-          <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex items-center justify-between">
+          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between">
             <div className="text-[11px] text-muted-foreground">
-              <span className="text-danger">*</span> Campos de llenado obligatorio
+              <span className="text-danger">*</span> Campos obligatorios
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
+                type="button"
+                variant="neutral"
                 onClick={() => onOpenChange(false)}
-                className="text-xs h-9 px-4"
+                className="text-xs"
               >
                 Cancelar
               </Button>
               <Button
+                type="button"
                 variant="primary"
-                size="sm"
                 onClick={handleSave}
-                className="text-xs h-9 px-4 gap-1.5"
+                className="gap-2 text-sm"
               >
-                Guardar recurso
+                <Check className="size-4" />
+                <span>{isEditing ? "Guardar cambios" : "Crear recurso"}</span>
               </Button>
             </div>
           </DialogFooter>
         </TooltipProvider>
-      </DialogContent >
-    </Dialog >
+      </DialogContent>
+    </Dialog>
   );
 }
 

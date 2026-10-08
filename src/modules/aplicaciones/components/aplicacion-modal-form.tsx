@@ -195,55 +195,23 @@ export function AplicacionModalForm({
             {/* Nombre */}
             <div className="md:col-span-2 space-y-1.5">
               <label className="text-xs font-semibold text-foreground">
-                Nombre de la aplicación <span className="text-danger">*</span>
-              </label>
-              <InputGroup size="sm" state={errors.nombre ? "error" : "default"}>
-                <InputGroupInput
-                  placeholder="Ej. Gestión Docente, SIGE, Portal Estudiantil"
-                  value={nombre}
-                  onChange={(e) => handleNombreChange(e.target.value)}
-                  className="text-sm bg-white dark:bg-zinc-950"
-                />
-              </InputGroup>
-              {errors.nombre && (
-                <p className="text-[11px] text-danger flex items-center gap-1 mt-1">
-                  <AlertCircle className="size-3 shrink-0" />
-                  {errors.nombre}
-                </p>
-              )}
-            </div>
-
-            {/* Código / Sigla */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">
-                Código / Sigla
-              </label>
-              <InputGroup size="sm">
-                <InputGroupInput
-                  placeholder="Ej. SGD, SIGE, TH"
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                  className="text-sm font-mono uppercase bg-white dark:bg-zinc-950"
-                />
-              </InputGroup>
-            </div>
-          </div>
-
-          {/* Descripción */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-foreground">
                 Descripción institucional <span className="text-danger">*</span>
               </label>
-              <span className="text-[11px] text-muted-foreground">
-                Finalidad funcional del sistema
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-muted-foreground">
+                  Finalidad funcional del sistema
+                </span>
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  {descripcion.length}/100
+                </span>
+              </div>
             </div>
             <InputGroup multiline state={errors.descripcion ? "error" : "default"}>
               <InputGroupTextarea
                 placeholder="Describe el propósito del sistema, los procesos institucionales que atiende y el tipo de personal que interactúa con él..."
                 rows={3}
-                value={descripcion}
+                maxLength={100}
+                  value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 className="text-sm bg-white dark:bg-zinc-950"
               />
@@ -322,7 +290,7 @@ export function AplicacionModalForm({
             type="submit"
             form="aplicacion-form"
             variant="primary"
-            className="gap-2 text-xs"
+            className="gap-2 text-sm"
           >
             <Check className="size-4" />
             <span>{isEditing ? "Guardar cambios" : "Crear aplicación"}</span>

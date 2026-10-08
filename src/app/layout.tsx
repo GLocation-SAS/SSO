@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../messages/es.json";
 import { getAssetPath } from "@/lib/assets";
+import Script from "next/script";
 
 /*
   TIPOGRAFÍAS
@@ -89,8 +90,9 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script
+        <Script
           id="theme-script"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

@@ -107,7 +107,7 @@ export function AplicacionModalDetail({
                   <TooltipTrigger asChild>
                     <Button
                       variant="neutral"
-                      size="sm"
+                      size="default"
                       rightIcon={<ExternalLink className="size-3.5" />}
                       onClick={() => window.open(aplicacion.urlAcceso, '_blank', 'noopener,noreferrer')}
                     >
@@ -211,7 +211,7 @@ export function AplicacionModalDetail({
             {onToggleStatus && (
               <Button
                 variant={aplicacion.estado === "Activa" ? "warning" : "success"}
-                size="sm"
+                size="default"
                 onClick={() => {
                   onOpenChange(false);
                   onToggleStatus(aplicacion);
@@ -235,7 +235,7 @@ export function AplicacionModalDetail({
             {onEdit && (
               <Button
                 variant="primary"
-                size="sm"
+                size="default"
                 onClick={() => {
                   onOpenChange(false);
                   onEdit(aplicacion);

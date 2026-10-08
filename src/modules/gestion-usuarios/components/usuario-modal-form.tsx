@@ -883,7 +883,7 @@ export function UsuarioModalForm({
                               </label>
                               <Button
                                 variant="primary"
-                                size="sm"
+                                size="default"
                                 onClick={() => handleAddAccessToSede(sedeNombre)}
                                 disabled={!currentApp || !currentRol}
                                 className="w-full h-9 text-xs gap-1"

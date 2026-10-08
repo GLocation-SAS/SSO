@@ -289,14 +289,23 @@ export function RolModalPermissions({
                             <div className="flex items-start gap-2.5 py-1">
                               <div className="flex items-center gap-1.5">
                                 {hasChildren ? (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => toggleExpand(rootItem.recursoNombre)}
-                                    className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
-                                  >
-                                    <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
-                                  </Button>
+                                  <TooltipProvider delayDuration={150}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          onClick={() => toggleExpand(rootItem.recursoNombre)}
+                                          className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
+                                        >
+                                          <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        <p className="text-xs">Desplegar submódulos</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 ) : (
                                   <div className="size-6 shrink-0 mt-0.5"></div>
                                 )}
@@ -411,7 +420,7 @@ export function RolModalPermissions({
             variant="primary"
             onClick={handleSave}
             disabled={!hasChanges}
-            className="gap-2 text-xs"
+            className="gap-2 text-sm"
           >
             <Save className="size-3.5" />
             <span>Guardar matriz</span>

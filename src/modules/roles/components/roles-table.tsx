@@ -201,9 +201,18 @@ export function RolesTable({
                               </Tooltip>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1 max-w-[280px]">
-                            {rol.descripcion || "Sin descripción"}
-                          </p>
+                          <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <p className="text-xs text-muted-foreground line-clamp-1 max-w-[280px] cursor-help">
+                                    {rol.descripcion || "Sin descripción"}
+                                  </p>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs" variant="info">
+                                  <p>{rol.descripcion || "Sin descripción"}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                             <Users className="size-3 text-muted-foreground/70" />
                             <span>

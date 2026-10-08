@@ -215,14 +215,23 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                         <div className="flex items-start gap-2.5 py-1">
                           <div className="flex items-center gap-1.5">
                             {hasChildren ? (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => toggleExpand(rootRec.id)}
-                                className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
-                              >
-                                <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
-                              </Button>
+                              <TooltipProvider delayDuration={150}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      onClick={() => toggleExpand(rootRec.id)}
+                                      className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
+                                    >
+                                      <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    <p className="text-xs">Desplegar submódulos</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             ) : (
                               <div className="size-6 shrink-0 mt-0.5"></div>
                             )}
@@ -451,7 +460,16 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                         <TableCell>
                           <div className="flex flex-col min-w-0">
                             <span className="font-medium text-sm text-foreground">{rs.nombre}</span>
-                            <span className="text-[11px] text-muted-foreground line-clamp-1">{rs.descripcion}</span>
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">{rs.descripcion}</span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs" variant="info">
+                                  <p>{rs.descripcion}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">{rs.recursoPadreNombre || "Raíz"}</TableCell>

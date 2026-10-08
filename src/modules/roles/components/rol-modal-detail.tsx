@@ -2,6 +2,12 @@
 
 import * as React from "react";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -36,6 +42,7 @@ import {
   MapPin,
   Calendar,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import {
   RolItem,
@@ -130,7 +137,7 @@ export function RolModalDetail({
             {/* Acción visible para editar el rol */}
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => {
                 onOpenChange(false);
                 onEdit(rol);
@@ -236,7 +243,7 @@ export function RolModalDetail({
                 </p>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="default"
                   onClick={() => {
                     onOpenChange(false);
                     onEdit(rol);
@@ -298,14 +305,23 @@ export function RolModalDetail({
                               <div className="flex items-start gap-2.5">
                                 <div className="flex items-center gap-1.5">
                                   {hasChildren ? (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      onClick={() => toggleExpand(rootItem.id)}
-                                      className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
-                                    >
-                                      <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
-                                    </Button>
+                                    <TooltipProvider delayDuration={150}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => toggleExpand(rootItem.id)}
+                                            className="size-6 p-0 rounded-md hover:bg-primary/20 text-primary transition-transform duration-300 shrink-0 mt-0.5"
+                                          >
+                                            <ChevronRight className={cn("size-4 transition-transform duration-300", isExpanded && "rotate-90")} />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top">
+                                          <p className="text-xs">Desplegar acciones y submódulos</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   ) : (
                                     <div className="size-6 shrink-0 mt-0.5"></div>
                                   )}
@@ -316,9 +332,18 @@ export function RolModalDetail({
                                     {rootItem.nombre}
                                   </span>
                                   {rootItem.descripcion && (
-                                    <span className="text-[11px] text-muted-foreground line-clamp-1">
-                                      {rootItem.descripcion}
-                                    </span>
+                                    <TooltipProvider delayDuration={150}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
+                                            {rootItem.descripcion}
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-xs" variant="info">
+                                          <p>{rootItem.descripcion}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   )}
                                 </div>
                               </div>
@@ -405,9 +430,18 @@ export function RolModalDetail({
                                       {childItem.nombre}
                                     </span>
                                     {childItem.descripcion && (
-                                      <span className="text-[11px] text-muted-foreground line-clamp-1">
-                                        {childItem.descripcion}
-                                      </span>
+                                      <TooltipProvider delayDuration={150}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="text-[11px] text-muted-foreground line-clamp-1 cursor-help">
+                                            {childItem.descripcion}
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-xs" variant="info">
+                                          <p>{childItem.descripcion}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                     )}
                                   </div>
                                 </div>
@@ -497,7 +531,7 @@ export function RolModalDetail({
             <Button
               type="button"
               variant="neutral"
-              size="sm"
+              size="default"
               onClick={() => onOpenChange(false)}
               className="text-xs"
             >
@@ -506,7 +540,7 @@ export function RolModalDetail({
             <Button
               type="button"
               variant="primary"
-              size="sm"
+              size="default"
               onClick={() => {
                 onEdit(rol);
               }}
