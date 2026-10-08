@@ -199,10 +199,9 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
           <TableBody>
             {recursos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground dark:text-neutral-300">
-                    No hay recursos configurados para esta aplicación.
-                  </TableCell>
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground dark:text-neutral-300">
+                  No hay recursos configurados para esta aplicación.
+                </TableCell>
               </TableRow>
             ) : (
               recursos.map((rec) => {
@@ -212,7 +211,6 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                   <TableRow
                     key={rec.id}
                     className={cn(
-                      isSubRecurso && "bg-muted/10 hover:bg-muted/20"
                       isSubRecurso
                         ? "bg-muted/10 dark:bg-muted/25 hover:bg-muted/20 dark:hover:bg-muted/45"
                         : "border-l-4 border-l-primary/60 dark:border-l-primary dark:bg-muted/65"
@@ -222,36 +220,29 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                     <TableCell className="pl-6">
                       <div className="flex items-start gap-2.5 py-1">
                         {isSubRecurso ? (
-                          <div className="flex items-center gap-1.5 text-muted-foreground pl-4 shrink-0 mt-0.5">
-                            <CornerDownRight className="size-4 text-primary" />
-                            <FileCode className="size-4 text-muted-foreground" />
-                            <div className="flex items-center gap-1.5 text-muted-foreground dark:text-neutral-300 pl-4 shrink-0 mt-0.5">
-                              <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
-                              <FileCode className="size-4 text-muted-foreground dark:text-neutral-300" />
-                            </div>
-                            ) : (
-                            <div className="size-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
-                              <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0 mt-0.5">
-                                <Folder className="size-4" />
-                              </div>
+                          <div className="flex items-center gap-1.5 text-muted-foreground dark:text-neutral-300 pl-4 shrink-0 mt-0.5">
+                            <CornerDownRight className="size-4 text-primary dark:text-primary-300" />
+                            <FileCode className="size-4 text-muted-foreground dark:text-neutral-300" />
+                          </div>
+                        ) : (
+                          <div className="size-7 rounded-md bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 flex items-center justify-center shrink-0 mt-0.5">
+                            <Folder className="size-4" />
+                          </div>
                         )}
                               <div className="flex flex-col min-w-0">
                                 <span
                                   className={cn(
                                     "text-sm truncate",
                                     isSubRecurso
-                                      ? "font-medium text-foreground"
-                                      : "font-bold font-heading text-foreground"
-                                        ? "font-medium text-foreground dark:text-neutral-100"
-                                        : "font-bold font-heading text-foreground dark:text-white"
+                                      ? "font-medium text-foreground dark:text-neutral-100"
+                                      : "font-bold font-heading text-foreground dark:text-white"
                                   )}
                                 >
                                   {rec.nombre}
                                 </span>
-                                <span className="text-xs text-muted-foreground line-clamp-1">
-                                  <span className="text-xs text-muted-foreground dark:text-neutral-300 line-clamp-1">
-                                    {rec.descripcion}
-                                  </span>
+                                <span className="text-xs text-muted-foreground dark:text-neutral-300 line-clamp-1">
+                                  {rec.descripcion}
+                                </span>
                               </div>
                             </div>
                           </TableCell>
@@ -259,19 +250,16 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                     {/* 2. Recurso Padre */}
                         <TableCell>
                           {rec.recursoPadreNombre ? (
-                            <div className="flex items-center gap-1.5 text-xs text-foreground font-medium">
-                              <Folder className="size-3.5 text-muted-foreground shrink-0" />
-                              <div className="flex items-center gap-1.5 text-xs text-foreground dark:text-neutral-200 font-medium">
-                                <Folder className="size-3.5 text-muted-foreground dark:text-neutral-400 shrink-0" />
-                                <span>{rec.recursoPadreNombre}</span>
-                              </div>
-                              ) : (
-                              <span className="text-xs text-muted-foreground italic">
-                                <span className="text-xs text-muted-foreground dark:text-neutral-400 italic">
-                                  Raíz (Principal)
-                                </span>
-                      )}
-                              </TableCell>
+                            <div className="flex items-center gap-1.5 text-xs text-foreground dark:text-neutral-200 font-medium">
+                              <Folder className="size-3.5 text-muted-foreground dark:text-neutral-400 shrink-0" />
+                              <span>{rec.recursoPadreNombre}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground dark:text-neutral-400 italic">
+                              Raíz (Principal)
+                            </span>
+                          )}
+                        </TableCell>
 
                               {/* 3. Roles con Acceso */}
                               <TableCell>
@@ -282,7 +270,6 @@ export function TabRecursos({ aplicacion }: TabRecursosProps) {
                                       tone="primary"
                                       appearance="soft"
                                       size="sm"
-                                      className="text-[10px] font-medium"
                                       className="text-[10px] font-medium dark:bg-primary-900/40 dark:text-primary-200"
                                     >
                                       <ShieldCheck className="size-3" />

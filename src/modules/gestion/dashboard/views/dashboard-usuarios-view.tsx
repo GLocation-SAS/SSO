@@ -271,7 +271,7 @@ export function DashboardUsuariosView() {
         {/* ─────────────────────────────────────────────────────────────────── */}
         {/* 1. CONTENEDOR LATERAL IZQUIERDO: EXCLUSIVAMENTE PARA FOTO          */}
         {/* ─────────────────────────────────────────────────────────────────── */}
-        <div className="w-full lg:w-[340px] xl:w-[400px] 2xl:w-[440px] shrink-0 self-stretch rounded-xl border border-border/80 bg-muted/10 overflow-hidden relative group min-h-[460px] lg:min-h-full flex flex-col">
+        <div className="w-full lg:w-[380px] xl:w-[440px] 2xl:w-[480px] shrink-0 self-stretch rounded-xl border border-border/80 bg-muted/10 overflow-hidden relative group min-h-[520px] lg:min-h-full flex flex-col">
           <Input
             type="file"
             ref={fileInputRef}
@@ -289,7 +289,7 @@ export function DashboardUsuariosView() {
               <img
                 src={getAssetPath(userPhoto)}
                 alt="Resumen de gestión"
-                className="absolute inset-0 w-full h-full object-cover object-left-top"
+                className="absolute inset-0 w-full h-full object-cover object-[center_60%]"
                 onError={() => setUserPhoto(null)}
               />
             ) : (
@@ -523,7 +523,7 @@ export function DashboardUsuariosView() {
             </div>
 
             {/* Selector interactivo de aplicaciones tipo tabs: 6 principales + desplegable 'Ver más' al lado de SAE */}
-            <div className="flex items-center gap-2.5 overflow-x-auto py-2 my-2 md:my-3 w-full scrollbar-none">
+            <div className="flex flex-wrap items-center gap-2.5 py-2 my-2 md:my-3 w-full">
               {visibleApps.map((app) => {
                 const IconComp = APP_ICONS[app.id] || GraduationCap;
                 const isSelected = app.id === selectedAppId;
@@ -534,10 +534,10 @@ export function DashboardUsuariosView() {
                     key={app.id}
                     onClick={() => handleSelectApp(app.id)}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shrink-0 cursor-pointer outline-none border",
+                      "items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shrink-0 cursor-pointer outline-none border",
                       isSelected
-                        ? "bg-primary text-white border-primary shadow-xs font-bold"
-                        : "bg-surface border-border text-foreground hover:bg-muted/70 hover:border-border/80"
+                        ? "flex bg-primary text-white border-primary shadow-xs font-bold"
+                        : "hidden md:flex bg-surface border-border text-foreground hover:bg-muted/70 hover:border-border/80"
                     )}
                   >
                     {isSelected && isLoadingApp ? (
@@ -565,88 +565,77 @@ export function DashboardUsuariosView() {
                 );
               })}
 
-              {/* Menú desplegable 'Ver más' al lado de SAE */}
-              {extraApps.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shrink-0 cursor-pointer outline-none border",
-                        isExtraAppSelected
-                          ? "bg-primary text-white border-primary shadow-xs font-bold"
-                          : "bg-surface border-border text-foreground hover:bg-muted/70 hover:border-border/80"
-                      )}
-                    >
-                      {isExtraAppSelected && isLoadingApp ? (
-                        <Loader2 className="size-3.5 animate-spin text-white" />
-                      ) : isExtraAppSelected && selectedExtraApp ? (
-                        (() => {
-                          const ExtraIcon = APP_ICONS[selectedExtraApp.id] || Layers;
-                          return <ExtraIcon className="size-3.5 text-white" />;
-                        })()
-                      ) : (
-                        <Layers className="size-3.5 text-primary dark:text-primary-300" />
-                      )}
-                      <span>
-                        {isExtraAppSelected && selectedExtraApp
-                          ? selectedExtraApp.nombre
-                          : "Ver más"}
+              {/* Menú desplegable 'Ver más' */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shrink-0 cursor-pointer outline-none border",
+                      isExtraAppSelected
+                        ? "bg-primary text-white border-primary shadow-xs font-bold md:flex"
+                        : "bg-surface border-border text-foreground hover:bg-muted/70 hover:border-border/80 flex"
+                    )}
+                  >
+                    {isExtraAppSelected && isLoadingApp ? (
+                      <Loader2 className="size-3.5 animate-spin text-white" />
+                    ) : isExtraAppSelected && selectedExtraApp ? (
+                      (() => {
+                        const ExtraIcon = APP_ICONS[selectedExtraApp.id] || Layers;
+                        return <ExtraIcon className="size-3.5 text-white" />;
+                      })()
+                    ) : (
+                      <Layers className="size-3.5 text-primary dark:text-primary-300" />
+                    )}
+                    <span>
+                      {isExtraAppSelected && selectedExtraApp
+                        ? selectedExtraApp.nombre
+                        : "Ver más"}
+                    </span>
+                    {isExtraAppSelected && selectedExtraApp ? (
+                      <span className="text-[11px] tabular-nums px-1.5 py-0.2 rounded font-bold bg-white/20 text-white">
+                        {selectedExtraApp.usuarios}
                       </span>
-                      {isExtraAppSelected && selectedExtraApp ? (
-                        <span className="text-[11px] tabular-nums px-1.5 py-0.2 rounded font-bold bg-white/20 text-white">
-                          {selectedExtraApp.usuarios}
+                    ) : (
+                      <span className="text-[10px] tabular-nums px-1.5 py-0.2 rounded font-medium bg-muted text-muted-foreground">
+                        <span className="hidden md:inline">+{extraApps.length}</span>
+                        <span className="md:hidden">+{APLICACIONES_DATA.length - 1}</span>
+                      </span>
+                    )}
+                    <ChevronDown className="size-3.5 opacity-70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 p-1">
+                  <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold px-2 py-1.5">
+                    Otras aplicaciones
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {APLICACIONES_DATA.map((app) => {
+                    if (app.id === selectedAppId) return null;
+                    const AppIcon = APP_ICONS[app.id] || Layers;
+                    const isVisibleApp = visibleApps.some((v) => v.id === app.id);
+                    
+                    return (
+                      <DropdownMenuItem
+                        key={app.id}
+                        onClick={() => handleSelectApp(app.id)}
+                        className={cn(
+                          "items-center justify-between gap-2 px-2.5 py-2 text-xs rounded-md cursor-pointer",
+                          isVisibleApp ? "flex md:hidden" : "flex"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <AppIcon className="size-3.5 text-primary dark:text-primary-300" />
+                          <span>{app.nombre}</span>
+                        </div>
+                        <span className="text-[11px] tabular-nums px-1.5 py-0.2 rounded font-medium bg-muted text-muted-foreground">
+                          {app.usuarios}
                         </span>
-                      ) : (
-                        <span className="text-[10px] tabular-nums px-1.5 py-0.2 rounded font-medium bg-muted text-muted-foreground">
-                          +{extraApps.length}
-                        </span>
-                      )}
-                      <ChevronDown className="size-3.5 opacity-70" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 p-1">
-                    <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold px-2 py-1.5">
-                      Otras aplicaciones ({extraApps.length})
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {extraApps.map((app) => {
-                      const AppIcon = APP_ICONS[app.id] || Layers;
-                      const isSelected = app.id === selectedAppId;
-                      return (
-                        <DropdownMenuItem
-                          key={app.id}
-                          onClick={() => handleSelectApp(app.id)}
-                          className={cn(
-                            "flex items-center justify-between gap-2 px-2.5 py-2 text-xs rounded-md cursor-pointer",
-                            isSelected && "bg-primary text-white font-bold"
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <AppIcon
-                              className={cn(
-                                "size-3.5",
-                                isSelected ? "text-white" : "text-primary dark:text-primary-300"
-                              )}
-                            />
-                            <span>{app.nombre}</span>
-                          </div>
-                          <span
-                            className={cn(
-                              "text-[11px] tabular-nums px-1.5 py-0.2 rounded font-medium",
-                              isSelected
-                                ? "bg-white/20 text-white font-bold"
-                                : "bg-muted text-muted-foreground"
-                            )}
-                          >
-                            {app.usuarios}
-                          </span>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* ── CONTENEDOR INTERNO: APLICACIÓN SELECCIONADA (ENCABEZADO + ROLES Y SEDES) ── */}
