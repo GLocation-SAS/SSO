@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import {
   Table,
   TableHeader,
@@ -236,11 +237,11 @@ export function UsuarioModalAccess({
     
     setConfirmDialog({
       open: true,
-      title: isActivo ? "Â¿Inactivar acceso?" : "Â¿Activar acceso?",
+      title: isActivo ? "¿Desactivar acceso?" : "¿Activar acceso?",
       description: isActivo 
-        ? `Estás a punto de inactivar el acceso a ${asig.aplicacionNombre}.` 
+        ? `Estás a punto de desactivar el acceso a ${asig.aplicacionNombre}.` 
         : `Estás a punto de activar el acceso a ${asig.aplicacionNombre}.`,
-      confirmText: isActivo ? "Inactivar" : "Activar",
+      confirmText: isActivo ? "Desactivar" : "Activar",
       variant: isActivo ? "warning" : "success",
       onConfirm: () => {
         const sedesCopy = usuario.sedes.map((s) => ({
@@ -295,7 +296,7 @@ export function UsuarioModalAccess({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
+        size="2xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-surface"
         onInteractOutside={(e) => {
           if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
@@ -568,8 +569,21 @@ export function UsuarioModalAccess({
                                   <TableCell className="font-semibold text-foreground">
                                     {asig.aplicacionNombre}
                                   </TableCell>
-                                  <TableCell className="text-muted-foreground font-medium">
-                                    {asig.rolNombre}
+                                  <TableCell>
+                                    {(() => {
+                                      const style = getRoleBadgeStyle(asig.rolNombre);
+                                      return (
+                                        <Badge
+                                          tone={style.tone}
+                                          appearance={style.appearance}
+                                          size="sm"
+                                          className={style.className}
+                                        >
+                                          <ShieldCheck className="size-3" />
+                                          {asig.rolNombre}
+                                        </Badge>
+                                      );
+                                    })()}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <Badge
@@ -623,7 +637,7 @@ export function UsuarioModalAccess({
                                               variant="ghost"
                                               size="icon"
                                               onClick={() => handleToggleAsigStatus(asig)}
-                                              aria-label={asig.estado === "Activo" ? "Inactivar acceso" : "Activar acceso"}
+                                              aria-label={asig.estado === "Activo" ? "Desactivar acceso" : "Activar acceso"}
                                               className={cn(
                                                 "size-7",
                                                 asig.estado === "Activo"
@@ -639,7 +653,7 @@ export function UsuarioModalAccess({
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent variant="info" side="top">
-                                            {asig.estado === "Activo" ? "Inactivar acceso" : "Activar acceso"}
+                                            {asig.estado === "Activo" ? "Desactivar acceso" : "Activar acceso"}
                                           </TooltipContent>
                                         </Tooltip>
 

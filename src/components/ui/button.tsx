@@ -144,8 +144,8 @@ const buttonVariants = cva(
 
         neutral: [
           // Base
-          "border-neutral-500",
-          "bg-neutral-500",
+          "border-neutral-600",
+          "bg-neutral-600",
           "text-white",
           "font-semibold",
 
@@ -161,7 +161,6 @@ const buttonVariants = cva(
           "hover:bg-neutral-700",
           "hover:border-neutral-700",
           "hover:text-white",
-
         ].join(" "),
 
         outline: [

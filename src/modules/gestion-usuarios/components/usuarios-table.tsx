@@ -24,7 +24,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid, MoreVertical } from "lucide-react";
+import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid } from "lucide-react";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import { UsuarioItem } from "../data/usuarios-data";
 import {
   Pagination,
@@ -118,11 +119,21 @@ function AccesosCell({
       {/* 3. Rol */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 text-xs cursor-default">
-            <ShieldCheck className="size-3.5 text-primary shrink-0" />
-            <span className="font-semibold text-xs text-foreground truncate max-w-[210px]">
-              {primaryRol}
-            </span>
+          <div className="flex items-center gap-1.5 cursor-default">
+            {(() => {
+              const style = getRoleBadgeStyle(primaryRol);
+              return (
+                <Badge
+                  tone={style.tone}
+                  appearance={style.appearance}
+                  size="sm"
+                  className={cn("max-w-[210px] truncate text-[10px] tracking-normal", style.className)}
+                >
+                  <ShieldCheck className="size-3" />
+                  <span className="truncate">{primaryRol}</span>
+                </Badge>
+              );
+            })()}
           </div>
         </TooltipTrigger>
         <TooltipContent variant="info" side="top" className="flex flex-col items-start gap-1">
@@ -243,48 +254,49 @@ export function UsuariosTable({
         <TooltipContent variant="info" side="top">Gestionar accesos</TooltipContent>
       </Tooltip>
 
-      <DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Ver más acciones"
-                className="size-8 text-muted-foreground hover:text-foreground"
-              >
-                <MoreVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent variant="info" side="top">Ver más acciones</TooltipContent>
-        </Tooltip>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={() => onChangePassword(usr)} className="gap-2 cursor-pointer">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onChangePassword(usr)}
+            aria-label="Cambiar clave"
+            className="size-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+          >
             <Key className="size-4" />
-            <span>Cambiar clave</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => onToggleStatus(usr)} 
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent variant="info" side="top">Cambiar clave</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onToggleStatus(usr)}
+            aria-label={usr.estado === "Activo" ? "Desactivar usuario" : "Activar usuario"}
             className={cn(
-              "gap-2 cursor-pointer",
-              usr.estado === "Activo" ? "text-warning focus:bg-warning/10 focus:text-warning" : "text-success focus:bg-success/10 focus:text-success"
+              "size-8",
+              usr.estado === "Activo"
+                ? "text-muted-foreground hover:text-warning hover:bg-warning/10"
+                : "text-muted-foreground hover:text-success hover:bg-success/10"
             )}
           >
             {usr.estado === "Activo" ? (
-              <>
-                <PowerOff className="size-4" />
-                <span>Inactivar usuario</span>
-              </>
+              <PowerOff className="size-4" />
             ) : (
-              <>
-                <Power className="size-4" />
-                <span>Activar usuario</span>
-              </>
+              <Power className="size-4" />
             )}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent
+          variant={usr.estado === "Activo" ? "warning" : "success"}
+          side="top"
+        >
+          {usr.estado === "Activo" ? "Desactivar usuario" : "Activar usuario"}
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 
@@ -293,245 +305,240 @@ export function UsuariosTable({
       <div id="usuarios-table-container" className="flex flex-col gap-4">
         <div className="hidden lg:block overflow-x-auto w-full">
           <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[20%] min-w-[180px] dark:text-white pl-6">Usuario</TableHead>
-              <TableHead className="w-[15%] min-w-[130px] dark:text-white">Documento</TableHead>
-              <TableHead className="w-[22%] min-w-[200px] dark:text-white">Correo</TableHead>
-              <TableHead className="w-[18%] min-w-[160px] dark:text-white">Accesos</TableHead>
-              <TableHead className="w-[10%] min-w-[100px] text-center dark:text-white">Estado</TableHead>
-              <TableHead className="w-[10%] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
-              <TableHead className="w-[5%] min-w-[90px] text-right dark:text-white pr-6">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedUsuarios.length === 0 ? (
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  No se encontraron usuarios.
-                </TableCell>
+                <TableHead className="w-[20%] min-w-[180px] dark:text-white pl-6">Usuario</TableHead>
+                <TableHead className="w-[15%] min-w-[130px] dark:text-white">Documento</TableHead>
+                <TableHead className="w-[22%] min-w-[200px] dark:text-white">Correo</TableHead>
+                <TableHead className="w-[18%] min-w-[160px] dark:text-white">Accesos</TableHead>
+                <TableHead className="w-[10%] min-w-[100px] text-center dark:text-white">Estado</TableHead>
+                <TableHead className="w-[10%] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
+                <TableHead className="w-[5%] min-w-[90px] text-right dark:text-white pr-6">Acciones</TableHead>
               </TableRow>
-            ) : (
-              paginatedUsuarios.map((usr) => {
-                return (
-                  <TableRow key={usr.id}>
-                    {/* 1. Usuario */}
-                    <TableCell className="pl-6">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="font-semibold text-sm text-foreground truncate block w-full cursor-default">
-                            {usr.nombre} {usr.apellidos}
+            </TableHeader>
+            <TableBody>
+              {paginatedUsuarios.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    No se encontraron usuarios.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedUsuarios.map((usr) => {
+                  return (
+                    <TableRow key={usr.id}>
+                      {/* 1. Usuario */}
+                      <TableCell className="pl-6">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="font-semibold text-sm text-foreground truncate block w-full cursor-default">
+                              {usr.nombre} {usr.apellidos}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent variant="info" side="top">
+                            <p>{usr.nombre} {usr.apellidos}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+
+                      {/* 2. Documento (Tipo + Número) */}
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-foreground">
+                            {usr.documentoIdentificacion || usr.identificacion || "—"}
                           </span>
-                        </TooltipTrigger>
-                        <TooltipContent variant="info" side="top">
-                          <p>{usr.nombre} {usr.apellidos}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-
-                    {/* 2. Documento (Tipo + Número) */}
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">
-                          {usr.documentoIdentificacion || usr.identificacion || "—"}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {usr.tipoDocumento || "Cédula"}
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    {/* 4. Correo */}
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="text-sm text-foreground truncate block w-full cursor-default">
-                            {usr.email || usr.correo || "—"}
+                          <span className="text-[11px] text-muted-foreground">
+                            {usr.tipoDocumento || "Cédula"}
                           </span>
-                        </TooltipTrigger>
-                        <TooltipContent variant="info" side="top">
-                          <p>{usr.email || usr.correo || "—"}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
+                        </div>
+                      </TableCell>
 
-                    {/* 5. Accesos (Sede · Aplicación · Rol) */}
-                    <TableCell>
-                      <AccesosCell usr={usr} />
-                    </TableCell>
+                      {/* 4. Correo */}
+                      <TableCell>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm text-foreground truncate block w-full cursor-default">
+                              {usr.email || usr.correo || "—"}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent variant="info" side="top">
+                            <p>{usr.email || usr.correo || "—"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
 
-                    {/* 6. Estado */}
-                    <TableCell className="text-center">
-                      <Badge
-                        tone={
-                          usr.estado === "Activo"
-                            ? "success"
-                            : usr.estado === "Inactivo"
-                              ? "neutral"
-                              : "warning"
-                        }
-                        appearance="soft"
-                        className={cn(
-                          "font-semibold border text-xs",
-                          usr.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                          usr.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
-                          usr.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
-                        )}
-                      >
-                        {usr.estado}
-                      </Badge>
-                    </TableCell>
+                      {/* 5. Accesos (Sede · Aplicación · Rol) */}
+                      <TableCell>
+                        <AccesosCell usr={usr} />
+                      </TableCell>
 
-                    {/* 7. Fecha de creación */}
-                    <TableCell>
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">
-                        {usr.fechaCreacion}
-                      </span>
-                    </TableCell>
+                      {/* 6. Estado */}
+                      <TableCell className="text-center">
+                        <Badge
+                          tone={
+                            usr.estado === "Activo"
+                              ? "success"
+                              : usr.estado === "Inactivo"
+                                ? "neutral"
+                                : "warning"
+                          }
+                          appearance="soft"
+                          className={cn(
+                            "font-semibold border text-xs",
+                            usr.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
+                            usr.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700",
+                            usr.estado === "Pendiente" && "bg-warning/15 text-warning-800 dark:text-warning-300 border-warning/30"
+                          )}
+                        >
+                          {usr.estado}
+                        </Badge>
+                      </TableCell>
 
-                    {/* 8. Acciones visibles */}
-                    <TableCell className="text-right pr-6 whitespace-nowrap">
-                      {renderActions(usr)}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                      {/* 7. Fecha de creación */}
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          {usr.fechaCreacion}
+                        </span>
+                      </TableCell>
+
+                      {/* 8. Acciones visibles */}
+                      <TableCell className="text-right pr-6 whitespace-nowrap">
+                        {renderActions(usr)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
 
-      {/* Mobile Card Row (Responsive) */}
-      <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        {paginatedUsuarios.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground border border-border rounded-xl bg-surface">
-            No se encontraron usuarios.
-          </div>
-        ) : (
-          paginatedUsuarios.map((usr) => (
-            <InteractiveCard
-              key={usr.id}
-              className="flex flex-col gap-3 text-left"
-              color="default"
-              hideChevron
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-col">
-                  <span className="font-bold text-sm text-foreground">{usr.nombre} {usr.apellidos}</span>
-                  <span className="text-xs text-muted-foreground">{usr.email || usr.correo || "-"}</span>
-                </div>
-                <Badge
-                  appearance="soft"
-                  variant={usr.estado === "Activo" ? "success" : "default"}
-                  className={cn(
-                    "shrink-0",
-                    usr.estado === "Activo"
-                      ? "bg-success/10 text-success border-transparent"
-                      : "bg-muted text-muted-foreground border-transparent"
-                  )}
-                >
-                  {usr.estado}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex flex-col">
-                  <span className="text-muted-foreground font-semibold">Documento</span>
-                  <span className="text-foreground">{usr.documentoIdentificacion || usr.identificacion || "-"}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-muted-foreground font-semibold">Registro</span>
-                  <span className="text-foreground">{usr.fechaCreacion}</span>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
-                <span className="text-xs text-muted-foreground font-semibold">Sedes y Accesos</span>
-                <div className="bg-muted/30 p-2 rounded-md">
-                  <AccesosCell usr={usr} />
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-border/60 flex items-center justify-end">
-                {renderActions(usr)}
-              </div>
-            </InteractiveCard>
-          ))
-        )}
-      </div>
-
-      {/* Paginación */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <span className="text-xs text-muted-foreground">
-            Mostrando {usuarios.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, usuarios.length)} de {usuarios.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">por pág:</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1">
-                  <span>{itemsPerPage}</span>
-                  <ChevronDown className="size-3 opacity-60" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[60px]">
-                {[3, 6, 9, 12].map((size) => (
-                  <DropdownMenuItem
-                    key={size}
-                    onClick={() => {
-                      setItemsPerPage(size);
-                      setCurrentPage(1);
-                    }}
-                    className="text-xs cursor-pointer justify-center"
+        {/* Mobile Card Row (Responsive) */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedUsuarios.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground border border-border rounded-xl bg-surface">
+              No se encontraron usuarios.
+            </div>
+          ) : (
+            paginatedUsuarios.map((usr) => (
+              <InteractiveCard
+                key={usr.id}
+                className="flex flex-col gap-3 text-left"
+                color="default"
+                hideChevron
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{usr.nombre} {usr.apellidos}</span>
+                    <span className="text-xs text-muted-foreground">{usr.email || usr.correo || "-"}</span>
+                  </div>
+                  <Badge
+                    appearance="soft"
+                    tone={usr.estado === "Activo" ? "success" : "neutral"}
+                    className="shrink-0"
                   >
-                    {size}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                    {usr.estado}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground font-semibold">Documento</span>
+                    <span className="text-foreground">{usr.documentoIdentificacion || usr.identificacion || "-"}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground font-semibold">Registro</span>
+                    <span className="text-foreground">{usr.fechaCreacion}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
+                  <span className="text-xs text-muted-foreground font-semibold">Sedes y Accesos</span>
+                  <div className="bg-muted/30 p-2 rounded-md">
+                    <AccesosCell usr={usr} />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                  {renderActions(usr)}
+                </div>
+              </InteractiveCard>
+            ))
+          )}
         </div>
-        <Pagination className="w-auto mx-0">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentPage((p) => Math.max(1, p - 1));
-                }}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
+
+        {/* Paginación */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-muted-foreground">
+              Mostrando {usuarios.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, usuarios.length)} de {usuarios.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">por pág:</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1">
+                    <span>{itemsPerPage}</span>
+                    <ChevronDown className="size-3 opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[60px]">
+                  {[3, 6, 9, 12].map((size) => (
+                    <DropdownMenuItem
+                      key={size}
+                      onClick={() => {
+                        setItemsPerPage(size);
+                        setCurrentPage(1);
+                      }}
+                      className="text-xs cursor-pointer justify-center"
+                    >
+                      {size}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          <Pagination className="w-auto mx-0">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
                   href="#"
-                  isActive={currentPage === i + 1}
                   onClick={(e) => {
                     e.preventDefault();
-                    setCurrentPage(i + 1);
+                    setCurrentPage((p) => Math.max(1, p - 1));
                   }}
-                >
-                  {i + 1}
-                </PaginationLink>
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                />
               </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCurrentPage((p) => Math.min(totalPages, p + 1));
-                }}
-                className={currentPage === totalPages || totalPages === 0 ? "pointer-events-none opacity-50" : ""}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    href="#"
+                    isActive={currentPage === i + 1}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(i + 1);
+                    }}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                  }}
+                  className={currentPage === totalPages || totalPages === 0 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
-    </div>
-  </TooltipProvider>
-);
+    </TooltipProvider>
+  );
 }

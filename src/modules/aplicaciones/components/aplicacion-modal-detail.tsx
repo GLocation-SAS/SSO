@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InteractiveCard } from "@/components/ui/data-display";
 import {
   Users,
   ShieldCheck,
@@ -32,6 +33,12 @@ import { TabResumen } from "./tabs/tab-resumen";
 import { TabUsuarios } from "./tabs/tab-usuarios";
 import { TabRoles } from "./tabs/tab-roles";
 import { TabRecursos } from "./tabs/tab-recursos";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AplicacionModalDetailProps {
   open: boolean;
@@ -69,96 +76,90 @@ export function AplicacionModalDetail({
 
   const IconComponent = getAppIcon(aplicacion.icono);
 
+  const [activeTab, setActiveTab] = React.useState("resumen");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-background"
+        size="3xl"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
-          <div className="flex items-center justify-between w-full">
-            <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
-              Detalle de la aplicación
-            </DialogTitle>
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1.5"
-            >
-              <Link href={`/aplicaciones/${aplicacion.id}`}>
-                <ExternalLink className="size-3.5" />
-                <span>Página completa</span>
-              </Link>
-            </Button>
-          </div>
+        <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 items-start text-left">
+          <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+            Detalle de la aplicación
+          </DialogTitle>
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-6 bg-background">
+        <div className="overflow-y-auto flex-1 p-6 space-y-6 bg-white dark:bg-zinc-950">
           {/* Header de resumen */}
-          <div className="p-4 rounded-xl border border-border bg-background flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-2xs">
-            <div className="flex items-start gap-3.5">
-              <div className="size-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 mt-0.5">
-                <IconComponent className="size-6" />
+          <InteractiveCard
+            hideChevron
+            color="primary"
+            className="cursor-default"
+            borderless={true}
+            shadowless={true}
+            decorativeIcon={<IconComponent className="size-full" />}
+            rightElement={
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="neutral"
+                      size="sm"
+                      rightIcon={<ExternalLink className="size-3.5" />}
+                      onClick={() => window.open(aplicacion.urlAcceso, '_blank', 'noopener,noreferrer')}
+                    >
+                      Acceder al portal
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent variant="info" side="top" className="max-w-xs text-center">
+                    <p>Esta acción te llevará fuera del SSO hacia el portal de {aplicacion.nombre}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            }
+          >
+            <div className="flex flex-col gap-1.5 mt-0.5 w-full">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-bold text-foreground">
+                  {aplicacion.nombre}
+                </h2>
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                  {aplicacion.codigo}
+                </span>
+                <Badge
+                  tone={aplicacion.estado === "Activa" ? "success" : "neutral"}
+                  appearance="soft"
+                  size="sm"
+                  className="font-semibold text-[10px] px-2 py-0"
+                >
+                  {aplicacion.estado}
+                </Badge>
               </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-lg font-bold text-foreground">
-                    {aplicacion.nombre}
-                  </h2>
-                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-                    {aplicacion.codigo}
-                  </span>
-                  <Badge
-                    tone={aplicacion.estado === "Activa" ? "success" : "neutral"}
-                    appearance="soft"
-                    size="sm"
-                    className="font-semibold text-xs"
-                  >
-                    {aplicacion.estado}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground max-w-xl">
-                  {aplicacion.descripcion}
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Users className="size-3.5 text-primary" />
-                    <strong className="text-foreground">{aplicacion.usuariosCount}</strong> usuarios
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <ShieldCheck className="size-3.5 text-info" />
-                    <strong className="text-foreground">{aplicacion.rolesCount}</strong> roles
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FolderTree className="size-3.5 text-warning-600" />
-                    <strong className="text-foreground">{aplicacion.recursosCount}</strong> recursos
-                  </span>
-                </div>
+              <p className="text-xs text-muted-foreground max-w-2xl">
+                {aplicacion.descripcion}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-1.5 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Users className="size-3.5 text-primary" />
+                  <strong className="text-foreground">{aplicacion.usuariosCount}</strong> usuarios
+                </span>
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="size-3.5 text-info" />
+                  <strong className="text-foreground">{aplicacion.rolesCount}</strong> roles
+                </span>
+                <span className="flex items-center gap-1">
+                  <FolderTree className="size-3.5 text-warning-600" />
+                  <strong className="text-foreground">{aplicacion.recursosCount}</strong> recursos
+                </span>
               </div>
             </div>
-
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-xs shrink-0 gap-1.5 h-8"
-            >
-              <a
-                href={aplicacion.urlAcceso}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>Acceder al portal</span>
-                <ExternalLink className="size-3.5" />
-              </a>
-            </Button>
-          </div>
+          </InteractiveCard>
 
           {/* Tabs Navigation */}
-          <Tabs defaultValue="resumen" className="w-full flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col">
             <TabsList variant="line" className="w-full justify-start border-b border-border mb-4">
               <TabsTrigger value="resumen" className="px-6 py-2.5 text-xs font-semibold">
                 Resumen
@@ -176,7 +177,7 @@ export function AplicacionModalDetail({
 
             {/* TAB 1: RESUMEN */}
             <TabsContent value="resumen" className="mt-0 outline-none">
-              <TabResumen aplicacion={aplicacion} />
+              <TabResumen aplicacion={aplicacion} onNavigateTab={setActiveTab} />
             </TabsContent>
 
             {/* TAB 2: USUARIOS */}
@@ -197,9 +198,9 @@ export function AplicacionModalDetail({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between sm:justify-between">
           <Button
-            variant="outline"
+            variant="neutral"
             onClick={() => onOpenChange(false)}
             className="text-xs"
           >
@@ -209,22 +210,18 @@ export function AplicacionModalDetail({
           <div className="flex items-center gap-2">
             {onToggleStatus && (
               <Button
-                variant="outline"
+                variant={aplicacion.estado === "Activa" ? "warning" : "success"}
                 size="sm"
                 onClick={() => {
                   onOpenChange(false);
                   onToggleStatus(aplicacion);
                 }}
-                className={
-                  aplicacion.estado === "Activa"
-                    ? "text-warning hover:text-warning hover:bg-warning/10 border-warning/30 text-xs"
-                    : "text-success hover:text-success hover:bg-success/10 border-success/30 text-xs"
-                }
+                className="gap-2 text-xs"
               >
                 {aplicacion.estado === "Activa" ? (
                   <>
                     <PowerOff className="size-3.5" />
-                    <span>Inactivar aplicación</span>
+                    <span>Desactivar aplicación</span>
                   </>
                 ) : (
                   <>
@@ -238,6 +235,7 @@ export function AplicacionModalDetail({
             {onEdit && (
               <Button
                 variant="primary"
+                size="sm"
                 onClick={() => {
                   onOpenChange(false);
                   onEdit(aplicacion);

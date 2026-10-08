@@ -104,8 +104,8 @@ export function UsuarioSheetForm({
         setTipoDocumento("Cédula");
         setIdentificacion(usuarioToEdit.documentoIdentificacion || usuarioToEdit.identificacion || "");
         setCorreo(usuarioToEdit.email || usuarioToEdit.correo || "");
-        setTelefono(usuarioToEdit.telefono);
-        setCargo(usuarioToEdit.cargo);
+        setTelefono(usuarioToEdit.telefono || "");
+        setCargo(usuarioToEdit.cargo || "");
         setEstado(usuarioToEdit.estado);
         const sedes = usuarioToEdit.sedes.map(s => s.sedeNombre);
         setSelectedSedes(sedes);

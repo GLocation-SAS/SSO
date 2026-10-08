@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InputGroup, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   ShieldCheck,
   Users,
@@ -107,7 +114,8 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <TooltipProvider>
+      <div className="flex flex-col gap-6">
       {/* Header del Tab con Botón de Creación */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-border bg-muted/20">
         <div className="flex items-center gap-3">
@@ -144,20 +152,19 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
             className="border border-border bg-surface shadow-2xs hover:border-primary/40 transition-all flex flex-col justify-between"
           >
             <CardHeader className="p-5 pb-3 border-b border-border/50">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-3">
                 <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <ShieldCheck className="size-4.5" />
                 </div>
-                <Badge tone="primary" appearance="outline" size="sm">
-                  {rol.usuariosCount} usuarios
-                </Badge>
+                <div>
+                  <CardTitle className="text-base font-heading font-bold text-foreground">
+                    {rol.nombre}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                    {rol.descripcion}
+                  </CardDescription>
+                </div>
               </div>
-              <CardTitle className="text-base font-heading font-bold text-foreground mt-2">
-                {rol.nombre}
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground line-clamp-2">
-                {rol.descripcion}
-              </CardDescription>
             </CardHeader>
 
             <CardContent className="p-5 pt-3 flex flex-col gap-3">
@@ -177,28 +184,35 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
               <div className="flex items-center gap-1.5 mt-1">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => {
                     setSelectedRolForModal(rol);
                     setIsPermissionsModalOpen(true);
                   }}
-                  className="flex-1 justify-between text-xs group hover:border-primary/50"
+                  className="flex-1 justify-between text-xs group"
                 >
                   <span>Ver matriz y permisos</span>
-                  <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-muted-foreground hover:text-foreground shrink-0"
-                  title="Abrir en página completa"
-                >
-                  <Link href={`/aplicaciones/${aplicacion.id}/roles/${rol.id}`}>
-                    <ExternalLink className="size-3.5" />
-                  </Link>
-                </Button>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-foreground shrink-0"
+                    >
+                      <Link href={`/aplicaciones/${aplicacion.id}/roles/${rol.id}`}>
+                        <ExternalLink className="size-3.5" />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" variant="info" className="flex-col items-start max-w-[220px] text-left">
+                    <p className="font-semibold">Gestionar rol</p>
+                    <p className="text-[11px] opacity-90">Te redirigirá a la vista detallada de configuración del rol.</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </CardContent>
           </Card>
@@ -209,19 +223,12 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent size="lg" className="p-0 gap-0 overflow-hidden">
           <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 text-left">
-            <div className="flex items-center gap-3">
-              <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <ShieldCheck className="size-5" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-heading font-bold text-foreground">
-                  Crear rol para {aplicacion.nombre}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                  Define el perfil institucional. A continuación podrás configurar su matriz de permisos.
-                </DialogDescription>
-              </div>
-            </div>
+            <DialogTitle className="text-xl font-heading font-bold text-primary">
+              Crear rol para {aplicacion.nombre}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Define el perfil institucional. A continuación podrás configurar su matriz de permisos.
+            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreateRol} className="p-6 space-y-4">
@@ -229,31 +236,35 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
               <label className="text-xs font-semibold text-foreground">
                 Nombre del rol <span className="text-danger">*</span>
               </label>
-              <Input
-                placeholder="Ej. Gestor de Distrito, Auditor, Operador"
-                value={nuevoNombre}
-                onChange={(e) => {
-                  setNuevoNombre(e.target.value);
-                  setError(null);
-                }}
-                className="text-sm"
-              />
+              <InputGroup>
+                <InputGroupInput
+                  placeholder="Ej. Gestor de Distrito, Auditor, Operador"
+                  value={nuevoNombre}
+                  onChange={(e) => {
+                    setNuevoNombre(e.target.value);
+                    setError(null);
+                  }}
+                  className="text-sm"
+                />
+              </InputGroup>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground">
                 Descripción funcional <span className="text-danger">*</span>
               </label>
-              <Textarea
-                placeholder="Describe qué funciones y facultades otorga este rol a los funcionarios..."
-                rows={3}
-                value={nuevaDescripcion}
-                onChange={(e) => {
-                  setNuevaDescripcion(e.target.value);
-                  setError(null);
-                }}
-                className="text-sm"
-              />
+              <InputGroup className="h-auto">
+                <InputGroupTextarea
+                  placeholder="Describe qué funciones y facultades otorga este rol a los funcionarios..."
+                  rows={3}
+                  value={nuevaDescripcion}
+                  onChange={(e) => {
+                    setNuevaDescripcion(e.target.value);
+                    setError(null);
+                  }}
+                  className="text-sm"
+                />
+              </InputGroup>
             </div>
 
             {error && (
@@ -273,7 +284,7 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
             <DialogFooter className="pt-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="neutral"
                 onClick={() => setIsCreateOpen(false)}
                 className="text-xs"
               >
@@ -295,7 +306,8 @@ export function TabRoles({ aplicacion }: TabRolesProps) {
         rol={selectedRolForModal}
         aplicacion={aplicacion}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
 

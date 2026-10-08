@@ -32,10 +32,10 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import {
   Building2,
   ShieldCheck,
-  MoreVertical,
   UserCheck,
   UserX,
   ExternalLink,
@@ -65,11 +65,6 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
   const [selectedSede, setSelectedSede] = React.useState("Todas");
   const [selectedEstado, setSelectedEstado] = React.useState("Todos");
 
-  // Diálogo para revocar/cambiar estado
-  const [selectedUserToToggle, setSelectedUserToToggle] =
-    React.useState<AplicacionUsuarioAccess | null>(null);
-  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
-
   // Lista única de roles disponibles en esta app
   const availableRoles = React.useMemo(() => {
     return Array.from(new Set(usuarios.map((u) => u.rol)));
@@ -93,21 +88,6 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
     });
   }, [usuarios, searchTerm, selectedRol, selectedSede, selectedEstado]);
 
-  const handleToggleUserStatus = () => {
-    if (!selectedUserToToggle) return;
-    const newStatus =
-      selectedUserToToggle.estado === "Activo" ? "Inactivo" : "Activo";
-    setUsuarios((prev) =>
-      prev.map((u) =>
-        u.id === selectedUserToToggle.id ? { ...u, estado: newStatus } : u
-      )
-    );
-    toast.success(
-      `Acceso de "${selectedUserToToggle.usuarioNombre}" actualizado a ${newStatus}.`
-    );
-    setIsConfirmOpen(false);
-  };
-
   return (
     <TooltipProvider delayDuration={150}>
       <div className="flex flex-col gap-6">
@@ -128,12 +108,6 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
               </p>
             </div>
           </div>
-          <Button asChild variant="outline" size="sm" className="h-8 text-xs shrink-0">
-            <Link href="/gestion-usuarios/usuarios" className="gap-1.5">
-              <span>Gestionar en Usuarios</span>
-              <ExternalLink className="size-3" />
-            </Link>
-          </Button>
         </div>
 
         {/* Barra de Filtros */}
@@ -321,17 +295,22 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
 
                     {/* 3. Rol */}
                     <TableCell>
-                      <div className="flex items-center gap-2 text-xs">
-                        <ShieldCheck className="size-3.5 text-secondary-600 dark:text-secondary-300 shrink-0" />
-                        <Badge
-                          tone="primary"
-                          appearance="soft"
-                          size="sm"
-                          className="font-medium"
-                        >
-                          {usr.rol}
-                        </Badge>
-                      </div>
+                      {(() => {
+                        const style = getRoleBadgeStyle(usr.rol);
+                        return (
+                          <div className="flex items-center gap-2 text-xs">
+                            <ShieldCheck className="size-3.5 text-muted-foreground shrink-0" />
+                            <Badge
+                              tone={style.tone}
+                              appearance={style.appearance}
+                              size="sm"
+                              className={style.className}
+                            >
+                              {usr.rol}
+                            </Badge>
+                          </div>
+                        );
+                      })()}
                     </TableCell>
 
                     {/* 4. Estado */}
@@ -354,51 +333,29 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
 
                     {/* 6. Acciones */}
                     <TableCell className="text-right pr-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-foreground dark:hover:text-white"
-                          >
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem asChild className="cursor-pointer">
-                            <Link
-                              href="/gestion-usuarios/usuarios"
-                              className="flex items-center gap-2"
+                      <div className="flex items-center justify-end">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              asChild
+                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
                             >
-                              <Eye className="size-4 text-muted-foreground" />
-                              <span>Ver usuario</span>
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUserToToggle(usr);
-                              setIsConfirmOpen(true);
-                            }}
-                            className={
-                              usr.estado === "Activo"
-                                ? "text-warning cursor-pointer flex items-center gap-2"
-                                : "text-success cursor-pointer flex items-center gap-2"
-                            }
-                          >
-                            {usr.estado === "Activo" ? (
-                              <>
-                                <UserX className="size-4" />
-                                <span>Inactivar acceso</span>
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="size-4" />
-                                <span>Activar acceso</span>
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                              <Link
+                                href="/gestion-usuarios/usuarios"
+                                aria-label={`Ver usuario ${usr.usuarioNombre}`}
+                              >
+                                <Eye className="size-4" />
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" variant="info" className="flex-col items-start max-w-[220px] text-left">
+                            <p className="font-semibold">Gestionar en Usuarios</p>
+                            <p className="text-[11px] opacity-90">Te redirigirá a la vista general de usuarios para administrar este perfil.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -406,31 +363,6 @@ export function TabUsuarios({ aplicacion }: TabUsuariosProps) {
             </TableBody>
           </Table>
         </div>
-
-        {/* Diálogo de Confirmación */}
-        <ConfirmDialog
-          open={isConfirmOpen}
-          onOpenChange={setIsConfirmOpen}
-          title={
-            selectedUserToToggle?.estado === "Activo"
-              ? "Inactivar acceso de usuario"
-              : "Activar acceso de usuario"
-          }
-          description={`¿Confirmas que deseas ${selectedUserToToggle?.estado === "Activo"
-              ? "inactivar"
-              : "restablecer"
-            } los permisos de "${selectedUserToToggle?.usuarioNombre}" en la sede "${selectedUserToToggle?.sede
-            }" para esta aplicación?`}
-          confirmText={
-            selectedUserToToggle?.estado === "Activo"
-              ? "Inactivar acceso"
-              : "Activar acceso"
-          }
-          variant={
-            selectedUserToToggle?.estado === "Activo" ? "warning" : "success"
-          }
-          onConfirm={handleToggleUserStatus}
-        />
       </div>
     </TooltipProvider>
   );

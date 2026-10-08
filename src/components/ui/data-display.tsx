@@ -98,7 +98,7 @@ export function BaseCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface InteractiveCardProps {
-  title: string
+  title?: string
   subtitle?: string
   description?: string
   icon?: React.ReactNode
@@ -117,6 +117,7 @@ export interface InteractiveCardProps {
   shadowless?: boolean
   iconContainerClassName?: string
   activeInnerBgClassName?: string
+  as?: React.ElementType
 }
 
 const INTERACTIVE_COLORS: Record<string, string> = {
@@ -193,6 +194,7 @@ export function InteractiveCard({
   shadowless = false,
   iconContainerClassName,
   activeInnerBgClassName,
+  as: Component = onClick ? "button" : "div",
 }: InteractiveCardProps) {
   const colorClass = INTERACTIVE_COLORS[color] || INTERACTIVE_COLORS.default;
   const innerBgClass = isActive
@@ -202,9 +204,8 @@ export function InteractiveCard({
   const iconBgClass = INTERACTIVE_ICON_BG[color] || INTERACTIVE_ICON_BG.default;
 
   return (
-    <button
-      type="button"
-      disabled={disabled}
+    <Component
+      {...(Component === "button" ? { type: "button", disabled } : {})}
       onClick={onClick}
       className={cn(
         "group relative w-full text-left rounded-xl transition-all duration-200 outline-none overflow-hidden",
@@ -284,7 +285,7 @@ export function InteractiveCard({
           </div>
         )}
       </div>
-    </button>
+    </Component>
   )
 }
 

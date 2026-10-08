@@ -133,7 +133,7 @@ export function AplicacionModalForm({
       descripcion: descripcion.trim(),
       urlAcceso: urlAcceso.trim(),
       estado,
-      requiereAtencion: aplicacionToEdit?.requiereAtencion || false,
+      requiereAtencion: isEditing ? (aplicacionToEdit?.requiereAtencion || false) : true,
       fechaCreacion: aplicacionToEdit?.fechaCreacion || "Hoy, 10:00",
       ultimaActualizacion: "Hoy, ahora",
       usuariosCount: aplicacionToEdit?.usuariosCount || 0,
@@ -150,10 +150,10 @@ export function AplicacionModalForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border shrink-0 items-start text-left bg-white dark:bg-zinc-950">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Layers className="size-5" />
@@ -175,7 +175,7 @@ export function AplicacionModalForm({
         <form
           id="aplicacion-form"
           onSubmit={handleSubmit}
-          className="overflow-y-auto flex-1 p-6 space-y-5"
+          className="overflow-y-auto flex-1 p-6 space-y-5 bg-white dark:bg-zinc-950"
         >
           {/* Banner de flujo arquitectónico */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-3">
@@ -202,7 +202,7 @@ export function AplicacionModalForm({
                   placeholder="Ej. Gestión Docente, SIGE, Portal Estudiantil"
                   value={nombre}
                   onChange={(e) => handleNombreChange(e.target.value)}
-                  className="text-sm"
+                  className="text-sm bg-white dark:bg-zinc-950"
                 />
               </InputGroup>
               {errors.nombre && (
@@ -223,7 +223,7 @@ export function AplicacionModalForm({
                   placeholder="Ej. SGD, SIGE, TH"
                   value={codigo}
                   onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                  className="text-sm font-mono uppercase"
+                  className="text-sm font-mono uppercase bg-white dark:bg-zinc-950"
                 />
               </InputGroup>
             </div>
@@ -245,7 +245,7 @@ export function AplicacionModalForm({
                 rows={3}
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className="text-sm"
+                className="text-sm bg-white dark:bg-zinc-950"
               />
             </InputGroup>
             {errors.descripcion && (
@@ -268,7 +268,7 @@ export function AplicacionModalForm({
                   placeholder="https://sistema.mineduc.gob.ec"
                   value={urlAcceso}
                   onChange={(e) => setUrlAcceso(e.target.value)}
-                  className="text-sm font-mono"
+                  className="text-sm font-mono bg-white dark:bg-zinc-950"
                 />
               </InputGroup>
               {errors.urlAcceso && (
@@ -294,7 +294,7 @@ export function AplicacionModalForm({
                   placeholder="Seleccionar estado"
                   showClear={false}
                   size="sm"
-                  className="w-full text-xs"
+                  className="w-full text-xs bg-white dark:bg-zinc-950"
                 />
                 <ComboboxContent className="min-w-full">
                   <ComboboxList>
@@ -308,7 +308,7 @@ export function AplicacionModalForm({
         </form>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-muted/20 shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-end gap-3 bg-white dark:bg-zinc-950">
           <Button
             type="button"
             variant="neutral"

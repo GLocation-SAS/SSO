@@ -15,9 +15,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Edit,
-  Users,
-  ShieldCheck,
-  FolderTree,
   ExternalLink,
   GraduationCap,
   Briefcase,
@@ -25,8 +22,16 @@ import {
   KeyRound,
   MapPin,
   Layers,
+  MoreVertical,
+  PowerOff
 } from "lucide-react";
 import { Link } from "@/routing";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 import {
   AplicacionItem,
@@ -38,6 +43,7 @@ import { TabRoles } from "../components/tabs/tab-roles";
 import { TabRecursos } from "../components/tabs/tab-recursos";
 import { AplicacionModalForm } from "../components/aplicacion-modal-form";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface AplicacionDetailViewProps {
   id: string;
@@ -63,29 +69,45 @@ const getAppIcon = (iconName?: string) => {
 export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
   const foundApp = mockAplicacionesData.find((a) => a.id === id) || {
     id,
-    codigo: "APP",
-    nombre: "Aplicación Institucional",
-    descripcion: "Sistema de gestión y administración de procesos del MINEDUC.",
-    urlAcceso: "https://mineduc.gob.ec",
+    codigo: "SGD",
+    nombre: "Gestión Docente",
+    descripcion: "Sistema central para administración, escalafón y contratos del personal docente a nivel nacional.",
+    urlAcceso: "https://mineduc.gob.ec/sgd",
     estado: "Activa" as const,
-    requiereAtencion: false,
+    requiereAtencion: true,
     fechaCreacion: "01/01/2024",
     ultimaActualizacion: "Hoy, 10:00",
-    usuariosCount: 120,
-    rolesCount: 4,
-    recursosCount: 6,
-    icono: "Layers",
+    usuariosCount: 1420,
+    rolesCount: 8,
+    recursosCount: 14,
+    icono: "GraduationCap",
   };
 
   const [aplicacion, setAplicacion] = React.useState<AplicacionItem>(foundApp);
   const [activeTab, setActiveTab] = React.useState("resumen");
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [isConfirmToggleOpen, setIsConfirmToggleOpen] = React.useState(false);
 
   const IconComponent = getAppIcon(aplicacion.icono);
 
   const handleSaveApp = (updated: AplicacionItem) => {
     setAplicacion(updated);
     toast.success(`Datos de "${updated.nombre}" guardados exitosamente.`);
+  };
+
+  const handleToggleStatus = () => {
+    const isCurrentlyActive = aplicacion.estado === "Activa";
+    const newStatus: "Activa" | "Inactiva" = isCurrentlyActive ? "Inactiva" : "Activa";
+
+    setAplicacion((prev) => ({ ...prev, estado: newStatus }));
+
+    if (isCurrentlyActive) {
+      toast.warning(`La aplicación "${aplicacion.nombre}" fue desactivada.`);
+    } else {
+      toast.success(`La aplicación "${aplicacion.nombre}" ha sido activada.`);
+    }
+
+    setIsConfirmToggleOpen(false);
   };
 
   return (
@@ -149,39 +171,6 @@ export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
               <p className="text-sm text-muted-foreground max-w-2xl">
                 {aplicacion.descripcion}
               </p>
-
-              {/* Badges de Conteos Arquitectónicos */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <Users className="size-3.5 text-primary" />
-                  <span>
-                    <strong className="text-foreground">
-                      {aplicacion.usuariosCount.toLocaleString("es-EC")}
-                    </strong>{" "}
-                    usuarios
-                  </span>
-                </div>
-                <span className="text-muted-foreground/40">•</span>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <ShieldCheck className="size-3.5 text-info" />
-                  <span>
-                    <strong className="text-foreground">
-                      {aplicacion.rolesCount}
-                    </strong>{" "}
-                    roles
-                  </span>
-                </div>
-                <span className="text-muted-foreground/40">•</span>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <FolderTree className="size-3.5 text-warning-600" />
-                  <span>
-                    <strong className="text-foreground">
-                      {aplicacion.recursosCount}
-                    </strong>{" "}
-                    recursos
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -198,7 +187,7 @@ export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span>Abrir aplicación</span>
+                <span>Acceder a la aplicación</span>
                 <ExternalLink className="size-3.5" />
               </a>
             </Button>
@@ -212,6 +201,23 @@ export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
               <Edit className="size-3.5" />
               <span>Editar aplicación</span>
             </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="size-8">
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={() => setIsConfirmToggleOpen(true)}
+                  className="text-destructive focus:text-destructive cursor-pointer"
+                >
+                  <PowerOff className="size-4 mr-2" />
+                  {aplicacion.estado === "Activa" ? "Desactivar aplicación" : "Activar aplicación"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -219,14 +225,14 @@ export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto gap-2 sm:gap-6">
             <TabsTrigger value="resumen">Resumen</TabsTrigger>
-            <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="roles">Roles</TabsTrigger>
-            <TabsTrigger value="recursos">Recursos</TabsTrigger>
+            <TabsTrigger value="usuarios">Usuarios ({aplicacion.usuariosCount.toLocaleString("es-EC")})</TabsTrigger>
+            <TabsTrigger value="roles">Roles ({aplicacion.rolesCount})</TabsTrigger>
+            <TabsTrigger value="recursos">Recursos ({aplicacion.recursosCount})</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: RESUMEN */}
           <TabsContent value="resumen" className="pt-6 outline-none">
-            <TabResumen aplicacion={aplicacion} />
+            <TabResumen aplicacion={aplicacion} onNavigateTab={setActiveTab} />
           </TabsContent>
 
           {/* TAB 2: USUARIOS */}
@@ -252,6 +258,29 @@ export function AplicacionDetailView({ id }: AplicacionDetailViewProps) {
         onOpenChange={setIsEditModalOpen}
         aplicacionToEdit={aplicacion}
         onSave={handleSaveApp}
+      />
+      
+      {/* Confirmación Desactivar */}
+      <ConfirmDialog
+        open={isConfirmToggleOpen}
+        onOpenChange={setIsConfirmToggleOpen}
+        title={
+          aplicacion.estado === "Activa"
+            ? "Desactivar aplicación"
+            : "Activar aplicación"
+        }
+        description={
+          aplicacion.estado === "Activa"
+            ? "Los usuarios dejarán de tener acceso a esta aplicación. La configuración de roles y recursos se conservará."
+            : `¿Deseas reactivar el acceso a "${aplicacion.nombre}"? Los funcionarios con roles activos podrán autenticarse nuevamente.`
+        }
+        confirmText={
+          aplicacion.estado === "Activa"
+            ? "Desactivar aplicación"
+            : "Activar aplicación"
+        }
+        variant={aplicacion.estado === "Activa" ? "warning" : "success"}
+        onConfirm={handleToggleStatus}
       />
     </div>
   );

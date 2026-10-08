@@ -34,6 +34,7 @@ import {
   Grid,
 } from "lucide-react";
 import { UsuarioItem } from "../data/usuarios-data";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 
 interface UsuarioModalDetailProps {
   open: boolean;
@@ -64,7 +65,7 @@ export function UsuarioModalDetail({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
+        size="2xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-surface"
       >
         {/* HEADER */}
@@ -305,8 +306,21 @@ export function UsuarioModalDetail({
                                 <TableCell className="font-semibold text-foreground">
                                   {asig.aplicacionNombre}
                                 </TableCell>
-                                <TableCell className="text-muted-foreground font-medium">
-                                  {asig.rolNombre}
+                                <TableCell>
+                                  {(() => {
+                                    const style = getRoleBadgeStyle(asig.rolNombre);
+                                    return (
+                                      <Badge
+                                        tone={style.tone}
+                                        appearance={style.appearance}
+                                        size="sm"
+                                        className={style.className}
+                                      >
+                                        <ShieldCheck className="size-3" />
+                                        {asig.rolNombre}
+                                      </Badge>
+                                    );
+                                  })()}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <Badge

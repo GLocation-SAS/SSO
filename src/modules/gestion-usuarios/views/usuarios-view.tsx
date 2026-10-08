@@ -255,15 +255,15 @@ export function UsuariosView() {
       setConfirmDialog({
         open: true,
         variant: "warning",
-        title: "¿Inactivar usuario?",
-        description: `Estás a punto de inactivar a este usuario. Esta acción suspenderá su acceso a todas las aplicaciones asignadas.`,
-        confirmText: "Inactivar",
+        title: "¿Desactivar usuario?",
+        description: `Estás a punto de desactivar a este usuario. Esta acción suspenderá su acceso a todas las aplicaciones asignadas.`,
+        confirmText: "Desactivar",
         cancelText: "Cerrar",
         onConfirm: () => {
           setUsuarios((prev) =>
             prev.map((u) => (u.id === usuario.id ? { ...u, estado: "Inactivo" } : u))
           );
-          toast.info("Usuario inactivado correctamente", {
+          toast.info("Usuario desactivado correctamente", {
             description: `${nombreCompleto} ha pasado a estado Inactivo.`,
           });
         },

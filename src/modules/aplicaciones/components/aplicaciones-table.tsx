@@ -33,7 +33,6 @@ import {
   Users,
   ShieldCheck,
   Layers,
-  MoreVertical,
   ExternalLink,
   GraduationCap,
   Briefcase,
@@ -279,7 +278,7 @@ export function AplicacionesTable({
                               variant="ghost"
                               size="icon"
                               onClick={() => onToggleStatus(app)}
-                              aria-label={app.estado === "Activa" ? "Inactivar aplicación" : "Activar aplicación"}
+                              aria-label={app.estado === "Activa" ? "Desactivar aplicación" : "Activar aplicación"}
                               className={cn(
                                 "size-8",
                                 app.estado === "Activa"
@@ -295,7 +294,7 @@ export function AplicacionesTable({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="top" variant="info">
-                            {app.estado === "Activa" ? "Inactivar" : "Activar"}
+                            {app.estado === "Activa" ? "Desactivar" : "Activar"}
                           </TooltipContent>
                         </Tooltip>
                       </div>

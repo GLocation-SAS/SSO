@@ -14,7 +14,7 @@ export interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title?: string;
-  description?: string;
+  description?: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: "default" | "success" | "danger" | "warning" | "info";
@@ -40,15 +40,10 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter showCloseButton={false}>
-          <Button
-            type="button"
-            variant="neutral"
-            size="default"
-            onClick={() => onOpenChange(false)}
-          >
-            {cancelText}
-          </Button>
+        <DialogFooter 
+          showCloseButton={false}
+          className="flex-col sm:flex sm:flex-col w-full sm:w-full gap-3 [&_button]:w-full pt-4"
+        >
           <Button
             type="button"
             variant={variant === "default" ? "primary" : variant}
@@ -59,6 +54,14 @@ export function ConfirmDialog({
             }}
           >
             {confirmText}
+          </Button>
+          <Button
+            type="button"
+            variant="neutral"
+            size="default"
+            onClick={() => onOpenChange(false)}
+          >
+            {cancelText}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/combobox";
 import { Multiselect } from "@/components/ui/multiselect";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import { Stepper, Step } from "@/components/ui/stepper";
 import {
   Table,
@@ -365,7 +366,7 @@ export function UsuarioModalForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
+        size="2xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
         onInteractOutside={(e) => {
           if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
@@ -915,8 +916,21 @@ export function UsuarioModalForm({
                                     <TableCell className="font-semibold text-foreground">
                                       {asig.app}
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                      {asig.rol}
+                                    <TableCell>
+                                      {(() => {
+                                        const style = getRoleBadgeStyle(asig.rol);
+                                        return (
+                                          <Badge
+                                            tone={style.tone}
+                                            appearance={style.appearance}
+                                            size="sm"
+                                            className={style.className}
+                                          >
+                                            <ShieldCheck className="size-3" />
+                                            {asig.rol}
+                                          </Badge>
+                                        );
+                                      })()}
                                     </TableCell>
                                     <TableCell className="text-right">
                                       <TooltipProvider>

@@ -31,7 +31,15 @@ import {
   CornerDownRight,
   Folder,
   FileCode,
+  CheckSquare2,
+  Square,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Link } from "@/routing";
 import {
   mockAplicacionesData,
@@ -409,14 +417,26 @@ export function RolDetailView({ appId, rolId }: RolDetailViewProps) {
 
                     {/* Acción rápida */}
                     <TableCell className="text-right pr-6">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleAllForRecurso(item.recursoId)}
-                        className="h-7 text-[11px] text-muted-foreground hover:text-foreground"
-                      >
-                        {allSelected ? "Desmarcar todo" : "Todos"}
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleAllForRecurso(item.recursoId)}
+                            aria-label={allSelected ? "Desmarcar todos los permisos" : "Marcar todos los permisos"}
+                            className="size-7 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                          >
+                            {allSelected ? (
+                              <CheckSquare2 className="size-4 text-primary" />
+                            ) : (
+                              <Square className="size-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" variant="info">
+                          <p>{allSelected ? "Desmarcar todos los permisos" : "Marcar todos los permisos"}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 );

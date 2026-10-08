@@ -176,18 +176,25 @@ export function LogsTable({
 
                   {/* Acción "Ver detalle" */}
                   <TableCell className="text-right text-xs pr-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewDetail(log);
-                      }}
-                      className="h-8 px-2.5 text-xs text-primary dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 hover:bg-primary/10 dark:hover:bg-primary-900/40 gap-1 font-semibold"
-                    >
-                      <Eye className="size-3.5" />
-                      <span>Detalle</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetail(log);
+                          }}
+                          aria-label="Ver detalle de auditoría"
+                          className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" variant="info">
+                        <p>Ver detalle</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
@@ -341,18 +348,25 @@ export function AccesosTable({
 
                   {/* Ver detalle */}
                   <TableCell className="text-right text-xs pr-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewDetail(acc);
-                      }}
-                      className="h-8 px-2.5 text-xs text-primary dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 hover:bg-primary/10 dark:hover:bg-primary-900/40 gap-1 font-semibold"
-                    >
-                      <Eye className="size-3.5" />
-                      <span>Detalle</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetail(acc);
+                          }}
+                          aria-label="Ver detalle de acceso"
+                          className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" variant="info">
+                        <p>Ver detalle</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
@@ -534,8 +548,8 @@ export function ActividadTable({
                         act.totalAccesos > 100
                           ? "bg-primary/15 dark:bg-primary-900/40 text-primary dark:text-primary-300"
                           : act.totalAccesos > 0
-                          ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-neutral-200"
-                          : "text-muted-foreground dark:text-neutral-400"
+                            ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-neutral-200"
+                            : "text-muted-foreground dark:text-neutral-400"
                       )}
                     >
                       {act.totalAccesos}
@@ -595,31 +609,26 @@ function TablePaginationBar({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 text-xs text-muted-foreground dark:text-neutral-300">
-      <div className="flex items-center gap-2">
-        <span>
-          Mostrando <strong className="text-foreground dark:text-neutral-100">{startItem}-{endItem}</strong> de{" "}
-          <strong className="text-foreground dark:text-neutral-100">{totalItems}</strong> registros
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-3 border-t border-border bg-surface">
+      <div className="flex items-center gap-4">
+        <span className="text-xs text-muted-foreground">
+          Mostrando {startItem}–{endItem} de {totalItems}
         </span>
-        <div className="flex items-center gap-1.5 ml-2">
-          <span>Filas:</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">por pág:</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs gap-1 border-border bg-background dark:bg-muted/40 text-foreground dark:text-neutral-200 hover:bg-muted/50 dark:hover:bg-muted"
-              >
-                {itemsPerPage}
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1">
+                <span>{itemsPerPage}</span>
                 <ChevronDown className="size-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-[60px] bg-popover dark:bg-neutral-900 border-border">
+            <DropdownMenuContent align="start" className="min-w-[60px]">
               {[5, 7, 10, 20].map((size) => (
                 <DropdownMenuItem
                   key={size}
                   onClick={() => onItemsPerPageChange(size)}
-                  className="text-xs cursor-pointer justify-center text-popover-foreground dark:text-neutral-200"
+                  className="text-xs cursor-pointer justify-center"
                 >
                   {size}
                 </DropdownMenuItem>
@@ -638,10 +647,7 @@ function TablePaginationBar({
                 e.preventDefault();
                 onPageChange(Math.max(1, currentPage - 1));
               }}
-              className={cn(
-                "dark:text-neutral-200 dark:hover:bg-muted/60",
-                currentPage === 1 && "pointer-events-none opacity-50"
-              )}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
           {Array.from({ length: totalPages }).map((_, i) => (
@@ -653,10 +659,6 @@ function TablePaginationBar({
                   e.preventDefault();
                   onPageChange(i + 1);
                 }}
-                className={cn(
-                  "dark:text-neutral-200 dark:hover:bg-muted/60",
-                  currentPage === i + 1 && "dark:bg-primary dark:text-white font-bold"
-                )}
               >
                 {i + 1}
               </PaginationLink>
@@ -669,10 +671,7 @@ function TablePaginationBar({
                 e.preventDefault();
                 onPageChange(Math.min(totalPages, currentPage + 1));
               }}
-              className={cn(
-                "dark:text-neutral-200 dark:hover:bg-muted/60",
-                (currentPage === totalPages || totalPages === 0) && "pointer-events-none opacity-50"
-              )}
+              className={(currentPage === totalPages || totalPages === 0) ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
         </PaginationContent>

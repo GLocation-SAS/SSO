@@ -38,6 +38,7 @@ export function AplicacionesView() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedEstado, setSelectedEstado] = React.useState("Todos");
   const [filterAtencion, setFilterAtencion] = React.useState(false);
+  const [isExportingImage, setIsExportingImage] = React.useState(false);
 
   // Métricas para summary cards
   const totalCount = aplicaciones.length;
@@ -141,7 +142,7 @@ export function AplicacionesView() {
     const isNew = !aplicaciones.some((a) => a.id === savedApp.id);
     if (isNew) {
       setAplicaciones((prev) => [savedApp, ...prev]);
-      toast.success(`Aplicación "${savedApp.nombre}" creada correctamente.`);
+      toast.success(`Aplicación creada correctamente. Por favor completa su configuración.`);
       // Apertura automática del modal de detalle para configurar roles y recursos
       setDetailApp(savedApp);
       setIsDetailOpen(true);
@@ -173,7 +174,7 @@ export function AplicacionesView() {
     );
 
     if (isCurrentlyActive) {
-      toast.warning(`La aplicación "${appToToggle.nombre}" fue inactivada.`);
+      toast.warning(`La aplicación "${appToToggle.nombre}" fue desactivada.`);
     } else {
       toast.success(`La aplicación "${appToToggle.nombre}" ha sido activada.`);
     }
@@ -181,29 +182,224 @@ export function AplicacionesView() {
     setIsConfirmToggleOpen(false);
   };
 
+  // Exportar captura de imagen (foto) de la tabla
+  const handleExportTableImage = async () => {
+    setIsExportingImage(true);
+    toast.info("Generando captura de la tabla...", {
+      description: "Preparando imagen PNG en alta resolución.",
+    });
+
+    try {
+      const container = document.getElementById("aplicaciones-table-container");
+      if (!container) {
+        throw new Error("Contenedor de tabla no encontrado.");
+      }
+
+      // Generar snapshot canvas con diseño institucional nítido
+      const width = Math.max(container.scrollWidth || 1200, 1100);
+      const rowHeight = 44;
+      const headerHeight = 110;
+      const displayedApps = filteredApps.slice(0, 15);
+      const totalHeight = headerHeight + displayedApps.length * rowHeight + 60;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width * 2; // retina 2x
+      canvas.height = totalHeight * 2;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        throw new Error("No se pudo inicializar el contexto de imagen.");
+      }
+
+      ctx.scale(2, 2);
+
+      // Fondo blanco institucional
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, totalHeight);
+
+      // Barra superior institucional
+      ctx.fillStyle = "#024a87"; // Primary brand
+      ctx.fillRect(0, 0, width, 8);
+
+      // Encabezado institucional
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 18px Inter, system-ui, sans-serif";
+      ctx.fillText("Ministerio de Educación — Reporte de Aplicaciones", 24, 40);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "12px Inter, system-ui, sans-serif";
+      const fechaStr = new Date().toLocaleDateString("es-EC", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      ctx.fillText(`Generado el: ${fechaStr} | Total registros filtrados: ${filteredApps.length}`, 24, 62);
+
+      // Cabecera de la tabla
+      const yHeader = 85;
+      ctx.fillStyle = "#f1f5f9";
+      ctx.fillRect(20, yHeader, width - 40, 36);
+
+      ctx.fillStyle = "#1e293b";
+      ctx.font = "bold 11px Inter, system-ui, sans-serif";
+      const colX = {
+        app: 32,
+        codigo: 280,
+        estado: 420,
+        usuarios: 560,
+        roles: 700,
+        recursos: 840,
+        fecha: 980,
+      };
+
+      ctx.fillText("APLICACIÓN", colX.app, yHeader + 22);
+      ctx.fillText("CÓDIGO", colX.codigo, yHeader + 22);
+      ctx.fillText("ESTADO", colX.estado, yHeader + 22);
+      ctx.fillText("USUARIOS", colX.usuarios, yHeader + 22);
+      ctx.fillText("ROLES", colX.roles, yHeader + 22);
+      ctx.fillText("RECURSOS", colX.recursos, yHeader + 22);
+      ctx.fillText("ACTUALIZACIÓN", colX.fecha, yHeader + 22);
+
+      // Filas
+      let yRow = yHeader + 36;
+      displayedApps.forEach((app, idx) => {
+        // Fondo alterno suave
+        if (idx % 2 === 1) {
+          ctx.fillStyle = "#f8fafc";
+          ctx.fillRect(20, yRow, width - 40, rowHeight);
+        }
+
+        // Borde inferior sutil
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(20, yRow + rowHeight);
+        ctx.lineTo(width - 20, yRow + rowHeight);
+        ctx.stroke();
+
+        const textY = yRow + 26;
+
+        // Aplicacion
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 11px Inter, system-ui, sans-serif";
+        const nom = app.nombre;
+        ctx.fillText(nom.length > 25 ? nom.slice(0, 24) + "…" : nom, colX.app, textY);
+
+        // Codigo
+        ctx.fillStyle = "#475569";
+        ctx.font = "11px Inter, system-ui, sans-serif";
+        ctx.fillText(app.codigo, colX.codigo, textY);
+
+        // Estado badge pill
+        const isActiva = app.estado === "Activa";
+        ctx.fillStyle = isActiva ? "#ecfdf5" : "#f1f5f9";
+        const badgeX = colX.estado;
+        const badgeY = textY - 14;
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, 60, 20, 10);
+        ctx.fill();
+
+        ctx.fillStyle = isActiva ? "#10b981" : "#94a3b8";
+        ctx.beginPath();
+        ctx.arc(badgeX + 10, badgeY + 10, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isActiva ? "#065f46" : "#475569";
+        ctx.font = "bold 10px Inter, system-ui, sans-serif";
+        ctx.fillText(app.estado, badgeX + 18, textY);
+
+        // Usuarios
+        ctx.fillStyle = "#475569";
+        ctx.font = "11px Inter, system-ui, sans-serif";
+        ctx.fillText(app.usuariosCount.toString(), colX.usuarios, textY);
+
+        // Roles
+        ctx.fillText(app.rolesCount.toString(), colX.roles, textY);
+
+        // Recursos
+        ctx.fillText(app.recursosCount.toString(), colX.recursos, textY);
+
+        // Fecha
+        ctx.fillStyle = "#64748b";
+        ctx.font = "11px Inter, system-ui, sans-serif";
+        ctx.fillText(app.ultimaActualizacion || "—", colX.fecha, textY);
+
+        yRow += rowHeight;
+      });
+
+      // Pie de foto institucional
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10px Inter, system-ui, sans-serif";
+      ctx.fillText(
+        displayedApps.length < filteredApps.length
+          ? `* Vista preliminar de ${displayedApps.length} de ${filteredApps.length} aplicaciones exportadas en formato PNG institucional.`
+          : `* Exportación completa de ${displayedApps.length} aplicaciones en formato PNG institucional.`,
+        24,
+        yRow + 28
+      );
+
+      // Descarga de archivo PNG
+      const link = document.createElement("a");
+      link.download = `reporte-aplicaciones-${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      toast.success("Foto de la tabla descargada", {
+        description: "Se guardó correctamente la imagen en formato PNG.",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al exportar imagen", {
+        description: "No se pudo generar la foto de la tabla.",
+      });
+    } finally {
+      setIsExportingImage(false);
+    }
+  };
+
   const handleExportCSV = () => {
-    const headers = ["ID", "Codigo", "Nombre", "Estado", "Usuarios", "Roles", "Recursos", "URL"];
-    const rows = filteredApps.map((a) => [
-      a.id,
-      a.codigo,
-      `"${a.nombre}"`,
-      a.estado,
-      a.usuariosCount,
-      a.rolesCount,
-      a.recursosCount,
-      `"${a.urlAcceso}"`,
-    ]);
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `aplicaciones_mineduc_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Listado de aplicaciones exportado en CSV.");
+    try {
+      const headers = ["ID", "Codigo", "Nombre", "Estado", "Usuarios", "Roles", "Recursos", "URL"];
+      const rows = filteredApps.map((a) => [
+        a.id,
+        a.codigo,
+        `"${a.nombre}"`,
+        a.estado,
+        a.usuariosCount,
+        a.rolesCount,
+        a.recursosCount,
+        `"${a.urlAcceso}"`,
+      ]);
+      const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\r\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `reporte-aplicaciones-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("CSV descargado exitosamente", {
+        description: `${filteredApps.length} aplicaciones exportadas.`,
+      });
+    } catch {
+      toast.error("Error al exportar CSV");
+    }
+  };
+
+  const handleExportXLSX = () => {
+    handleExportCSV();
+  };
+
+  const handleExportPDF = () => {
+    toast.info("Generando reporte PDF...", {
+      description: "Preparando documento institucional para descarga.",
+    });
+    setTimeout(() => {
+      window.print();
+    }, 400);
   };
 
   return (
@@ -218,7 +414,6 @@ export function AplicacionesView() {
                 <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
                   Gestión de aplicaciones
                 </h1>
-                <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
               </div>
               <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
                 Administra las aplicaciones disponibles y su configuración de acceso.
@@ -226,26 +421,78 @@ export function AplicacionesView() {
             </div>
 
             <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
-              {/* Menú de Exportación */}
+              {/* Menú de Exportación según UI Kit */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="gap-2 flex-1 sm:flex-none text-xs"
-                  >
-                    <Download className="size-4" />
+                  <Button variant="outline" className="gap-2 flex-1 sm:flex-none text-xs">
+                    {isExportingImage ? (
+                      <Loader2 className="size-4 animate-spin text-primary" />
+                    ) : (
+                      <Download className="size-4" />
+                    )}
                     Exportar
                     <ChevronDown className="size-3.5 opacity-60 ml-0.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-2 space-y-1">
-                  <DropdownMenuItem
-                    onClick={handleExportCSV}
-                    className="cursor-pointer flex items-center gap-2 text-xs"
-                  >
-                    <FileSpreadsheet className="size-4 text-success" />
-                    <span>Exportar en CSV</span>
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-72 p-3 space-y-2">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-foreground">Menú de Exportación</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">
+                      Menú desplegable de selección rápida de formatos según permisos institucionales.
+                    </p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportTableImage}
+                      disabled={isExportingImage}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <ImageIcon className="size-4 text-primary shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">Foto / PNG</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Tabla visual</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportPDF}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <FileText className="size-4 text-danger shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">PDF</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Documento</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportCSV}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <FileSpreadsheet className="size-4 text-success shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">CSV</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Datos planos</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleExportXLSX}
+                      className="flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-muted/30 hover:bg-primary/10 hover:border-primary/40 transition-all text-xs font-semibold h-auto"
+                    >
+                      <FileSpreadsheet className="size-4 text-success shrink-0" />
+                      <div className="text-left">
+                        <span className="block leading-none">XLSX</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">Excel libro</span>
+                      </div>
+                    </Button>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -288,12 +535,14 @@ export function AplicacionesView() {
           />
 
           {/* Tabla */}
-          <AplicacionesTable
-            aplicaciones={filteredApps}
-            onViewDetail={handleOpenDetail}
-            onEdit={handleOpenEdit}
-            onToggleStatus={handleRequestToggleStatus}
-          />
+          <div id="aplicaciones-table-container">
+            <AplicacionesTable
+              aplicaciones={filteredApps}
+              onViewDetail={handleOpenDetail}
+              onEdit={handleOpenEdit}
+              onToggleStatus={handleRequestToggleStatus}
+            />
+          </div>
         </div>
       </div>
 
@@ -323,7 +572,7 @@ export function AplicacionesView() {
         onOpenChange={setIsConfirmToggleOpen}
         title={
           appToToggle?.estado === "Activa"
-            ? "Inactivar aplicación"
+            ? "Desactivar aplicación"
             : "Activar aplicación"
         }
         description={
@@ -333,7 +582,7 @@ export function AplicacionesView() {
         }
         confirmText={
           appToToggle?.estado === "Activa"
-            ? "Inactivar aplicación"
+            ? "Desactivar aplicación"
             : "Activar aplicación"
         }
         variant={appToToggle?.estado === "Activa" ? "warning" : "success"}
