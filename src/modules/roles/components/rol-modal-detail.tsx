@@ -412,28 +412,6 @@ export function RolModalDetail({
                                   </div>
                                 </div>
                               </TableCell>
-                            {isChild ? (
-                              <CornerDownRight className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                            ) : (
-                              <Folder className="size-4 text-primary shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex flex-col min-w-0">
-                              <span
-                                className={cn(
-                                  "text-xs text-foreground",
-                                  !isChild && "font-semibold"
-                                )}
-                              >
-                                {item.nombre}
-                              </span>
-                              {item.descripcion && (
-                                <span className="text-[11px] text-muted-foreground line-clamp-1">
-                                  {item.descripcion}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
 
                               <TableCell className="text-center py-2.5">
                                 <Badge
