@@ -52,6 +52,13 @@ export function IngresosAplicacionesView() {
 
   // Selección de fila interactiva
   const [selectedAcceso, setSelectedAcceso] = React.useState<AccesoAplicacionItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedAcceso && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedAcceso]);
 
   // Modal de Detalle
   const [detailModalOpen, setDetailModalOpen] = React.useState(false);
@@ -481,7 +488,7 @@ export function IngresosAplicacionesView() {
           </div>
 
           {/* DERECHA (~35%): Panel Gráfico Dinámico */}
-          <div className="lg:col-span-4 w-full sticky top-4">
+          <div className="lg:col-span-4 w-full lg:sticky lg:top-4" ref={panelRef}>
             <DynamicChartPanel
               title="Análisis Dinámico"
               contextTitle={dynamicContext.title}

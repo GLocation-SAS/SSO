@@ -282,9 +282,9 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
   const activeSegment = items.find((d) => d.id === hoveredId);
 
   return (
-    <div className="flex items-center justify-between gap-4 p-2">
+    <div className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-6 sm:gap-4 p-2 w-full">
       {/* SVG Donut */}
-      <div className="relative size-28 shrink-0 flex items-center justify-center">
+      <div className="relative size-28 shrink-0 flex items-center justify-center mx-auto sm:mx-0">
         <svg className="size-full -rotate-90" viewBox="0 0 100 100">
           <circle
             cx="50"
@@ -352,7 +352,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
       </div>
 
       {/* Leyenda interactiva */}
-      <div className="flex-1 space-y-1.5 text-xs">
+      <div className="flex-1 w-full min-w-0 space-y-1.5 text-xs">
         {items.map((item) => {
           const isHovered = hoveredId === item.id;
           return (

@@ -152,41 +152,6 @@ export function LogsTable({
                       </span>
                     </div>
 
-        {/* Mobile Card Row (Responsive) */}
-        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {paginatedLogs.map((log) => (
-            <InteractiveCard
-              key={log.id}
-              className="flex flex-col gap-3 text-left"
-              color="default"
-              hideChevron
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-col">
-                  <span className="font-bold text-sm text-foreground">{log.responsable.nombre}</span>
-                  <span className="text-xs text-muted-foreground">{log.fechaRelativa}</span>
-                </div>
-                <StatusBadge status={log.accion} />
-              </div>
-              <div className="text-xs text-muted-foreground line-clamp-2">
-                {log.detalleBreve}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
-                <div className="flex flex-col gap-1">
-                  <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Elemento</span>
-                  <span className="text-foreground font-medium truncate">{log.elementoNombre}</span>
-                </div>
-                <div className="flex flex-col gap-1 items-end">
-                  <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Estado</span>
-                  <StatusBadge status={log.estado} />
-                </div>
-              </div>
-              <div className="pt-2 border-t border-border/60 flex items-center justify-end">
-                <Button variant="ghost" size="icon" onClick={() => onViewDetail(log)} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
-              </div>
-            </InteractiveCard>
-          ))}
-        </div>
                   </TableCell>
 
                   {/* Responsable */}
@@ -248,6 +213,49 @@ export function LogsTable({
             })}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedLogs.map((log) => {
+            const isSelected = selectedId === log.id;
+            return (
+              <InteractiveCard
+                key={log.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectRow?.(log)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{log.responsable.nombre}</span>
+                    <span className="text-xs text-muted-foreground">{log.fechaRelativa}</span>
+                  </div>
+                  <StatusBadge status={log.accion} />
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  {log.detalleBreve}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Elemento</span>
+                    <span className="text-foreground font-medium truncate">{log.elementoNombre}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Estado</span>
+                    <StatusBadge status={log.estado} />
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewDetail(log); }} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
+                </div>
+              </InteractiveCard>
+            );
+          })}
         </div>
 
         {/* Paginación */}
@@ -440,6 +448,46 @@ export function AccesosTable({
         </Table>
         </div>
 
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedAccesos.map((acc) => {
+            const isSelected = selectedId === acc.id;
+            return (
+              <InteractiveCard
+                key={acc.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectRow?.(acc)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{acc.usuario.nombre}</span>
+                    <span className="text-xs text-muted-foreground">{acc.fechaRelativa}</span>
+                  </div>
+                  <StatusBadge status={acc.resultado} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Aplicación</span>
+                    <span className="text-foreground font-medium truncate">{acc.aplicacion}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Sede</span>
+                    <span className="text-foreground font-medium truncate">{acc.sede}</span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewDetail(acc); }} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
+                </div>
+              </InteractiveCard>
+            );
+          })}
+        </div>
+
         {/* Paginación */}
         <TablePaginationBar
           currentPage={currentPage}
@@ -623,6 +671,58 @@ export function ActividadTable({
             })}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedItems.map((act) => {
+            const isSelected = selectedUserId === act.usuario.id;
+            return (
+              <InteractiveCard
+                key={act.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectUser(isSelected ? null : act)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{act.usuario.nombre}</span>
+                    <span className="text-[11px] text-muted-foreground font-mono">{act.usuario.email}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-muted-foreground">Accesos</span>
+                    <span className="font-mono font-bold text-sm">{act.totalAccesos}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1 text-xs pt-2 border-t border-border/60">
+                  <span className="text-muted-foreground font-semibold text-[11px]">Aplicaciones utilizadas</span>
+                  <div className="flex flex-wrap items-center gap-1 mt-1">
+                    {act.aplicacionesUtilizadas.length > 0 ? (
+                      act.aplicacionesUtilizadas.map((app) => (
+                        <Badge key={app} tone="neutral" appearance="soft" size="sm" className="text-[10px] font-medium">{app}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground italic">Sin aplicaciones</span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold text-[11px]">Rol</span>
+                    <span className="text-foreground font-medium truncate">{act.rolPrincipal}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold text-[11px]">Última actividad</span>
+                    <span className="text-foreground font-medium">{act.ultimaActividadRelativa}</span>
+                  </div>
+                </div>
+              </InteractiveCard>
+            );
+          })}
         </div>
 
         {/* Paginación */}

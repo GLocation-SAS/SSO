@@ -41,6 +41,13 @@ export function ActividadUsuariosView() {
 
   // Selección de usuario (fila de la tabla)
   const [selectedUser, setSelectedUser] = React.useState<UsuarioActividadItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedUser && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedUser]);
 
   // 1. Filtrado de datos
   const filteredActividades = React.useMemo(() => {
@@ -527,7 +534,7 @@ export function ActividadUsuariosView() {
         </div>
 
         {/* COLUMNA DERECHA (~35%): Panel Dinámico Reactivo */}
-        <div className="lg:col-span-4 lg:sticky lg:top-4">
+        <div className="lg:col-span-4 lg:sticky lg:top-4" ref={panelRef}>
           <DynamicChartPanel
             contextTitle={dynamicContext.title}
             contextSubtitle={dynamicContext.subtitle}

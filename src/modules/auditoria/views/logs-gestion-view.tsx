@@ -56,6 +56,13 @@ export function LogsGestionView() {
 
   // Selección de fila para análisis interactivo
   const [selectedLog, setSelectedLog] = React.useState<LogGestionItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedLog && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedLog]);
 
   // Modal de Detalle
   const [detailModalOpen, setDetailModalOpen] = React.useState(false);
@@ -522,7 +529,7 @@ export function LogsGestionView() {
           </div>
 
           {/* DERECHA (~35% / col-span-4): Análisis Dinámico */}
-          <div className="lg:col-span-4 w-full sticky top-4">
+          <div className="lg:col-span-4 w-full lg:sticky lg:top-4" ref={panelRef}>
             <DynamicChartPanel
               title="Análisis Dinámico"
               contextTitle={dynamicContext.title}
