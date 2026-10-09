@@ -22,6 +22,29 @@ import {
 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence, animate } from "framer-motion";
+
+function AnimatedNumber({ value }: { value: number | string }) {
+  const nodeRef = React.useRef<HTMLSpanElement>(null);
+  
+  React.useEffect(() => {
+    if (typeof value !== "number") return;
+    const node = nodeRef.current;
+    if (node) {
+      const controls = animate(0, value, {
+        duration: 0.8,
+        ease: "easeOut",
+        onUpdate(v) {
+          node.textContent = Math.round(v).toLocaleString("es-EC");
+        }
+      });
+      return () => controls.stop();
+    }
+  }, [value]);
+  
+  if (typeof value !== "number") return <span>{value}</span>;
+  return <span ref={nodeRef}>{value.toLocaleString("es-EC")}</span>;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROPS Y TIPOS
@@ -110,7 +133,7 @@ export function DynamicChartPanel({
               className="h-7 px-2 text-[11px] text-primary hover:text-primary hover:bg-primary/10 gap-1 font-semibold"
             >
               <RotateCcw className="size-3" />
-              <span>Ver general</span>
+              <span>Limpiar selección</span>
             </Button>
           )}
         </div>
@@ -152,7 +175,7 @@ export function DynamicChartPanel({
             )}
           </div>
           <span className="text-lg font-bold font-heading text-foreground tabular-nums">
-            {extraStat.value}
+            <AnimatedNumber value={extraStat.value} />
           </span>
         </div>
       )}
@@ -192,14 +215,16 @@ export function DynamicChartPanel({
                     {item.label}
                   </span>
                   <span className="text-muted-foreground tabular-nums font-mono text-[11px]">
-                    {item.value} {barsData.valueSuffix || ""} ({item.pct}%)
+                    <AnimatedNumber value={item.value} /> {barsData.valueSuffix || ""} ({item.pct}%)
                   </span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-muted/60 overflow-hidden relative">
-                  <div
-                    className="h-full rounded-full transition-all duration-500 ease-out"
+                  <motion.div
+                    className="h-full rounded-full transition-colors duration-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(4, Math.min(100, item.pct))}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                     style={{
-                      width: `${Math.max(4, Math.min(100, item.pct))}%`,
                       backgroundColor: item.color || "var(--color-primary)",
                     }}
                   />
@@ -210,7 +235,7 @@ export function DynamicChartPanel({
         </div>
       )}
 
-      {/* 5. EVOLUCIÓN TEMPORAL / TREND BARS */}
+      {/* 5. EVOLUCIÓN TEMPORAL */}
       {trendData && trendData.points.length > 0 && (
         <div className="space-y-3 pt-1 border-t border-border/40">
           <div className="flex items-center justify-between">
@@ -269,7 +294,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
             const isHovered = hoveredId === seg.id;
             const isDimmed = hoveredId !== null && !isHovered;
             return (
-              <circle
+              <motion.circle
                 key={seg.id}
                 cx="50"
                 cy="50"
@@ -278,10 +303,12 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
                 stroke={seg.color || "var(--color-primary)"}
                 strokeWidth={isHovered ? 14 : 12}
                 strokeDasharray={seg.strokeDasharray}
-                strokeDashoffset={seg.strokeDashoffset}
+                initial={{ strokeDashoffset: circumference }}
+                animate={{ strokeDashoffset: seg.strokeDashoffset }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 strokeLinecap="round"
                 className={cn(
-                  "cursor-pointer transition-all duration-200",
+                  "cursor-pointer transition-colors duration-200",
                   isHovered ? "filter drop-shadow-md" : "",
                   isDimmed ? "opacity-35" : "opacity-100"
                 )}
@@ -297,7 +324,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
           {activeSegment ? (
             <>
               <span className="text-sm font-black text-foreground tabular-nums leading-tight">
-                {activeSegment.value}
+                <AnimatedNumber value={activeSegment.value} />
               </span>
               <span
                 className="text-[9px] font-bold line-clamp-1 max-w-[60px]"
@@ -309,7 +336,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
           ) : (
             <>
               <span className="text-sm font-black text-foreground tabular-nums leading-tight">
-                {total}
+                <AnimatedNumber value={total} />
               </span>
               <span className="text-[9px] font-bold text-muted-foreground uppercase">
                 Total
@@ -341,7 +368,7 @@ function DonutChartWidget({ items }: { items: DistributionItem[] }) {
                 <span className="truncate text-foreground text-[11px]">{item.label}</span>
               </div>
               <span className="text-muted-foreground font-mono text-[11px] tabular-nums shrink-0">
-                {item.value} ({item.pct}%)
+                <AnimatedNumber value={item.value} /> ({item.pct}%)
               </span>
             </div>
           );
@@ -385,17 +412,17 @@ function TrendBarWidget({ points }: { points: TrendPoint[] }) {
               )}
 
               {/* Barra */}
-              <div
+              <motion.div
                 className={cn(
-                  "w-full rounded-t-sm transition-all duration-300 ease-out",
+                  "w-full rounded-t-sm transition-colors duration-300",
                   isHovered
                     ? "bg-primary brightness-110"
                     : "bg-primary/70 dark:bg-primary/80",
                   isDimmed && "opacity-40"
                 )}
-                style={{
-                  height: `${Math.max(6, heightPct)}%`,
-                }}
+                initial={{ height: 0 }}
+                animate={{ height: `${Math.max(6, heightPct)}%` }}
+                transition={{ duration: 0.6, ease: "easeOut", delay: idx * 0.05 }}
               />
             </div>
           );

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { InteractiveCard } from "@/components/ui/data-display";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface AuditSummaryCardItem {
@@ -24,33 +25,27 @@ interface AuditSummaryCardsProps {
 const colorMap = {
   primary: {
     iconContainer: "bg-primary/15 text-primary",
-    activeBg: "bg-primary/10 dark:bg-primary/20",
-    pill: "text-primary dark:text-primary-300",
+    activeBg: "bg-primary-100/90 dark:bg-muted/30",
   },
   secondary: {
     iconContainer: "bg-secondary/15 text-secondary",
     activeBg: "bg-secondary/10 dark:bg-secondary/20",
-    pill: "text-secondary dark:text-secondary-300",
   },
   success: {
-    iconContainer: "bg-success/15 text-success",
-    activeBg: "bg-success/10 dark:bg-success/20",
-    pill: "text-success",
+    iconContainer: "bg-success/15 text-success-700 dark:text-success-300",
+    activeBg: "bg-success-100/90 dark:bg-success-900/50",
   },
   warning: {
     iconContainer: "bg-warning/15 text-warning-700 dark:text-warning-300",
-    activeBg: "bg-warning/10 dark:bg-warning/20",
-    pill: "text-warning-700 dark:text-warning-400",
+    activeBg: "bg-warning-100/90 dark:bg-warning-900/50",
   },
   danger: {
     iconContainer: "bg-danger/15 text-danger",
     activeBg: "bg-danger/10 dark:bg-danger/20",
-    pill: "text-danger",
   },
   neutral: {
-    iconContainer: "bg-muted-foreground/20 text-foreground",
-    activeBg: "bg-muted/70",
-    pill: "text-muted-foreground",
+    iconContainer: "bg-muted-foreground/25 dark:bg-muted-foreground/35 text-foreground dark:text-neutral-200",
+    activeBg: "bg-muted/80 dark:bg-muted/60",
   },
 };
 
@@ -77,6 +72,7 @@ export function AuditSummaryCards({
           <InteractiveCard
             key={c.id}
             title={c.label}
+            description={c.subtitle}
             color={chosenColor}
             hideChevron
             borderless
@@ -87,23 +83,21 @@ export function AuditSummaryCards({
             onClick={() => onSelectCard?.(c.id)}
             icon={<Icon className="size-5" />}
             decorativeIcon={<Icon className="size-full" />}
-            className="cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110"
-            meta={
-              <div className="flex flex-col gap-0.5 pt-0.5">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-2xl font-bold font-heading tracking-tight text-foreground">
+            className={cn(
+              "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110",
+              isCurrentActive ? "bg-primary/5" : "bg-surface hover:bg-muted/40"
+            )}
+            rightElement={
+              <div className="flex flex-col items-end justify-center gap-1 py-2.5">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-3xl font-bold font-heading tracking-tight text-foreground">
                     {typeof c.value === "number" ? c.value.toLocaleString("es-EC") : c.value}
                   </span>
-                  {isCurrentActive && (
-                    <span className={cn("text-[11px] font-semibold", colorStyles.pill)}>
-                      Filtro activo
-                    </span>
-                  )}
                 </div>
-                {c.subtitle && (
-                  <span className="text-[11px] text-muted-foreground truncate">
-                    {c.subtitle}
-                  </span>
+                {isCurrentActive ? (
+                  <CheckCircle2 className="size-4 text-primary shrink-0 animate-in fade-in zoom-in-95 duration-200" />
+                ) : (
+                  <div className="h-4" />
                 )}
               </div>
             }

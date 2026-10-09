@@ -152,6 +152,7 @@ export function AuditFilters({
               key={chip.id}
               label={chip.label}
               onRemove={chip.onRemove}
+              removable
               className="text-xs"
             />
           ))}

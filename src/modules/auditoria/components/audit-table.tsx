@@ -96,11 +96,9 @@ export function LogsTable({
               <TableHead className=" dark:text-white">
                 Elemento
               </TableHead>
-              <TableHead className="min-w-[180px]  dark:text-white">
-                Detalle Breve
-              </TableHead>
+
               <TableHead className="w-[110px]  dark:text-white">
-                Estado
+                Resultado
               </TableHead>
               <TableHead className="w-[90px] text-right  dark:text-white pr-4">
                 Acción
@@ -200,12 +198,9 @@ export function LogsTable({
                     </div>
                   </TableCell>
 
-                  {/* Detalle breve */}
-                  <TableCell className="text-xs text-muted-foreground dark:text-neutral-300">
-                    <Tooltip><TooltipTrigger asChild><p className="line-clamp-2 leading-relaxed cursor-default">{log.detalleBreve}</p></TooltipTrigger><TooltipContent variant="info" side="top" className="max-w-xs">{log.detalleBreve}</TooltipContent></Tooltip>
-                  </TableCell>
 
-                  {/* Estado */}
+
+                  {/* Resultado */}
                   <TableCell className="text-xs">
                     <StatusBadge status={log.estado} />
                   </TableCell>
