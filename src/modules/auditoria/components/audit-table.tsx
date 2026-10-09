@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
+import { InteractiveCard } from "@/components/ui/data-display";
 import { StatusBadge } from "./status-badge";
 import { AuditEmptyState } from "./empty-state";
 import { LogGestionItem } from "../data/logs.mock";
@@ -43,6 +44,7 @@ import { cn } from "@/lib/utils";
 // 1. LOGS DE GESTIÓN TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface LogsTableProps {
+  isLoading?: boolean;
   logs: LogGestionItem[];
   selectedId?: string | null;
   onSelectRow?: (log: LogGestionItem) => void;
@@ -51,6 +53,7 @@ interface LogsTableProps {
 }
 
 export function LogsTable({
+  isLoading,
   logs,
   selectedId,
   onSelectRow,
@@ -70,35 +73,36 @@ export function LogsTable({
     setCurrentPage(1);
   }, [logs.length]);
 
-  if (logs.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || logs.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="logs-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className="w-[140px]  dark:text-white pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Responsable
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Acción
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Elemento
               </TableHead>
-              <TableHead className="min-w-[180px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="min-w-[180px]  dark:text-white">
                 Detalle Breve
               </TableHead>
-              <TableHead className="w-[110px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="w-[110px]  dark:text-white">
                 Estado
               </TableHead>
-              <TableHead className="w-[90px] text-right text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  dark:text-white pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -133,14 +137,48 @@ export function LogsTable({
                         {log.fecha.split(" ")[0]}
                       </span>
                     </div>
+
+        {/* Mobile Card Row (Responsive) */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedLogs.map((log) => (
+            <InteractiveCard
+              key={log.id}
+              className="flex flex-col gap-3 text-left"
+              color="default"
+              hideChevron
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-foreground">{log.responsable.nombre}</span>
+                  <span className="text-xs text-muted-foreground">{log.fechaRelativa}</span>
+                </div>
+                <StatusBadge status={log.accion} />
+              </div>
+              <div className="text-xs text-muted-foreground line-clamp-2">
+                {log.detalleBreve}
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                <div className="flex flex-col gap-1">
+                  <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Elemento</span>
+                  <span className="text-foreground font-medium truncate">{log.elementoNombre}</span>
+                </div>
+                <div className="flex flex-col gap-1 items-end">
+                  <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Estado</span>
+                  <StatusBadge status={log.estado} />
+                </div>
+              </div>
+              <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                <Button variant="ghost" size="icon" onClick={() => onViewDetail(log)} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
+              </div>
+            </InteractiveCard>
+          ))}
+        </div>
                   </TableCell>
 
                   {/* Responsable */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {log.responsable.nombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{log.responsable.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{log.responsable.nombre}</TooltipContent></Tooltip>
                       <span className="text-[11px] text-muted-foreground dark:text-neutral-300 line-clamp-1">
                         {log.responsable.cargo}
                       </span>
@@ -155,9 +193,7 @@ export function LogsTable({
                   {/* Elemento */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {log.elementoNombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{log.elementoNombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{log.elementoNombre}</TooltipContent></Tooltip>
                       <span className="text-[10px] text-muted-foreground dark:text-neutral-300">
                         {log.tipoElemento} &bull; {log.aplicacion}
                       </span>
@@ -166,7 +202,7 @@ export function LogsTable({
 
                   {/* Detalle breve */}
                   <TableCell className="text-xs text-muted-foreground dark:text-neutral-300">
-                    <p className="line-clamp-2 leading-relaxed">{log.detalleBreve}</p>
+                    <Tooltip><TooltipTrigger asChild><p className="line-clamp-2 leading-relaxed cursor-default">{log.detalleBreve}</p></TooltipTrigger><TooltipContent variant="info" side="top" className="max-w-xs">{log.detalleBreve}</TooltipContent></Tooltip>
                   </TableCell>
 
                   {/* Estado */}
@@ -201,6 +237,7 @@ export function LogsTable({
             })}
           </TableBody>
         </Table>
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -220,6 +257,7 @@ export function LogsTable({
 // 2. INGRESOS A APLICACIONES TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface AccesosTableProps {
+  isLoading?: boolean;
   accesos: AccesoAplicacionItem[];
   selectedId?: string | null;
   onSelectRow?: (acceso: AccesoAplicacionItem) => void;
@@ -228,6 +266,7 @@ interface AccesosTableProps {
 }
 
 export function AccesosTable({
+  isLoading,
   accesos,
   selectedId,
   onSelectRow,
@@ -247,35 +286,36 @@ export function AccesosTable({
     setCurrentPage(1);
   }, [accesos.length]);
 
-  if (accesos.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || accesos.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="accesos-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className="w-[140px]  dark:text-white pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Usuario
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Aplicación
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Rol
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Sede
               </TableHead>
-              <TableHead className="w-[110px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="w-[110px]  dark:text-white">
                 Resultado
               </TableHead>
-              <TableHead className="w-[90px] text-right text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  dark:text-white pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -315,9 +355,7 @@ export function AccesosTable({
                   {/* Usuario */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {acc.usuario.nombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{acc.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{acc.usuario.nombre}</TooltipContent></Tooltip>
                       <span className="text-[11px] text-muted-foreground dark:text-neutral-300 line-clamp-1 font-mono">
                         {acc.usuario.email}
                       </span>
@@ -373,6 +411,7 @@ export function AccesosTable({
             })}
           </TableBody>
         </Table>
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -392,6 +431,7 @@ export function AccesosTable({
 // 3. ACTIVIDAD DE USUARIOS (AGREGADA) TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface ActividadTableProps {
+  isLoading?: boolean;
   actividades: UsuarioActividadItem[];
   selectedUserId?: string | null;
   onSelectUser: (user: UsuarioActividadItem | null) => void;
@@ -399,6 +439,7 @@ interface ActividadTableProps {
 }
 
 export function ActividadTable({
+  isLoading,
   actividades,
   selectedUserId,
   onSelectUser,
@@ -417,32 +458,33 @@ export function ActividadTable({
     setCurrentPage(1);
   }, [actividades.length]);
 
-  if (actividades.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || actividades.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="actividad-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className=" dark:text-white pl-4">
                 Usuario
               </TableHead>
-              <TableHead className="min-w-[160px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="min-w-[160px]  dark:text-white">
                 Aplicaciones Utilizadas
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Rol
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className=" dark:text-white">
                 Sede
               </TableHead>
-              <TableHead className="w-[120px] text-center text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="w-[120px] text-center  dark:text-white">
                 Cant. Accesos
               </TableHead>
-              <TableHead className="w-[130px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[130px]  dark:text-white pr-4">
                 Última Actividad
               </TableHead>
             </TableRow>
@@ -487,9 +529,7 @@ export function ActividadTable({
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                          {act.usuario.nombre}
-                        </span>
+                        <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{act.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{act.usuario.nombre}</TooltipContent></Tooltip>
                         <span className="text-[11px] text-muted-foreground dark:text-neutral-300 font-mono line-clamp-1">
                           {act.usuario.email}
                         </span>
@@ -572,6 +612,7 @@ export function ActividadTable({
             })}
           </TableBody>
         </Table>
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -609,7 +650,7 @@ function TablePaginationBar({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-3 border-t border-border bg-surface">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <span className="text-xs text-muted-foreground">
           Mostrando {startItem}–{endItem} de {totalItems}

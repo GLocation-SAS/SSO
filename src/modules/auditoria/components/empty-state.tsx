@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Search, FileSearch, RotateCcw } from "lucide-react";
+import { Search, FileSearch, RotateCcw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AuditEmptyStateProps {
+  isLoading?: boolean;
   title?: string;
   description?: string;
   onResetFilters?: () => void;
@@ -13,6 +14,7 @@ interface AuditEmptyStateProps {
 }
 
 export function AuditEmptyState({
+  isLoading,
   title = "No se encontraron registros",
   description = "Prueba modificando los criterios de búsqueda o limpiando los filtros seleccionados.",
   onResetFilters,
@@ -26,13 +28,13 @@ export function AuditEmptyState({
       )}
     >
       <div className="size-14 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground shadow-xs">
-        <FileSearch className="size-7" />
+        {isLoading ? <Loader2 className="size-7 animate-spin" /> : <FileSearch className="size-7" />}
       </div>
       <div className="space-y-1 max-w-md">
-        <h3 className="text-sm font-bold text-foreground">{title}</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+        <h3 className="text-sm font-bold text-foreground">{isLoading ? "Cargando registros..." : title}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed">{isLoading ? "Por favor, espera un momento." : description}</p>
       </div>
-      {onResetFilters && (
+      {!isLoading && onResetFilters && (
         <Button
           variant="outline"
           size="sm"
