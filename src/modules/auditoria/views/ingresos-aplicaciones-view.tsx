@@ -445,7 +445,6 @@ export function IngresosAplicacionesView() {
             <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
               Ingresos a aplicaciones
             </h1>
-            <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
           </div>
           <p className="text-sm md:text-base text-muted-foreground max-w-3xl">
             Consulta los accesos realizados por los usuarios a las aplicaciones vinculadas al SSO.

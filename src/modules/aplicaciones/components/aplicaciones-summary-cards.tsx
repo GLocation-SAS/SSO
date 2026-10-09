@@ -117,8 +117,11 @@ export function AplicacionesSummaryCards({
                     </Badge>
                   )}
                 </div>
-                {/* Espaciador para igualar la altura de las cards de Usuarios que tienen un icono activo */}
-                <div className="h-4" />
+                {isActive ? (
+                  <CheckCircle2 className="size-4 text-primary shrink-0 animate-in fade-in zoom-in-95 duration-200" />
+                ) : (
+                  <div className="h-4" />
+                )}
               </div>
             }
           />

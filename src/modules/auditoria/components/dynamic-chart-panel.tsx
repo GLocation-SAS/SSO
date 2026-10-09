@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Clock,
   ArrowUpRight,
+  AppWindow,
 } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,7 @@ export interface DynamicChartPanelProps {
   contextSubtitle?: string;
   hasSelection?: boolean;
   onClearSelection?: () => void;
+  selectedLog?: any;
   // Chart 1: Donut de estado o composición
   donutData?: {
     title: string;
@@ -102,6 +104,7 @@ export function DynamicChartPanel({
   contextSubtitle,
   hasSelection = false,
   onClearSelection,
+  selectedLog,
   donutData,
   barsData,
   trendData,
@@ -254,6 +257,8 @@ export function DynamicChartPanel({
     </div>
   );
 }
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENTE DONUT CHART (SVG NATIVO ACCESIBLE)

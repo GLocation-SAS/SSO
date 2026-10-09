@@ -115,8 +115,10 @@ export function UsuariosSummaryCards({
                     </Badge>
                   )}
                 </div>
-                {isActive && (
+                {isActive ? (
                   <CheckCircle2 className="size-4 text-primary shrink-0 animate-in fade-in zoom-in-95 duration-200" />
+                ) : (
+                  <div className="h-4" />
                 )}
               </div>
             }

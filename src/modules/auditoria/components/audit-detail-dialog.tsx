@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "./status-badge";
 import { LogGestionItem } from "../data/logs.mock";
 import { AccesoAplicacionItem } from "../data/accesos.mock";
+import { InteractiveCard } from "@/components/ui/data-display";
 import {
   Clock,
   User,
@@ -47,7 +48,7 @@ export function AuditDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="xl" className="p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent size="3xl" className="p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
         {logItem && <LogDetailContent log={logItem} onClose={() => onOpenChange(false)} />}
         {accesoItem && <AccesoDetailContent acceso={accesoItem} onClose={() => onOpenChange(false)} />}
       </DialogContent>
@@ -69,12 +70,6 @@ function LogDetailContent({
     <div className="flex flex-col gap-6">
       {/* Cabecera */}
       <DialogHeader className="space-y-1.5 text-left">
-        <div className="flex items-center justify-between gap-3">
-          <Badge variant="neutral" appearance="soft" size="sm" className="font-mono text-[10px]">
-            {log.codigoEvento}
-          </Badge>
-          <StatusBadge status={log.estado} />
-        </div>
         <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary dark:text-white">
           Detalle del Cambio Administrativo
         </DialogTitle>
@@ -88,51 +83,75 @@ function LogDetailContent({
       {/* Grid de Metadatos Principales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Responsable */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <User className="size-3.5 text-primary" /> Responsable
-          </span>
-          <span className="text-sm font-semibold text-foreground">{log.responsable.nombre}</span>
-          <span className="text-[11px] text-muted-foreground font-mono">{log.responsable.email}</span>
-          <span className="text-[10px] text-muted-foreground pt-1">{log.responsable.cargo}</span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="info"
+          icon={<User className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Responsable</span>
+            <span className="text-sm font-semibold text-foreground leading-tight">{log.responsable.nombre}</span>
+            <span className="text-[11px] text-muted-foreground font-mono mt-0.5">{log.responsable.email}</span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">{log.responsable.cargo}</span>
+          </div>
+        </InteractiveCard>
 
         {/* Fecha y Hora */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <Clock className="size-3.5 text-primary" /> Fecha y Hora
-          </span>
-          <span className="text-sm font-semibold text-foreground">{log.fecha}</span>
-          <span className="text-[11px] text-muted-foreground">Registro: {log.fechaRelativa}</span>
-          <span className="text-[10px] text-muted-foreground pt-1">Sede: {log.responsable.sede}</span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="neutral"
+          icon={<Clock className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Fecha y Hora</span>
+            <span className="text-sm font-semibold text-foreground leading-tight">{log.fecha}</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Registro: {log.fechaRelativa}</span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">Sede: {log.responsable.sede}</span>
+          </div>
+        </InteractiveCard>
 
         {/* Acción Realizada */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1.5">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <Shield className="size-3.5 text-primary" /> Acción Realizada
-          </span>
-          <StatusBadge status={log.accion} size="md" />
-          <span className="text-[11px] text-muted-foreground line-clamp-2">
-            {log.detalleBreve}
-          </span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="primary"
+          icon={<Shield className="size-5" />}
+        >
+          <div className="flex flex-col text-left items-start">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Acción Realizada</span>
+            <StatusBadge status={log.accion} size="md" />
+            <span className="text-[11px] text-muted-foreground line-clamp-2 mt-1.5 leading-snug">
+              {log.detalleBreve}
+            </span>
+          </div>
+        </InteractiveCard>
 
         {/* Elemento Afectado */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <Layers className="size-3.5 text-primary" /> Elemento Afectado
-          </span>
-          <span className="text-sm font-semibold text-foreground line-clamp-1">
-            {log.elementoNombre}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            Tipo: <strong className="text-foreground">{log.tipoElemento}</strong>
-          </span>
-          <span className="text-[10px] text-muted-foreground pt-1">
-            Aplicación: {log.aplicacion}
-          </span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="default"
+          icon={<Layers className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Elemento Afectado</span>
+            <span className="text-sm font-semibold text-foreground line-clamp-1 leading-tight">
+              {log.elementoNombre}
+            </span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">
+              Tipo: <strong className="text-foreground">{log.tipoElemento}</strong>
+            </span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">
+              Aplicación: {log.aplicacion}
+            </span>
+          </div>
+        </InteractiveCard>
       </div>
 
       {/* Motivo de estado si requiere atención o falló */}
@@ -198,8 +217,14 @@ function LogDetailContent({
         </div>
       )}
 
-      <DialogFooter className="pt-2">
-        <Button variant="primary" onClick={onClose} className="w-full sm:w-auto">
+      <DialogFooter className="pt-2 flex flex-col sm:flex-row items-center sm:justify-between gap-3 w-full">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <StatusBadge status={log.estado} />
+          <Badge variant="neutral" appearance="soft" size="sm" className="font-mono text-[10px]">
+            {log.codigoEvento}
+          </Badge>
+        </div>
+        <Button variant="neutral" onClick={onClose} className="w-full sm:w-auto">
           Cerrar detalle
         </Button>
       </DialogFooter>
@@ -221,12 +246,6 @@ function AccesoDetailContent({
     <div className="flex flex-col gap-6">
       {/* Cabecera */}
       <DialogHeader className="space-y-1.5 text-left">
-        <div className="flex items-center justify-between gap-3">
-          <Badge variant="neutral" appearance="soft" size="sm" className="font-mono text-[10px]">
-            {acceso.codigoAcceso}
-          </Badge>
-          <StatusBadge status={acceso.resultado} />
-        </div>
         <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary dark:text-white">
           Detalle del Acceso a Aplicación
         </DialogTitle>
@@ -240,42 +259,60 @@ function AccesoDetailContent({
       {/* Datos Clave */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Usuario */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <User className="size-3.5 text-primary" /> Usuario
-          </span>
-          <span className="text-sm font-semibold text-foreground">{acceso.usuario.nombre}</span>
-          <span className="text-[11px] text-muted-foreground font-mono">{acceso.usuario.email}</span>
-          <span className="text-[10px] text-muted-foreground pt-1">
-            Cédula: {acceso.usuario.cedula}
-          </span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="info"
+          icon={<User className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Usuario</span>
+            <span className="text-sm font-semibold text-foreground leading-tight">{acceso.usuario.nombre}</span>
+            <span className="text-[11px] text-muted-foreground font-mono mt-0.5">{acceso.usuario.email}</span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">
+              Cédula: {acceso.usuario.cedula}
+            </span>
+          </div>
+        </InteractiveCard>
 
         {/* Aplicación y Rol */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <Layers className="size-3.5 text-primary" /> Aplicación Solicitada
-          </span>
-          <span className="text-sm font-semibold text-foreground">{acceso.aplicacion}</span>
-          <span className="text-[11px] text-muted-foreground">
-            Rol en la app: <strong className="text-foreground">{acceso.rol}</strong>
-          </span>
-          <span className="text-[10px] text-muted-foreground pt-1">
-            Código: {acceso.aplicacionCodigo}
-          </span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="primary"
+          icon={<Layers className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Aplicación Solicitada</span>
+            <span className="text-sm font-semibold text-foreground leading-tight">{acceso.aplicacion}</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">
+              Rol en la app: <strong className="text-foreground">{acceso.rol}</strong>
+            </span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">
+              Código: {acceso.aplicacionCodigo}
+            </span>
+          </div>
+        </InteractiveCard>
 
         {/* Sede y Temporalidad */}
-        <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 flex flex-col gap-1">
-          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5 uppercase">
-            <Clock className="size-3.5 text-primary" /> Fecha y Ubicación
-          </span>
-          <span className="text-sm font-semibold text-foreground">{acceso.fecha}</span>
-          <span className="text-[11px] text-muted-foreground">Sede: {acceso.sede}</span>
-          <span className="text-[10px] text-muted-foreground pt-1">
-            Transcurrido: {acceso.fechaRelativa}
-          </span>
-        </div>
+        <InteractiveCard 
+          hideChevron 
+          borderless
+          shadowless
+          color="neutral"
+          icon={<Clock className="size-5" />}
+        >
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">Fecha y Ubicación</span>
+            <span className="text-sm font-semibold text-foreground leading-tight">{acceso.fecha}</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Sede: {acceso.sede}</span>
+            <span className="text-[10px] text-muted-foreground mt-1.5">
+              Transcurrido: {acceso.fechaRelativa}
+            </span>
+          </div>
+        </InteractiveCard>
       </div>
 
       {/* Mensaje de Resultado */}
@@ -326,8 +363,14 @@ function AccesoDetailContent({
         </div>
       </div>
 
-      <DialogFooter className="pt-2">
-        <Button variant="primary" onClick={onClose} className="w-full sm:w-auto">
+      <DialogFooter className="pt-2 flex flex-col sm:flex-row items-center sm:justify-between gap-3 w-full">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <StatusBadge status={acceso.resultado} />
+          <Badge variant="neutral" appearance="soft" size="sm" className="font-mono text-[10px]">
+            {acceso.codigoAcceso}
+          </Badge>
+        </div>
+        <Button variant="neutral" onClick={onClose} className="w-full sm:w-auto">
           Cerrar detalle
         </Button>
       </DialogFooter>

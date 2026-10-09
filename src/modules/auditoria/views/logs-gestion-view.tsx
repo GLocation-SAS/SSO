@@ -373,7 +373,9 @@ export function LogsGestionView() {
   // Donut: Distribución de acciones en el dataset filtrado
   const donutData = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    const dataset = selectedLog ? [selectedLog] : filteredLogs;
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
 
     dataset.forEach((item) => {
       counts[item.accion] = (counts[item.accion] || 0) + 1;
@@ -404,7 +406,9 @@ export function LogsGestionView() {
 
   // Barras horizontales: Elementos más modificados o aplicaciones
   const barsData = React.useMemo(() => {
-    const dataset = selectedLog ? [selectedLog] : filteredLogs;
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
     const counts: Record<string, number> = {};
 
     dataset.forEach((item) => {
@@ -433,19 +437,26 @@ export function LogsGestionView() {
 
   // Trend temporal de eventos
   const trendData = React.useMemo(() => {
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
+      
+    // Generar evolución mockeada pero reactiva al dataset
+    const baseValue = Math.max(1, Math.floor(dataset.length / 3));
+    
     return {
       title: "Evolución de eventos en el periodo",
       unit: "Cambios",
       points: [
-        { label: "01/10", value: 2 },
-        { label: "02/10", value: 3 },
-        { label: "03/10", value: 2 },
-        { label: "04/10", value: 4 },
-        { label: "05/10", value: 6 },
-        { label: "06/10", value: filteredLogs.length },
+        { label: "01/10", value: baseValue },
+        { label: "02/10", value: Math.floor(baseValue * 1.5) },
+        { label: "03/10", value: baseValue },
+        { label: "04/10", value: Math.floor(baseValue * 2) },
+        { label: "05/10", value: Math.floor(baseValue * 2.5) },
+        { label: "06/10", value: dataset.length },
       ],
     };
-  }, [filteredLogs.length]);
+  }, [filteredLogs, selectedLog]);
 
   return (
     <div className="flex flex-col gap-5 w-full h-full pb-6">
@@ -459,7 +470,6 @@ export function LogsGestionView() {
             <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
               Logs de gestión
             </h1>
-            <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
           </div>
           <p className="text-sm md:text-base text-muted-foreground max-w-3xl">
             Consulta los cambios realizados sobre usuarios, aplicaciones, roles y accesos del sistema.
@@ -519,6 +529,7 @@ export function LogsGestionView() {
               contextSubtitle={dynamicContext.subtitle}
               hasSelection={dynamicContext.hasSelection}
               onClearSelection={() => setSelectedLog(null)}
+              selectedLog={selectedLog}
               donutData={donutData}
               barsData={barsData}
               trendData={trendData}
