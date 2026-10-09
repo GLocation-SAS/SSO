@@ -287,4 +287,167 @@ describe("verifyActiveUser", () => {
     const result = await verifyActiveUser(request);
     expect(result.decodedToken).toEqual(mockDecodedToken);
   });
+
+  it("should throw 403 APP_ACCESS_DENIED when targetApp is specified and user does not have access", async () => {
+    const request = new Request("http://localhost:3000/api/auth/me?app=notas", {
+      headers: { Authorization: "Bearer valid-token" },
+    });
+
+    const mockDecodedToken = {
+      uid: "user-no-app",
+      email: "noapp@example.com",
+      email_verified: true,
+      firebase: { sign_in_provider: "google.com" },
+    };
+
+    (adminAuth.verifyIdToken as jest.Mock).mockResolvedValue(mockDecodedToken);
+
+    const mockUserData = {
+      id: "usr-no-app",
+      email: "noapp@example.com",
+      active: true,
+      sedes: [
+        {
+          sedeId: "sede-1",
+          sedeNombre: "Planta Central",
+          asignaciones: [
+            {
+              id: "asig-1",
+              usuarioId: "usr-no-app",
+              sedeId: "sede-1",
+              sedeNombre: "Planta Central",
+              rolAplicacionId: "ra-1",
+              aplicacionNombre: "Portal Administrativo",
+              rolNombre: "Operador",
+              estado: "Activo",
+              permisos: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      docs: [{ id: "usr-no-app", data: () => mockUserData }],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    (adminDb.collection as jest.Mock).mockReturnValue({ where: mockWhere });
+
+    await expect(
+      verifyActiveUser(request, { targetApp: "notas" })
+    ).rejects.toThrow(AuthorizationError);
+
+    await expect(
+      verifyActiveUser(request, { targetApp: "notas" })
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: "APP_ACCESS_DENIED",
+      message: "No tienes permisos para acceder a la aplicación Notas.",
+    });
+  });
+
+  it("should succeed when targetApp is specified and user has active assignment for that app", async () => {
+    const request = new Request("http://localhost:3000/api/auth/me?app=notas", {
+      headers: { Authorization: "Bearer valid-token" },
+    });
+
+    const mockDecodedToken = {
+      uid: "user-notas",
+      email: "notas@example.com",
+      email_verified: true,
+      firebase: { sign_in_provider: "google.com" },
+    };
+
+    (adminAuth.verifyIdToken as jest.Mock).mockResolvedValue(mockDecodedToken);
+
+    const mockUserData = {
+      id: "usr-notas",
+      email: "notas@example.com",
+      active: true,
+      sedes: [
+        {
+          sedeId: "sede-1",
+          sedeNombre: "Planta Central",
+          asignaciones: [
+            {
+              id: "asig-2",
+              usuarioId: "usr-notas",
+              sedeId: "sede-1",
+              sedeNombre: "Planta Central",
+              rolAplicacionId: "ra-2",
+              aplicacionNombre: "Sistema de Notas",
+              rolNombre: "Docente",
+              estado: "Activo",
+              permisos: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      docs: [{ id: "usr-notas", data: () => mockUserData }],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    (adminDb.collection as jest.Mock).mockReturnValue({ where: mockWhere });
+
+    const result = await verifyActiveUser(request, { targetApp: "notas" });
+    expect(result.decodedToken).toEqual(mockDecodedToken);
+    expect(result.usuario).toEqual(mockUserData);
+  });
 });
+
+describe("hasUserApplicationAccess", () => {
+  it("should return false when user has no sedes or asignaciones", () => {
+    const { hasUserApplicationAccess } = require("../server-auth");
+    const userWithoutSedes: any = { id: "1", email: "test@test.com" };
+    expect(hasUserApplicationAccess(userWithoutSedes, "notas")).toBe(false);
+  });
+
+  it("should return false when matching assignment is Inactivo", () => {
+    const { hasUserApplicationAccess } = require("../server-auth");
+    const userInactiveApp: any = {
+      id: "1",
+      email: "test@test.com",
+      sedes: [
+        {
+          sedeId: "s1",
+          sedeNombre: "Central",
+          asignaciones: [
+            {
+              aplicacionNombre: "Notas",
+              estado: "Inactivo",
+            },
+          ],
+        },
+      ],
+    };
+    expect(hasUserApplicationAccess(userInactiveApp, "notas")).toBe(false);
+  });
+
+  it("should return true when matching assignment is Activo (case-insensitive substring/match)", () => {
+    const { hasUserApplicationAccess } = require("../server-auth");
+    const userActiveApp: any = {
+      id: "1",
+      email: "test@test.com",
+      sedes: [
+        {
+          sedeId: "s1",
+          sedeNombre: "Central",
+          asignaciones: [
+            {
+              aplicacionNombre: "Sistema de Calificaciones y Notas",
+              estado: "Activo",
+            },
+          ],
+        },
+      ],
+    };
+    expect(hasUserApplicationAccess(userActiveApp, "notas")).toBe(true);
+  });
+});
+

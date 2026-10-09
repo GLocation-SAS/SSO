@@ -22,6 +22,44 @@ export interface ActiveUserAuthResult {
   usuario: UsuarioItem;
 }
 
+export interface VerifyActiveUserOptions {
+  targetApp?: string;
+}
+
+/**
+ * Comprueba si un usuario tiene alguna asignación activa para una aplicación determinada.
+ */
+export function hasUserApplicationAccess(usuario: UsuarioItem, targetApp: string): boolean {
+  if (!targetApp || !usuario || !Array.isArray(usuario.sedes)) {
+    return false;
+  }
+
+  const normalizedTarget = targetApp.trim().toLowerCase();
+
+  for (const sede of usuario.sedes) {
+    if (!Array.isArray(sede?.asignaciones)) continue;
+    for (const asig of sede.asignaciones) {
+      const isAsigActive =
+        asig.estado === "Activo" || (asig as any).activo === true;
+
+      if (!isAsigActive) continue;
+
+      const appName = (asig.aplicacionNombre || "").trim().toLowerCase();
+      const appCode = ((asig as any).aplicacionCodigo || (asig as any).codigo || "").trim().toLowerCase();
+
+      if (
+        appName.includes(normalizedTarget) ||
+        (appCode && appCode.includes(normalizedTarget)) ||
+        (appName && normalizedTarget.includes(appName))
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export async function verifyAuthToken(request: Request): Promise<DecodedIdToken> {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -56,8 +94,12 @@ export async function verifyAuthToken(request: Request): Promise<DecodedIdToken>
 /**
  * Valida que la petición contenga un Firebase ID Token válido, correo verificado,
  * que el usuario exista en la colección `usuarios` de Firestore y que tenga `active === true`.
+ * Si se especifica `options.targetApp`, valida además que cuente con permisos activos en la app indicada.
  */
-export async function verifyActiveUser(request: Request): Promise<ActiveUserAuthResult> {
+export async function verifyActiveUser(
+  request: Request,
+  options?: VerifyActiveUserOptions
+): Promise<ActiveUserAuthResult> {
   const decodedToken = await verifyAuthToken(request);
 
   const email = decodedToken.email;
@@ -97,8 +139,22 @@ export async function verifyActiveUser(request: Request): Promise<ActiveUserAuth
     );
   }
 
+  // Verificación de acceso a la aplicación requerida
+  if (options?.targetApp) {
+    const hasAccess = hasUserApplicationAccess(usuario, options.targetApp);
+    if (!hasAccess) {
+      const appDisplayName = options.targetApp.charAt(0).toUpperCase() + options.targetApp.slice(1);
+      throw new AuthorizationError(
+        `No tienes permisos para acceder a la aplicación ${appDisplayName}.`,
+        403,
+        "APP_ACCESS_DENIED"
+      );
+    }
+  }
+
   return {
     decodedToken,
     usuario,
   };
 }
+

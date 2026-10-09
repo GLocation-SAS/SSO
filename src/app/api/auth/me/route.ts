@@ -3,7 +3,10 @@ import { verifyActiveUser, AuthorizationError } from "@/lib/auth/server-auth";
 
 export async function GET(request: Request) {
   try {
-    const { decodedToken, usuario } = await verifyActiveUser(request);
+    const { searchParams } = new URL(request.url);
+    const targetApp = searchParams.get("app") || undefined;
+
+    const { decodedToken, usuario } = await verifyActiveUser(request, { targetApp });
 
     const debeCambiarPassword =
       usuario.debeCambiarPassword !== undefined

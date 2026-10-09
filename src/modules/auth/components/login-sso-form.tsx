@@ -13,10 +13,20 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchCurrentAuthProfile } from "@/modules/gestion-usuarios/services/client-usuarios";
+import { fetchAuthProfile } from "../services/auth-client";
 import { MustChangePasswordDialog } from "./must-change-password-dialog";
+import type { LoginAuthConfig } from "../types/auth-config";
 
-export function LoginSSOForm({ className }: { className?: string }) {
+export type LoginSSOFormProps = LoginAuthConfig;
+
+export function LoginSSOForm({
+  className,
+  title = "Conecta MINEDUC",
+  subtitle = "Iniciar sesión",
+  description = "Conecta MINEDUC centraliza la administración de accesos y permisos a las aplicaciones y recursos institucionales.",
+  targetApp,
+  redirectTo = "/dashboard",
+}: LoginSSOFormProps) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -25,15 +35,15 @@ export function LoginSSOForm({ className }: { className?: string }) {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [showMustChangePassword, setShowMustChangePassword] = useState(false);
 
-  // Redirigir a dashboard si ya existe una sesión activa en Firebase y no requiere cambio de clave
+  // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
   useEffect(() => {
     if (!authLoading && user && !showMustChangePassword) {
-      fetchCurrentAuthProfile()
+      fetchAuthProfile({ targetApp })
         .then((profile) => {
           if (profile.debeCambiarPassword) {
             setShowMustChangePassword(true);
           } else {
-            router.replace("/dashboard");
+            router.replace(redirectTo);
           }
         })
         .catch(async (err: any) => {
@@ -48,7 +58,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
           await signOut(auth).catch(() => {});
         });
     }
-  }, [user, authLoading, showMustChangePassword, router]);
+  }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -92,7 +102,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
 
       // Validar autorización del usuario en Firestore mediante el servidor
       try {
-        const profile = await fetchCurrentAuthProfile();
+        const profile = await fetchAuthProfile({ targetApp });
 
         if (profile.debeCambiarPassword) {
           setShowMustChangePassword(true);
@@ -101,7 +111,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
           });
         } else {
           toast.success("Sesión iniciada con éxito");
-          router.replace("/dashboard");
+          router.replace(redirectTo);
         }
       } catch (authErr: any) {
         // Cerrar sesión en Firebase Auth inmediatamente si el servidor deniega el acceso
@@ -151,7 +161,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
     setGlobalError(null);
 
     try {
-      const { signInWithEmailAndPassword, signOut } = await import("firebase/auth");
+      const { signInWithEmailAndPassword } = await import("firebase/auth");
       const { auth } = await import("@/lib/firebase/client");
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -203,41 +213,41 @@ export function LoginSSOForm({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative z-10 w-full max-w-lg min-h-[550px] sm:min-h-[650px] flex flex-col justify-center rounded-xl border border-border bg-card p-6 sm:p-10 shadow-lg text-card-foreground",
+        "relative z-10 w-full max-w-lg flex flex-col justify-center rounded-xl border border-border bg-card p-6 sm:px-8 sm:py-7 shadow-lg text-card-foreground",
         className
       )}
     >
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <Image
           src={getAssetPath("/horizontal-light.svg")}
           alt="Logo Conecta MINEDUC"
-          width={180}
-          height={45}
-          className="dark:hidden"
+          width={160}
+          height={40}
+          className="dark:hidden h-auto w-auto max-h-9"
           unoptimized
         />
         <Image
           src={getAssetPath("/horizontal-dark.svg")}
           alt="Logo Conecta MINEDUC"
-          width={180}
-          height={45}
-          className="hidden dark:block"
+          width={160}
+          height={40}
+          className="hidden dark:block h-auto w-auto max-h-9"
           unoptimized
         />
         <ThemeToggle />
       </div>
 
-      <Separator className="mb-6" />
+      <Separator className="mb-4" />
 
-      <div className="mb-8 text-center sm:text-left">
-        <h1 className="sr-only font-heading text-h2 font-bold">Conecta MINEDUC</h1>
-        <h2 className="font-heading text-h2 font-semibold mb-2 text-primary-500 dark:text-primary-300">Iniciar sesión</h2>
+      <div className="mb-5 text-center sm:text-left">
+        <h1 className="sr-only font-heading text-h2 font-bold">{title}</h1>
+        <h2 className="font-heading text-h2 font-semibold mb-1 text-primary-500 dark:text-primary-300">{subtitle}</h2>
         <p className="font-sans text-body-sm text-muted-foreground text-balance">
-          Conecta MINEDUC centraliza la administración de accesos y permisos a las aplicaciones y recursos institucionales.
+          {description}
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Button
           variant="secondary"
           className="w-full"
