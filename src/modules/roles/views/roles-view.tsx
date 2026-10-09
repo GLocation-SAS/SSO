@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -541,6 +542,8 @@ export function RolesView() {
             activeFilter={activeSummaryFilter}
             onSelectFilter={handleSelectSummaryFilter}
           />
+
+          <Separator />
 
           {/* Barra de Filtros */}
           <RolesFilterBar

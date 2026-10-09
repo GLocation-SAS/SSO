@@ -43,7 +43,7 @@ export interface IntranetNavItem {
   label: string;
   icon: React.ElementType;
   href: string;
-  group: "inicio" | "principal" | "cuenta" | "gestion-usuarios";
+  group: "inicio" | "principal" | "gestion-usuarios";
   disabled?: boolean;
   badge?: number;
 }
@@ -61,16 +61,12 @@ export const INTRANET_NAV_ITEMS: IntranetNavItem[] = [
   { id: "rutas", label: "Rutas", icon: MapPinned, href: "/intranet/rutas", group: "principal" },
   { id: "contacto", label: "Contacto", icon: Inbox, href: "/intranet/contacto", group: "principal" },
   { id: "talento-humano", label: "Talento Humano", icon: Users, href: "/intranet/talento-humano", group: "principal" },
-
-  // Cuenta
-  { id: "mi-cuenta", label: "Mi Cuenta", icon: IdCard, href: "/intranet/mi-cuenta", group: "cuenta" },
 ];
 
 const GROUP_LABELS: Record<IntranetNavItem["group"], string> = {
   inicio: "Inicio",
   "gestion-usuarios": "Gestión de usuarios",
   principal: "Principal",
-  cuenta: "Cuenta",
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────

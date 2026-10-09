@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -499,6 +500,8 @@ export function RecursosView() {
             activeFilter={activeSummaryFilter}
             onSelectFilter={handleSelectSummaryFilter}
           />
+
+          <Separator />
 
           {/* Filtros */}
           <RecursosFilterBar

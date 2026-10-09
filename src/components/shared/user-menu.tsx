@@ -20,9 +20,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
+import { useRouter } from "@/routing";
+
 export function UserMenu() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const TriggerButton = (
     <button className="group flex items-center gap-2.5 rounded-full outline-none pr-2 pl-1 py-1 hover:bg-transparent data-[state=open]:bg-transparent transition-all cursor-pointer">
@@ -92,8 +95,6 @@ export function UserMenu() {
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
-              <MobileMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-              <div className="h-px bg-border my-1 mx-2" />
               <MobileMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
             </div>
           </div>
@@ -135,8 +136,6 @@ export function UserMenu() {
         <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <div className="flex flex-col gap-1 px-1">
-          <DesktopMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
           <DesktopMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
         </div>
       </DropdownMenuContent>
