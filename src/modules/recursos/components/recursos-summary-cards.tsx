@@ -71,9 +71,9 @@ export function RecursosSummaryCards({
       percentage: undefined,
       microText: "Sistemas con catálogo activo",
       icon: AppWindow,
-      color: "secondary" as const,
-      iconContainer: "bg-secondary/15 text-secondary-700 dark:text-secondary-300",
-      activeBg: "bg-secondary-100/90 dark:bg-secondary-900/50",
+      color: "info" as const,
+      iconContainer: "bg-info/15 text-info",
+      activeBg: "bg-info/10 dark:bg-muted/30",
     },
   ];
 
