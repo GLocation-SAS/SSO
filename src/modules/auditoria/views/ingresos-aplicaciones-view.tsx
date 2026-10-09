@@ -422,21 +422,6 @@ export function IngresosAplicacionesView() {
 
   return (
     <div className="flex flex-col gap-5 w-full h-full pb-6">
-      {/* 1. BREADCRUMB */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/auditoria/logs-gestion">Auditoría y trazabilidad</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Ingresos a aplicaciones</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Contenedor Principal */}
       <div className="border border-border rounded-xl bg-surface p-5 sm:p-6 shadow-sm flex flex-col gap-6">
         {/* Cabecera de Título y Descripción */}
@@ -460,21 +445,22 @@ export function IngresosAplicacionesView() {
 
         <Separator />
 
+        <AuditFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Buscar por nombre, correo o cédula..."
+          selectFilters={selectFilterConfigs}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          hasActiveFilters={hasActiveFilters}
+          onReset={handleResetFilters}
+          activeChips={activeChips}
+        />
+
         {/* Layout Principal: Izquierda 65% / Derecha 35% */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* IZQUIERDA (~65%): Tabla y Filtros */}
           <div className="lg:col-span-8 flex flex-col gap-5 w-full">
-            <AuditFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Buscar por nombre, correo o cédula..."
-              selectFilters={selectFilterConfigs}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              hasActiveFilters={hasActiveFilters}
-              onReset={handleResetFilters}
-              activeChips={activeChips}
-            />
 
             <AccesosTable
               accesos={filteredAccesos}

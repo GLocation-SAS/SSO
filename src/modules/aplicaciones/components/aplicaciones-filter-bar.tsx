@@ -42,7 +42,7 @@ export function AplicacionesFilterBar({
 
   return (
     <div className="flex flex-col gap-4 mb-6">
-      <div className="flex flex-wrap items-end gap-3.5 w-full">
+      <div className="flex flex-wrap items-center gap-3.5 w-full">
         {/* Combobox de Búsqueda de aplicación */}
         <div className="flex-1 min-w-[280px] max-w-[450px]">
           <Combobox
@@ -58,10 +58,10 @@ export function AplicacionesFilterBar({
               className="w-full text-xs"
               onChange={(e) => onSearchChange(e.target.value)}
             />
-            <ComboboxContent className="min-w-full">
+            <ComboboxContent className="min-w-[max-content]">
               <ComboboxList>
                 {aplicaciones.map((app) => (
-                  <ComboboxItem key={app.id} value={app.nombre}>
+                  <ComboboxItem key={app.id} value={app.nombre} className="whitespace-nowrap pr-6">
                     {app.nombre}
                   </ComboboxItem>
                 ))}
@@ -71,10 +71,7 @@ export function AplicacionesFilterBar({
         </div>
 
         {/* Filtro por Estado */}
-        <div className="w-[200px] shrink-0 flex flex-col gap-1.5">
-          <label className="text-[11px] font-semibold text-muted-foreground uppercase">
-            Estado
-          </label>
+        <div className="w-[200px] shrink-0">
           <Combobox
             value={selectedEstado}
             onValueChange={(val) => {
@@ -87,11 +84,11 @@ export function AplicacionesFilterBar({
               size="sm"
               className="w-full text-xs"
             />
-            <ComboboxContent className="min-w-full">
+            <ComboboxContent className="min-w-[max-content]">
               <ComboboxList>
-                <ComboboxItem value="Todos">Todos los estados</ComboboxItem>
-                <ComboboxItem value="Activa">Activa</ComboboxItem>
-                <ComboboxItem value="Inactiva">Inactiva</ComboboxItem>
+                <ComboboxItem value="Todos" className="whitespace-nowrap pr-6">Todos los estados</ComboboxItem>
+                <ComboboxItem value="Activa" className="whitespace-nowrap pr-6">Activa</ComboboxItem>
+                <ComboboxItem value="Inactiva" className="whitespace-nowrap pr-6">Inactiva</ComboboxItem>
               </ComboboxList>
             </ComboboxContent>
           </Combobox>

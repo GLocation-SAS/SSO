@@ -63,6 +63,22 @@ export function LogsTable({
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(7);
 
+  React.useEffect(() => {
+    const calculateItemsPerPage = () => {
+      const container = document.getElementById("logs-table-container");
+      if (container) {
+        const top = container.getBoundingClientRect().top;
+        const availableHeight = window.innerHeight - top - 100; // 100px para footer/margen
+        const calculated = Math.floor(availableHeight / 65); // 65px por fila
+        setItemsPerPage(Math.max(3, Math.min(25, calculated)));
+      }
+    };
+    calculateItemsPerPage();
+    setTimeout(calculateItemsPerPage, 100);
+    window.addEventListener("resize", calculateItemsPerPage);
+    return () => window.removeEventListener("resize", calculateItemsPerPage);
+  }, []);
+
   const totalPages = Math.ceil(logs.length / itemsPerPage) || 1;
   const paginatedLogs = React.useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -270,6 +286,22 @@ export function AccesosTable({
 }: AccesosTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(7);
+
+  React.useEffect(() => {
+    const calculateItemsPerPage = () => {
+      const container = document.getElementById("accesos-table-container");
+      if (container) {
+        const top = container.getBoundingClientRect().top;
+        const availableHeight = window.innerHeight - top - 100; // 100px para footer/margen
+        const calculated = Math.floor(availableHeight / 65); // 65px por fila
+        setItemsPerPage(Math.max(3, Math.min(25, calculated)));
+      }
+    };
+    calculateItemsPerPage();
+    setTimeout(calculateItemsPerPage, 100);
+    window.addEventListener("resize", calculateItemsPerPage);
+    return () => window.removeEventListener("resize", calculateItemsPerPage);
+  }, []);
 
   const totalPages = Math.ceil(accesos.length / itemsPerPage) || 1;
   const paginatedAccesos = React.useMemo(() => {
@@ -508,27 +540,11 @@ export function ActividadTable({
                 >
                   {/* Usuario */}
                   <TableCell className="text-xs pl-4">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={cn(
-                          "size-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-colors",
-                          isSelected
-                            ? "bg-primary text-primary-foreground dark:bg-primary dark:text-white shadow-xs"
-                            : "bg-muted dark:bg-neutral-800 text-muted-foreground dark:text-neutral-300"
-                        )}
-                      >
-                        {isSelected ? (
-                          <Check className="size-3.5 stroke-[3]" />
-                        ) : (
-                          act.usuario.nombre[0]
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{act.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{act.usuario.nombre}</TooltipContent></Tooltip>
-                        <span className="text-[11px] text-muted-foreground dark:text-neutral-300 font-mono line-clamp-1">
-                          {act.usuario.email}
-                        </span>
-                      </div>
+                    <div className="flex flex-col">
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{act.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{act.usuario.nombre}</TooltipContent></Tooltip>
+                      <span className="text-[11px] text-muted-foreground dark:text-neutral-300 font-mono line-clamp-1">
+                        {act.usuario.email}
+                      </span>
                     </div>
                   </TableCell>
 

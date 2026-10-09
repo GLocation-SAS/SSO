@@ -87,6 +87,21 @@ export function AplicacionesTable({
 }: AplicacionesTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(6);
+
+  React.useEffect(() => {
+    const calculateItemsPerPage = () => {
+      // Altura aproximada de headers, margen, paginación, filtros = ~420px
+      // Altura de fila de tabla = ~65px
+      const availableHeight = window.innerHeight - 420;
+      const calculated = Math.floor(availableHeight / 65);
+      setItemsPerPage(Math.max(3, Math.min(25, calculated)));
+    };
+
+    calculateItemsPerPage();
+    window.addEventListener("resize", calculateItemsPerPage);
+    return () => window.removeEventListener("resize", calculateItemsPerPage);
+  }, []);
+
   const totalPages = Math.ceil(aplicaciones.length / itemsPerPage) || 1;
 
   const paginatedApps = aplicaciones.slice(

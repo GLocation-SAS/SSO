@@ -66,7 +66,8 @@ export function AuditFilters({
       {/* Barra de controles interactivos */}
       <div className="flex flex-wrap items-end gap-3 w-full">
         {/* Input de Búsqueda */}
-        <div className="flex-1 min-w-[240px] max-w-[380px]">
+        <div className="flex-1 min-w-[240px] max-w-[380px] flex flex-col gap-1.5">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase">Búsqueda</label>
           <Search
             placeholder={searchPlaceholder}
             value={searchTerm}
@@ -81,12 +82,11 @@ export function AuditFilters({
         {selectFilters.map((flt) => (
           <div
             key={flt.id}
-            className="flex flex-col gap-1 shrink-0"
+            className="shrink-0 flex flex-col gap-1.5"
             style={{ width: flt.width || "170px" }}
+            title={`Filtrar resultados por ${flt.label.toLowerCase()}`}
           >
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {flt.label}
-            </label>
+            <label className="text-[11px] font-semibold text-muted-foreground uppercase">{flt.label}</label>
             <Combobox
               value={flt.value}
               onValueChange={(val) => {
@@ -99,10 +99,10 @@ export function AuditFilters({
                 size="sm"
                 className="w-full text-xs"
               />
-              <ComboboxContent className="min-w-full z-50">
+              <ComboboxContent className="min-w-[max-content] z-50">
                 <ComboboxList>
                   {flt.options.map((opt) => (
-                    <ComboboxItem key={opt.value} value={opt.value}>
+                    <ComboboxItem key={opt.value} value={opt.value} className="whitespace-nowrap pr-6">
                       {opt.label}
                     </ComboboxItem>
                   ))}
@@ -114,10 +114,8 @@ export function AuditFilters({
 
         {/* Selector de Rango de Fechas si aplica */}
         {onDateRangeChange && (
-          <div className="flex flex-col gap-1 shrink-0 min-w-[210px]">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Rango de Fechas
-            </label>
+          <div className="shrink-0 min-w-[210px] flex flex-col gap-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground uppercase">Rango de fechas</label>
             <DateRangeField
               value={dateRange}
               onChange={onDateRangeChange}
