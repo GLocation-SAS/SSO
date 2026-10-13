@@ -1,14 +1,22 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchCurrentAuthProfile } from "@/modules/gestion-usuarios/services/client-usuarios";
 import { toast } from "sonner";
 
+const ADMIN_ROUTE_PREFIXES = [
+  "/gestion-usuarios",
+  "/gestion",
+  "/aplicaciones",
+  "/auditoria",
+];
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading, logout } = useAuth();
+  const { user, profile, loading, logout, refreshProfile } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
@@ -19,43 +27,63 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         setIsVerifying(false);
         router.replace("/login-sso");
       } else {
-        fetchCurrentAuthProfile()
-          .then((profile) => {
-            if (isMounted) {
-              if (profile.usuario && profile.usuario.active === false) {
-                toast.error("Acceso denegado", {
-                  description: "Tu usuario está inactivo. Contacta con el administrador.",
-                });
-                logout().then(() => router.replace("/login-sso"));
-              } else {
-                setIsVerifying(false);
-              }
-            }
-          })
-          .catch((err) => {
-            if (isMounted) {
-              const errMsg = err.message || "";
-              if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
-                toast.info("Verificación requerida", {
-                  description: "Por favor, completa la verificación de dos pasos.",
-                });
-                router.replace("/doble-factor");
-                return;
-              }
+        const checkAccess = async () => {
+          try {
+            const currentProfile =
+              profile || (await refreshProfile()) || (await fetchCurrentAuthProfile());
+            if (!isMounted) return;
 
+            if (currentProfile?.usuario && currentProfile.usuario.active === false) {
               toast.error("Acceso denegado", {
-                description: errMsg || "Tu usuario no tiene acceso al sistema.",
+                description: "Tu usuario está inactivo. Contacta con el administrador.",
               });
-              logout().then(() => router.replace("/login-sso"));
+              await logout();
+              router.replace("/login-sso");
+              return;
             }
-          });
+
+            // Validar si la ruta requiere permisos administrativos
+            const isAdminRoute = ADMIN_ROUTE_PREFIXES.some(
+              (prefix) => pathname === prefix || pathname?.startsWith(prefix + "/")
+            );
+
+            if (isAdminRoute && !currentProfile?.isAdmin) {
+              toast.error("Acceso denegado", {
+                description: "No tienes permisos administrativos para acceder a este módulo.",
+              });
+              router.replace("/dashboard");
+              return;
+            }
+
+            setIsVerifying(false);
+          } catch (err: any) {
+            if (!isMounted) return;
+
+            const errMsg = err?.message || "";
+            if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
+              toast.info("Verificación requerida", {
+                description: "Por favor, completa la verificación de dos pasos.",
+              });
+              router.replace("/doble-factor");
+              return;
+            }
+
+            toast.error("Acceso denegado", {
+              description: errMsg || "Tu sesión ha expirado o no tienes acceso al sistema.",
+            });
+            await logout();
+            router.replace("/login-sso");
+          }
+        };
+
+        checkAccess();
       }
     }
 
     return () => {
       isMounted = false;
     };
-  }, [user, loading, router, logout]);
+  }, [user, profile, loading, router, pathname, logout, refreshProfile]);
 
   if (loading || isVerifying) {
     return (

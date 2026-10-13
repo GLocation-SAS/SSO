@@ -101,7 +101,7 @@ export function MustChangePasswordDialog({
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-muted-foreground">
-            El administrador ha requerido que actualices tu contraseña temporal antes de continuar al sistema.
+            El administrador ha requerido que actualices tu contraseña antes de continuar al sistema.
           </DialogDescription>
         </DialogHeader>
 

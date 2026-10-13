@@ -113,6 +113,18 @@ export interface AuthProfileResponse {
   uid: string;
   email: string;
   debeCambiarPassword: boolean;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+  isNotasUser?: boolean;
+  hasNotasSession?: boolean;
+  assignedApplications?: Array<{
+    aplicacionId: string;
+    aplicacionCodigo: string;
+    aplicacionNombre: string;
+    sedeId: string;
+    sedeNombre: string;
+    rolNombre: string;
+  }>;
   usuario?: UsuarioItem | null;
 }
 

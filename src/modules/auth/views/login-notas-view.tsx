@@ -20,7 +20,7 @@ export function LoginNotasView({ config }: LoginNotasViewProps) {
         subtitle={config?.subtitle || defaultSubtitle}
         description={config?.description || defaultDescription}
         targetApp={config?.targetApp || "notas"}
-        redirectTo={config?.redirectTo || "/dashboard"}
+        redirectTo={config?.redirectTo || "/dashboard?app=notas"}
         className={config?.className || "mr-0 lg:mr-4 xl:mr-12 w-full sm:max-w-md lg:max-w-[480px] max-h-[calc(100vh-2rem)] overflow-y-auto"}
       />
     </main>

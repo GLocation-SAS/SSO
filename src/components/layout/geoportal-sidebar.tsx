@@ -323,8 +323,16 @@ export function GeoportalSidebar({
 }) {
   const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const router = useRouter();
+
+  const isAdmin = profile?.isAdmin ?? false;
+  const visibleSections = React.useMemo(() => {
+    if (isAdmin) {
+      return navSections;
+    }
+    return navSections.filter((s) => s.title === "Inicio");
+  }, [isAdmin]);
 
   const showUser = variant === "full";
   const showBranding = variant === "full";
@@ -504,7 +512,7 @@ export function GeoportalSidebar({
 
       {/* ── Navigation ── */}
       <SidebarContent className="px-2 py-3 overflow-y-auto space-y-4">
-        {navSections.map((section, idx) => (
+        {visibleSections.map((section, idx) => (
           <div key={section.title} className="space-y-0.5">
             {!collapsed && (
               <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2 mb-2">

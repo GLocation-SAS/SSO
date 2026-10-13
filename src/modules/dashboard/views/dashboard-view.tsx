@@ -46,6 +46,10 @@ import {
   ChartLegend,
   ChartLegendItem,
 } from "@/components/ui/chart";
+import { useAuth } from "@/hooks/useAuth";
+import { useSearchParams } from "next/navigation";
+import { UserApplicationsView } from "./user-applications-view";
+import { NotasWelcomeView } from "./notas-welcome-view";
 
 const ATTENTION_ITEMS = [
   {
@@ -145,7 +149,7 @@ const ACCESS_HISTORY = [
   { day: "Dom", date: "05 Oct", value: 1880, change: "+7%" },
 ];
 
-export function DashboardView() {
+export function SuperadminDashboardView() {
   const [openCategoryId, setOpenCategoryId] = React.useState<string | null>(null);
   const [hoveredRoleId, setHoveredRoleId] = React.useState<string | null>(null);
   const [hoveredAppIdx, setHoveredAppIdx] = React.useState<number | null>(null);
@@ -875,3 +879,49 @@ export function DashboardView() {
     </div>
   );
 }
+
+function DashboardViewContent() {
+  const { profile, loading } = useAuth();
+  const searchParams = useSearchParams();
+  const appParam = searchParams.get("app");
+
+  if (loading) {
+    return (
+      <div className="flex w-full items-center justify-center p-12">
+        <span className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Si el contexto de acceso fue desde Notas, validar que cuente con sesión activa en Notas
+  if (appParam === "notas") {
+    if (profile?.hasNotasSession) {
+      return <NotasWelcomeView />;
+    }
+    // Si no tiene sesión de Notas verificada en el servidor, mostrar su vista correspondiente sin escalamiento
+    return profile?.isAdmin ? <SuperadminDashboardView /> : <UserApplicationsView />;
+  }
+
+  // Si el usuario es Super Admin, renderizar el tablero estratégico completo
+  if (profile?.isAdmin) {
+    return <SuperadminDashboardView />;
+  }
+
+  // Para usuarios estándar de SSO, mostrar su catálogo de aplicaciones asignadas
+  return <UserApplicationsView />;
+}
+
+export function DashboardView() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex w-full items-center justify-center p-12">
+          <span className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+        </div>
+      }
+    >
+      <DashboardViewContent />
+    </React.Suspense>
+  );
+}
+

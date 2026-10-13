@@ -36,6 +36,7 @@ export const APLICACIONES_CATALOGO: Aplicacion[] = [
   { id: "app-sgc", codigo: "SGC", nombre: "SGC", activo: true },
   { id: "app-tram", codigo: "TRAMITES", nombre: "Trámites", activo: true },
   { id: "app-inno", codigo: "INNOVACION", nombre: "Innovación", activo: true },
+  { id: "app-notas", codigo: "NOTAS", nombre: "Notas", activo: true },
 ];
 
 export const APLICACIONES_MINEDUC = APLICACIONES_CATALOGO.map(a => a.nombre);
@@ -72,6 +73,10 @@ export const ROLES_APLICACION: RolAplicacion[] = [
   { id: "ra-sige-an", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-an", rolNombre: "Auditor Nacional", usuariosMaxPermitidos: 8 },
   { id: "ra-sige-mat", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-mat", rolNombre: "Operador Matriculación", usuariosMaxPermitidos: 50 },
   { id: "ra-sige-sop", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-sop", rolNombre: "Técnico de Soporte", usuariosMaxPermitidos: 20 },
+
+  // Notas
+  { id: "ra-notas-cz", aplicacionId: "app-notas", aplicacionNombre: "Notas", rolId: "r-notas-cz", rolNombre: "Coordinadores Zonales", usuariosMaxPermitidos: 50 },
+  { id: "ra-notas-dd", aplicacionId: "app-notas", aplicacionNombre: "Notas", rolId: "r-notas-dd", rolNombre: "Directores Distritales", usuariosMaxPermitidos: 100 },
 ];
 
 export const ROLES_POR_APLICACION: Record<string, string[]> = {
@@ -83,6 +88,7 @@ export const ROLES_POR_APLICACION: Record<string, string[]> = {
   "SGC": ["Director de Gestión Calidad", "Técnico de Soporte Calidad"],
   "Trámites": ["Gestor de Trámites", "Revisor Documental"],
   "Innovación": ["Evaluador de Proyectos", "Gestor Pedagógico"],
+  "Notas": ["Coordinadores Zonales", "Directores Distritales"],
 };
 
 export const ROL_APLICACION_SEDE: RolAplicacionSede[] = [
@@ -98,6 +104,8 @@ export const ROL_APLICACION_SEDE: RolAplicacionSede[] = [
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-cp", usuariosMaxPermitidos: 6 },
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-adm", usuariosMaxPermitidos: 2 },
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-sso-sa", usuariosMaxPermitidos: 2 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-notas-cz", usuariosMaxPermitidos: 10 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-notas-dd", usuariosMaxPermitidos: 10 },
   { sedeId: "sede-d1101", sedeNombre: "Distrito 11D01", rolAplicacionId: "ra-gd-doc", usuariosMaxPermitidos: 80 },
 ];
 

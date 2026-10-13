@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { verifyActiveUser, AuthorizationError } from "@/lib/auth/server-auth";
+import {
+  verifyActiveUser,
+  isUserSuperAdmin,
+  extractActiveApplications,
+  validateExactApplicationAssignment,
+  AuthorizationError,
+} from "@/lib/auth/server-auth";
 
 export async function GET(request: Request) {
   try {
@@ -13,11 +19,27 @@ export async function GET(request: Request) {
         ? Boolean(usuario.debeCambiarPassword)
         : Boolean(decodedToken.debeCambiarPassword);
 
+    const isSuperAdmin = isUserSuperAdmin(usuario);
+    const isAdmin = isSuperAdmin;
+    const assignedApplications = extractActiveApplications(usuario);
+    const notasValidation = validateExactApplicationAssignment(usuario, "notas");
+    const isNotasUser = notasValidation.isValid;
+    const signInProvider =
+      decodedToken.firebase?.sign_in_provider || (decodedToken as any).signInProvider;
+    const hasNotasSession =
+      Boolean(decodedToken.notasTwoFactorVerified) ||
+      (signInProvider === "google.com" && isNotasUser);
+
     return NextResponse.json(
       {
         uid: decodedToken.uid,
         email: decodedToken.email,
         debeCambiarPassword,
+        isAdmin,
+        isSuperAdmin,
+        isNotasUser,
+        hasNotasSession,
+        assignedApplications,
         usuario,
       },
       { status: 200 }

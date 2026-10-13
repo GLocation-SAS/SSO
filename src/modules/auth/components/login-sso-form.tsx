@@ -47,6 +47,37 @@ export function LoginSSOForm({
   // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
   useEffect(() => {
     if (!authLoading && user && !showMustChangePassword) {
+      if (targetApp === "notas") {
+        fetchAuthProfile({ targetApp: "notas" })
+          .then((profile) => {
+            if (profile.hasNotasSession) {
+              router.replace(redirectTo);
+            } else {
+              // Sesión previa de SSO o sin 2FA de Notas verificado: desconectar para login independiente
+              import("firebase/auth").then(({ signOut }) => {
+                import("@/lib/firebase/client").then(({ auth }) => {
+                  signOut(auth).catch(() => {});
+                });
+              });
+            }
+          })
+          .catch(async (err: any) => {
+            const errMsg = err?.message || "";
+            if (
+              errMsg.includes("verificación en dos pasos") ||
+              errMsg.includes("MFA_REQUIRED") ||
+              errMsg.includes("NOTAS_MFA_REQUIRED")
+            ) {
+              router.replace(resolvedMfaRedirect);
+              return;
+            }
+            const { signOut } = await import("firebase/auth");
+            const { auth } = await import("@/lib/firebase/client");
+            await signOut(auth).catch(() => {});
+          });
+        return;
+      }
+
       fetchAuthProfile({ targetApp })
         .then((profile) => {
           if (profile.debeCambiarPassword) {

@@ -163,6 +163,21 @@ export const mockAplicacionesData: AplicacionItem[] = [
     recursosCount: 7,
     icono: "Layers",
   },
+  {
+    id: "notas",
+    codigo: "NOTAS",
+    nombre: "Notas",
+    descripcion: "Gestión institucional de calificaciones, evaluaciones y actas de notas para Coordinadores Zonales y Directores Distritales.",
+    urlAcceso: "/login-notas",
+    estado: "Activa",
+    requiereAtencion: false,
+    fechaCreacion: "13/10/2026",
+    ultimaActualizacion: "13/10/2026, 15:00",
+    usuariosCount: 180,
+    rolesCount: 2,
+    recursosCount: 6,
+    icono: "BookOpen",
+  },
 ];
 
 // ── Mock Data: Usuarios con acceso contextual (Usuario + Sede + Rol + Estado) ──
@@ -294,6 +309,30 @@ export const mockUsuariosAccesoPorApp: Record<string, AplicacionUsuarioAccess[]>
       ultimoAcceso: "Ayer, 14:05",
     },
   ],
+  "notas": [
+    {
+      id: "acc-notas-1",
+      usuarioId: "usr-notas-1",
+      usuarioNombre: "Jeimy Mateus",
+      usuarioEmail: "jeimy.mateus@glocation.com.co",
+      cedula: "1719874563",
+      sede: "Planta Central",
+      rol: "Coordinadores Zonales",
+      estado: "Activo",
+      ultimoAcceso: "Hoy, 14:40",
+    },
+    {
+      id: "acc-notas-2",
+      usuarioId: "usr-notas-2",
+      usuarioNombre: "Lic. Carlos Mendoza",
+      usuarioEmail: "carlos.mendoza@educacion.gob.ec",
+      cedula: "1714253678",
+      sede: "Distrito 17D01",
+      rol: "Directores Distritales",
+      estado: "Activo",
+      ultimoAcceso: "Hoy, 12:15",
+    },
+  ],
 };
 
 // ── Mock Data: Roles por Aplicación ──────────────────────────────────────────
@@ -372,6 +411,24 @@ export const mockRolesPorApp: Record<string, AplicacionRol[]> = {
       descripcion: "Visualización de hojas de vida e historial de desempeño sin privilegios de edición.",
       usuariosCount: 778,
       recursosCount: 3,
+    },
+  ],
+  "notas": [
+    {
+      id: "rol-notas-cz",
+      aplicacionId: "notas",
+      nombre: "Coordinadores Zonales",
+      descripcion: "Supervisión zonal de actas y calificaciones a nivel de coordinación zonal.",
+      usuariosCount: 45,
+      recursosCount: 6,
+    },
+    {
+      id: "rol-notas-dd",
+      aplicacionId: "notas",
+      nombre: "Directores Distritales",
+      descripcion: "Gestión distrital, cierre y asentamiento de actas de notas por período académico.",
+      usuariosCount: 135,
+      recursosCount: 5,
     },
   ],
 };
