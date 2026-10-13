@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/combobox";
 import { Multiselect } from "@/components/ui/multiselect";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import { Stepper, Step } from "@/components/ui/stepper";
 import {
   Table,
@@ -144,6 +145,19 @@ export function UsuarioModalForm({
     onConfirm: () => { },
   });
 
+  const resetForm = React.useCallback(() => {
+    setNombre("");
+    setApellidos("");
+    setTipoDocumento("Cédula");
+    setIdentificacion("");
+    setCorreo("");
+    setTelefono("");
+    setCargo("");
+    setEstado("Activo");
+    setSelectedSedes([]);
+    setAsignaciones([]);
+  }, []);
+
   // Sincronización inicial
   React.useEffect(() => {
     if (open) {
@@ -181,20 +195,7 @@ export function UsuarioModalForm({
       setSedeCurrentRol({});
       setCollapsedSedes({});
     }
-  }, [open, usuarioToEdit]);
-
-  const resetForm = () => {
-    setNombre("");
-    setApellidos("");
-    setTipoDocumento("Cédula");
-    setIdentificacion("");
-    setCorreo("");
-    setTelefono("");
-    setCargo("");
-    setEstado("Activo");
-    setSelectedSedes([]);
-    setAsignaciones([]);
-  };
+  }, [open, usuarioToEdit, resetForm]);
 
   // Validaciones por paso
   const validateStep = (stepIndex: number): boolean => {
@@ -281,10 +282,10 @@ export function UsuarioModalForm({
   const handleRemoveAccess = (asigId: string) => {
     const asig = asignaciones.find((a) => a.id === asigId);
     if (!asig) return;
-    
+
     setConfirmDialog({
       open: true,
-      title: "¿Quitar acceso?",
+      title: "Â¿Quitar acceso?",
       description: `Estás a punto de eliminar el acceso a ${asig.app} para el rol de ${asig.rol}.`,
       confirmText: "Quitar",
       variant: "danger",
@@ -392,7 +393,7 @@ export function UsuarioModalForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
+        size="2xl"
         className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden"
         onInteractOutside={(e) => {
           if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
@@ -401,8 +402,8 @@ export function UsuarioModalForm({
         }}
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
-          <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
+          <DialogTitle className="text-xl font-heading font-bold text-primary">
             {isEditing ? "Editar usuario" : "Crear usuario"}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
@@ -411,7 +412,7 @@ export function UsuarioModalForm({
         </DialogHeader>
 
         {/* STEPPER TOP BAR */}
-        <div className="px-6 py-4 border-b border-border bg-background shrink-0">
+        <div className="px-6 py-4 border-b border-border bg-surface shrink-0">
           <Stepper
             steps={stepperSteps}
             activeStep={activeStep}
@@ -469,10 +470,10 @@ export function UsuarioModalForm({
                   )}
                 </div>
 
-                {/* N.º de documento */}
+                {/* N.Âº de documento */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">
-                    N.º de documento <span className="text-danger">*</span>
+                    N.Âº de documento <span className="text-danger">*</span>
                   </label>
                   <InputGroup
                     size="sm"
@@ -515,7 +516,7 @@ export function UsuarioModalForm({
                       leftIcon={<User className="size-4 text-muted-foreground" />}
                     >
                       <InputGroupInput
-                        placeholder="Ej: María Fernanda"
+                        placeholder="Ej: Marí­a Fernanda"
                         value={nombre}
                         onChange={(e) => {
                           setNombre(e.target.value);
@@ -768,246 +769,250 @@ export function UsuarioModalForm({
               {/* Sección de Accesos */}
               <div className="pt-3 border-t border-border/60 space-y-5">
                 <div className="space-y-1">
-                <h3 className="text-sm font-bold text-foreground">
-                  Asignación de accesos
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Asigna las aplicaciones y roles correspondientes según las sedes seleccionadas.
-                </p>
-                {errors.asignaciones && (
-                  <p className="text-xs text-danger font-medium pt-1">
-                    {errors.asignaciones}
+                  <h3 className="text-sm font-bold text-foreground">
+                    Asignación de accesos
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Asigna las aplicaciones y roles correspondientes según las sedes seleccionadas.
                   </p>
-                )}
-              </div>
-
-              {selectedSedes.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
-                  Selecciona al menos una sede para asignar accesos.
+                  {errors.asignaciones && (
+                    <p className="text-xs text-danger font-medium pt-1">
+                      {errors.asignaciones}
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <div className="space-y-5">
-                  {selectedSedes.map((sedeNombre) => {
-                    const sedeAsignaciones = asignaciones.filter(
-                      (a) => a.sede === sedeNombre
-                    );
-                    const currentApp = sedeCurrentApp[sedeNombre] || "";
-                    const currentRol = sedeCurrentRol[sedeNombre] || "";
-                    const rolesForApp = currentApp ? ROLES_POR_APLICACION[currentApp] || [] : [];
 
-                    return (
-                      <div
-                        key={sedeNombre}
-                        className="rounded-xl border border-border bg-background overflow-hidden shadow-xs"
-                      >
-                        {/* Header de la Card de Sede */}
-                        <div 
-                          className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors"
-                          onClick={() => setCollapsedSedes(prev => ({ ...prev, [sedeNombre]: !prev[sedeNombre] }))}
+                {selectedSedes.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+                    Selecciona al menos una sede para asignar accesos.
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    {selectedSedes.map((sedeNombre) => {
+                      const sedeAsignaciones = asignaciones.filter(
+                        (a) => a.sede === sedeNombre
+                      );
+                      const currentApp = sedeCurrentApp[sedeNombre] || "";
+                      const currentRol = sedeCurrentRol[sedeNombre] || "";
+                      const rolesForApp = currentApp ? ROLES_POR_APLICACION[currentApp] || [] : [];
+
+                      return (
+                        <div
+                          key={sedeNombre}
+                          className="rounded-xl border border-border bg-surface overflow-hidden shadow-xs"
                         >
-                          <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                            <Building2 className="size-4 text-primary shrink-0" />
-                            <span>{sedeNombre}</span>
+                          {/* Header de la Card de Sede */}
+                          <div
+                            className="bg-muted/40 px-4 py-3 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors"
+                            onClick={() => setCollapsedSedes(prev => ({ ...prev, [sedeNombre]: !prev[sedeNombre] }))}
+                          >
+                            <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                              <Building2 className="size-4 text-primary shrink-0" />
+                              <span>{sedeNombre}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge
+                                tone="neutral"
+                                appearance="soft"
+                                className="text-xs font-semibold"
+                              >
+                                {sedeAsignaciones.length}{" "}
+                                {sedeAsignaciones.length === 1
+                                  ? "asignación"
+                                  : "asignaciones"}
+                              </Badge>
+                              <TooltipProvider>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <div className="p-1 rounded-md hover:bg-muted-foreground/10 transition-colors flex items-center justify-center">
+                                      <ChevronDown
+                                        className={cn(
+                                          "size-4 text-muted-foreground transition-transform duration-200",
+                                          collapsedSedes[sedeNombre] ? "-rotate-90" : "rotate-0"
+                                        )}
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent variant="info">
+                                    <p className="text-xs">{collapsedSedes[sedeNombre] ? "Desplegar sede" : "Ocultar sede"}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              tone="neutral"
-                              appearance="soft"
-                              className="text-xs font-semibold"
-                            >
-                              {sedeAsignaciones.length}{" "}
-                              {sedeAsignaciones.length === 1
-                                ? "asignación"
-                                : "asignaciones"}
-                            </Badge>
-                            <TooltipProvider>
-                              <Tooltip delayDuration={300}>
-                                <TooltipTrigger asChild>
-                                  <div className="p-1 rounded-md hover:bg-muted-foreground/10 transition-colors flex items-center justify-center">
-                                    <ChevronDown 
-                                      className={cn(
-                                        "size-4 text-muted-foreground transition-transform duration-200",
-                                        collapsedSedes[sedeNombre] ? "-rotate-90" : "rotate-0"
-                                      )} 
-                                    />
+
+                          {!collapsedSedes[sedeNombre] && (
+                            <>
+                              {/* Selectores de Aplicación y Rol */}
+                              <div className="p-4 bg-surface border-b border-border/60">
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                  <div className="md:col-span-5 space-y-1">
+                                    <label className="text-[11px] font-semibold text-foreground">
+                                      Aplicación
+                                    </label>
+                                    <Combobox
+                                      value={currentApp}
+                                      onValueChange={(val) => {
+                                        if (val) {
+                                          setSedeCurrentApp((prev) => ({
+                                            ...prev,
+                                            [sedeNombre]: val,
+                                          }));
+                                          setSedeCurrentRol((prev) => ({
+                                            ...prev,
+                                            [sedeNombre]: "",
+                                          }));
+                                        }
+                                      }}
+                                    >
+                                      <ComboboxInput
+                                        placeholder="Seleccionar aplicación..."
+                                        showClear={false}
+                                        showSearchIcon={false}
+                                        size="sm"
+                                        className="w-full text-xs"
+                                      />
+                                      <ComboboxContent className="min-w-full">
+                                        <ComboboxList>
+                                          {APLICACIONES_CATALOGO.map((app) => (
+                                            <ComboboxItem key={app.id} value={app.nombre}>
+                                              {app.nombre}
+                                            </ComboboxItem>
+                                          ))}
+                                        </ComboboxList>
+                                      </ComboboxContent>
+                                    </Combobox>
                                   </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="text-xs">{collapsedSedes[sedeNombre] ? "Desplegar sede" : "Ocultar sede"}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </div>
 
-                        {!collapsedSedes[sedeNombre] && (
-                          <>
-                            {/* Selectores de Aplicación y Rol */}
-                            <div className="p-4 bg-background border-b border-border/60">
-                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                            <div className="md:col-span-5 space-y-1">
-                              <label className="text-[11px] font-semibold text-foreground">
-                                Aplicación
-                              </label>
-                              <Combobox
-                                value={currentApp}
-                                onValueChange={(val) => {
-                                  if (val) {
-                                    setSedeCurrentApp((prev) => ({
-                                      ...prev,
-                                      [sedeNombre]: val,
-                                    }));
-                                    setSedeCurrentRol((prev) => ({
-                                      ...prev,
-                                      [sedeNombre]: "",
-                                    }));
-                                  }
-                                }}
-                              >
-                                <ComboboxInput
-                                  placeholder="Seleccionar aplicación..."
-                                  showClear={false}
-                                  showSearchIcon={false}
-                                  size="sm"
-                                  className="w-full text-xs"
-                                />
-                                <ComboboxContent className="min-w-full">
-                                  <ComboboxList>
-                                    {APLICACIONES_CATALOGO.map((app) => (
-                                      <ComboboxItem key={app.id} value={app.nombre}>
-                                        {app.nombre}
-                                      </ComboboxItem>
-                                    ))}
-                                  </ComboboxList>
-                                </ComboboxContent>
-                              </Combobox>
-                            </div>
+                                  <div className="md:col-span-5 space-y-1">
+                                    <label className="text-[11px] font-semibold text-foreground">
+                                      Rol
+                                    </label>
+                                    <Combobox
+                                      value={currentRol}
+                                      onValueChange={(val) => {
+                                        if (val) {
+                                          setSedeCurrentRol((prev) => ({
+                                            ...prev,
+                                            [sedeNombre]: val,
+                                          }));
+                                        }
+                                      }}
+                                      disabled={!currentApp}
+                                    >
+                                      <ComboboxInput
+                                        placeholder={
+                                          currentApp
+                                            ? "Seleccionar rol..."
+                                            : "Selecciona aplicación"
+                                        }
+                                        showClear={false}
+                                        showSearchIcon={false}
+                                        size="sm"
+                                        className="w-full text-xs"
+                                      />
+                                      <ComboboxContent className="min-w-full">
+                                        <ComboboxList>
+                                          {rolesForApp.map((rol) => (
+                                            <ComboboxItem key={rol} value={rol}>
+                                              {rol}
+                                            </ComboboxItem>
+                                          ))}
+                                        </ComboboxList>
+                                      </ComboboxContent>
+                                    </Combobox>
+                                  </div>
 
-                            <div className="md:col-span-5 space-y-1">
-                              <label className="text-[11px] font-semibold text-foreground">
-                                Rol
-                              </label>
-                              <Combobox
-                                value={currentRol}
-                                onValueChange={(val) => {
-                                  if (val) {
-                                    setSedeCurrentRol((prev) => ({
-                                      ...prev,
-                                      [sedeNombre]: val,
-                                    }));
-                                  }
-                                }}
-                                disabled={!currentApp}
-                              >
-                                <ComboboxInput
-                                  placeholder={
-                                    currentApp
-                                      ? "Seleccionar rol..."
-                                      : "Selecciona aplicación"
-                                  }
-                                  showClear={false}
-                                  showSearchIcon={false}
-                                  size="sm"
-                                  className="w-full text-xs"
-                                />
-                                <ComboboxContent className="min-w-full">
-                                  <ComboboxList>
-                                    {rolesForApp.map((rol) => (
-                                      <ComboboxItem key={rol} value={rol}>
-                                        {rol}
-                                      </ComboboxItem>
-                                    ))}
-                                  </ComboboxList>
-                                </ComboboxContent>
-                              </Combobox>
-                            </div>
+                                  <div className="md:col-span-2 space-y-1">
+                                    <label className="text-[11px] font-semibold text-transparent block select-none">
+                                      Acción
+                                    </label>
+                                    <Button
+                                      variant="primary"
+                                      size="default"
+                                      onClick={() => handleAddAccessToSede(sedeNombre)}
+                                      disabled={!currentApp || !currentRol}
+                                      className="w-full h-9 text-xs gap-1"
+                                    >
+                                      <Plus className="size-3.5" />
+                                      <span>Agregar</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
 
-                            <div className="md:col-span-2 space-y-1">
-                              <label className="text-[11px] font-semibold text-transparent block select-none">
-                                Acción
-                              </label>
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => handleAddAccessToSede(sedeNombre)}
-                                disabled={!currentApp || !currentRol}
-                                className="w-full h-9 text-xs gap-1"
-                              >
-                                <Plus className="size-3.5" />
-                                <span>Agregar</span>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Listado de asignaciones de la Sede */}
-                        <div className="px-4 pb-4 bg-background">
-                          {sedeAsignaciones.length === 0 ? (
-                            <p className="p-4 text-xs text-muted-foreground text-center italic border border-dashed border-border/60 rounded-lg">
-                              Sin accesos agregados en esta sede aún.
-                            </p>
-                          ) : (
-                            <Table>
-                              <TableHeader>
-                                <TableRow className="bg-primary hover:bg-primary/90 border-0 *:first:rounded-l-lg *:last:rounded-r-lg">
-                                  <TableHead className="text-xs font-semibold h-8 text-primary-foreground pl-4">
-                                    Aplicación
-                                  </TableHead>
-                                  <TableHead className="text-xs font-semibold h-8 text-primary-foreground">
-                                    Rol
-                                  </TableHead>
-                                  <TableHead className="text-xs font-semibold h-8 text-right pr-4 text-primary-foreground w-20">
-                                    Acciones
-                                  </TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {sedeAsignaciones.map((asig) => (
-                                  <TableRow
-                                    key={asig.id}
-                                    className="bg-muted/30 hover:bg-muted/50 border-0 *:first:rounded-l-lg *:last:rounded-r-lg"
-                                  >
-                                    <TableCell className="py-2 pl-4 text-xs font-semibold text-foreground">
-                                      {asig.app}
-                                    </TableCell>
-                                    <TableCell className="py-2 text-xs text-muted-foreground">
-                                      {asig.rol}
-                                    </TableCell>
-                                    <TableCell className="py-2 pr-4 text-right">
-                                      <TooltipProvider>
-                                        <Tooltip delayDuration={300}>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon-xs"
-                                              onClick={() => handleRemoveAccess(asig.id)}
-                                              className="text-muted-foreground hover:text-danger"
-                                            >
-                                              <Trash2 className="size-3.5" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p className="text-xs">Eliminar asignación</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
+                              {/* Listado de asignaciones de la Sede */}
+                              <div className="px-4 pb-4 pt-2">
+                                {sedeAsignaciones.length === 0 ? (
+                                  <p className="p-4 text-xs text-muted-foreground text-center italic border border-dashed border-border/60 rounded-lg">
+                                    Sin accesos agregados en esta sede aún.
+                                  </p>
+                                ) : (
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Aplicación</TableHead>
+                                        <TableHead>Rol</TableHead>
+                                        <TableHead className="text-right w-20">Acciones</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {sedeAsignaciones.map((asig) => (
+                                        <TableRow key={asig.id}>
+                                          <TableCell className="font-semibold text-foreground">
+                                            {asig.app}
+                                          </TableCell>
+                                          <TableCell>
+                                            {(() => {
+                                              const style = getRoleBadgeStyle(asig.rol);
+                                              return (
+                                                <Badge
+                                                  tone={style.tone}
+                                                  appearance={style.appearance}
+                                                  size="sm"
+                                                  className={style.className}
+                                                >
+                                                  <ShieldCheck className="size-3" />
+                                                  {asig.rol}
+                                                </Badge>
+                                              );
+                                            })()}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <TooltipProvider>
+                                              <Tooltip delayDuration={300}>
+                                                <TooltipTrigger asChild>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    onClick={() => handleRemoveAccess(asig.id)}
+                                                    className="text-muted-foreground hover:text-danger"
+                                                  >
+                                                    <Trash2 className="size-3.5" />
+                                                  </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent variant="info">
+                                                  <p className="text-xs">Eliminar asignación</p>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </TooltipProvider>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                )}
+                              </div>
+                            </>
                           )}
                         </div>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
           {/* PASO 3: RESUMEN */}
           {activeStep === 2 && (
@@ -1027,7 +1032,7 @@ export function UsuarioModalForm({
                   1. Datos del usuario
                 </h4>
 
-                <div className="rounded-xl border border-border bg-background p-4 divide-y divide-border/60 text-sm">
+                <div className="rounded-xl border border-border bg-surface p-4 divide-y divide-border/60 text-sm">
                   <div className="flex items-center justify-between py-2 first:pt-0">
                     <span className="text-xs text-muted-foreground">Nombre completo</span>
                     <span className="font-semibold text-foreground">
@@ -1041,7 +1046,7 @@ export function UsuarioModalForm({
                   </div>
 
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-xs text-muted-foreground">N.º de documento</span>
+                    <span className="text-xs text-muted-foreground">N.Âº de documento</span>
                     <span className="font-semibold text-foreground font-mono">
                       {identificacion}
                     </span>
@@ -1085,7 +1090,7 @@ export function UsuarioModalForm({
                     return (
                       <div
                         key={sedeNombre}
-                        className="rounded-xl border border-border bg-background p-4 space-y-2.5"
+                        className="rounded-xl border border-border bg-surface p-4 space-y-2.5"
                       >
                         <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                           <Building2 className="size-4 text-primary shrink-0" />
@@ -1121,7 +1126,7 @@ export function UsuarioModalForm({
           )}
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}

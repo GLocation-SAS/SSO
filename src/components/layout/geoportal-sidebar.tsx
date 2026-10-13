@@ -26,7 +26,7 @@ import {
   LayoutDashboard,
   BarChart3,
   Users,
-  AppWindow,
+  LayoutGrid,
   ChevronRight,
   PanelLeft,
   X,
@@ -34,9 +34,13 @@ import {
   Moon,
   LogOut,
   ShieldCheck,
+  FolderTree,
   History,
   LogIn,
   Activity,
+  User,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/routing";
@@ -62,6 +66,42 @@ interface NavSection {
   title: string;
   items: NavItem[];
 }
+
+const docenteNavSections: NavSection[] = [
+  {
+    title: "Inicio",
+    items: [
+      {
+        label: "Inicio",
+        href: "/inicio",
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+];
+
+const userNavSections: NavSection[] = [
+  {
+    title: "Inicio",
+    items: [
+      {
+        label: "Dashboard",
+        href: "/mi-dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    title: "Gestión de aplicaciones",
+    items: [
+      {
+        label: "Mis aplicaciones",
+        href: "/mis-aplicaciones",
+        icon: LayoutGrid,
+      },
+    ],
+  },
+];
 
 const navSections: NavSection[] = [
   {
@@ -95,7 +135,17 @@ const navSections: NavSection[] = [
       {
         label: "Aplicaciones",
         href: "/aplicaciones",
-        icon: AppWindow,
+        icon: LayoutGrid,
+      },
+      {
+        label: "Roles",
+        href: "/roles",
+        icon: ShieldCheck,
+      },
+      {
+        label: "Recursos",
+        href: "/recursos",
+        icon: FolderTree,
       },
     ],
   },
@@ -135,8 +185,20 @@ function checkIsPathActive(currentPath: string | null | undefined, targetHref: s
   const current = normalizePath(currentPath);
   const target = normalizePath(targetHref);
 
+  if (target === "/inicio") {
+    return current === "/inicio";
+  }
+
   if (target === "/dashboard") {
     return current === "/dashboard" || current === "/";
+  }
+
+  if (target === "/mi-dashboard") {
+    return current === "/mi-dashboard";
+  }
+
+  if (target === "/mis-aplicaciones") {
+    return current === "/mis-aplicaciones";
   }
 
   if (target === "/gestion/dashboard") {
@@ -323,18 +385,18 @@ export function GeoportalSidebar({
 }) {
   const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const { user, profile, logout } = useAuth();
+  const { user, profile, logout, isStandardUser, isDocente } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
-  const isAdmin = profile?.isAdmin ?? false;
-  const visibleSections = React.useMemo(() => {
-    if (isAdmin) {
-      return navSections;
-    }
-    return navSections.filter(
-      (s) => s.title === "Inicio" || s.title === "Gestión de aplicaciones"
-    );
-  }, [isAdmin]);
+  const isInicio = isDocente || pathname?.includes("/inicio");
+
+  const currentNavSections = isInicio
+    ? docenteNavSections
+    : isStandardUser
+    ? userNavSections
+    : navSections;
+  const homeHref = isInicio ? "/inicio" : isStandardUser ? "/mi-dashboard" : "/dashboard";
 
   const showUser = variant === "full";
   const showBranding = variant === "full";
@@ -410,7 +472,7 @@ export function GeoportalSidebar({
               )}
             >
               <Link
-                href="/dashboard"
+                href={homeHref}
                 className="flex items-center gap-3 shrink-0 group focus-visible:outline-none"
               >
                 {collapsed ? (
@@ -462,7 +524,7 @@ export function GeoportalSidebar({
           >
             {!collapsed && (
               <Link
-                href="/dashboard"
+                href={homeHref}
                 className="flex items-center shrink-0 focus-visible:outline-none"
                 onClick={handleNavigate}
               >
@@ -514,7 +576,7 @@ export function GeoportalSidebar({
 
       {/* ── Navigation ── */}
       <SidebarContent className="px-2 py-3 overflow-y-auto space-y-4">
-        {visibleSections.map((section, idx) => (
+        {currentNavSections.map((section, idx) => (
           <div key={section.title} className="space-y-0.5">
             {!collapsed && (
               <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2 mb-2">
@@ -616,7 +678,9 @@ export function GeoportalSidebar({
             {!collapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-foreground truncate">{displayName}</p>
-                <p className="text-[10px] text-muted-foreground truncate">Administradora</p>
+                <p className="text-[10px] text-muted-foreground truncate">
+                  {isStandardUser ? (user?.cargo || "Usuario Estándar") : "Administradora"}
+                </p>
               </div>
             )}
             {!collapsed && (

@@ -580,12 +580,49 @@ export function SuperadminDashboardView() {
               </div>
             </CardContent>
             <CardFooter className="relative z-10 py-4 px-6 border-t border-border/50 mt-auto flex justify-center items-center w-full">
-              <Link
-                href="/roles"
-                className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link"
-              >
-                Ver detalle de roles <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
-              </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" className="text-sm font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1.5 group/link outline-none p-0 h-auto hover:bg-transparent">
+                    Ver detalle de roles <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
+                  <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">
+                    <DialogTitle className="text-xl font-heading text-primary">Roles de {activeAppRoleFilter}</DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                      Detalle de usuarios y recursos asociados a cada rol.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-muted/40 border-b border-border/50 sticky top-0 backdrop-blur-md">
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider col-span-1">Rol</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Usuarios</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Recursos</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-right">Estado</span>
+                    </div>
+                    <div className="flex flex-col divide-y divide-border/40">
+                      {ROLE_DISTRIBUTION.map((r) => (
+                        <div key={r.id} className="grid grid-cols-4 gap-4 px-6 py-4 items-center hover:bg-muted/10 transition-colors">
+                          <div className="flex items-center gap-2 col-span-1">
+                            <div className="size-2 rounded-full shrink-0" style={{ backgroundColor: r.color }} />
+                            <span className="text-sm font-bold text-foreground truncate">{r.name}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-muted-foreground text-center tabular-nums">{r.count}</span>
+                          <span className="text-sm font-semibold text-muted-foreground text-center tabular-nums">{r.resources}</span>
+                          <div className="text-right">
+                            <Badge appearance="soft" tone="success" size="sm">{r.status}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <DialogFooter className="p-4 border-t border-border/50 bg-muted/10 flex justify-end">
+                    <DialogClose asChild>
+                      <Button variant="outline" size="sm">Cerrar</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardFooter>
           </Card>
 

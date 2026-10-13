@@ -1,17 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "@/routing";
 import {
   AuditSummaryCards,
   AuditSummaryCardItem,
@@ -50,6 +41,13 @@ export function ActividadUsuariosView() {
 
   // Selección de usuario (fila de la tabla)
   const [selectedUser, setSelectedUser] = React.useState<UsuarioActividadItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedUser && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedUser]);
 
   // 1. Filtrado de datos
   const filteredActividades = React.useMemo(() => {
@@ -484,43 +482,22 @@ export function ActividadUsuariosView() {
   }, [filteredActividades, selectedUser]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-full pb-10">
-      {/* ── 1. Encabezado & Breadcrumb ────────────────────────────────────── */}
-      <div className="flex flex-col gap-2">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-                  Inicio
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <span className="text-muted-foreground">Auditoría y trazabilidad</span>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Actividad de usuarios</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <div className="flex flex-col gap-1 mt-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Actividad de usuarios
-            </h1>
-            <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
+    <div className="flex flex-col gap-4 w-full h-full pb-4">
+      <div className="flex flex-col gap-6 w-full h-full">
+        <div className="border border-border rounded-xl bg-surface p-6 shadow-sm flex flex-col gap-6">
+          {/* ── 1. Encabezado ────────────────────────────────────── */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
+                  Actividad de usuarios
+                </h1>
+              </div>
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+                Consulta el uso e interacción de los usuarios en los sistemas integrados.
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Consulta el uso e interacción de los usuarios en los sistemas integrados.
-          </p>
-        </div>
-      </div>
-
-      <Separator />
 
       {/* ── 2. Resumen Superior (Máx 4 KPI Cards) ────────────────────────── */}
       <AuditSummaryCards
@@ -528,22 +505,25 @@ export function ActividadUsuariosView() {
         onSelectCard={handleSelectKpiCard}
       />
 
-      {/* ── 3. Layout Principal 65% / 35% ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* COLUMNA IZQUIERDA (~65%): Filtros y Tabla Operativa */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
-          <AuditFilters
-            searchPlaceholder="Buscar por nombre, correo o cédula..."
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            selectFilters={selectFilterConfigs}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            onReset={handleResetFilters}
-            hasActiveFilters={hasActiveFilters}
-            activeChips={activeChips}
-          />
+      <Separator />
 
+      {/* ── 3. Filtros y Búsqueda (Ancho completo) ───────────────────────── */}
+      <AuditFilters
+        searchPlaceholder="Buscar por nombre, correo o cédula..."
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectFilters={selectFilterConfigs}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        onReset={handleResetFilters}
+        hasActiveFilters={hasActiveFilters}
+        activeChips={activeChips}
+      />
+
+      {/* ── 4. Layout Principal 65% / 35% ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* COLUMNA IZQUIERDA (~65%): Tabla Operativa */}
+        <div className="lg:col-span-8 flex flex-col gap-4">
           {/* Tabla de Actividad Agregada */}
           <ActividadTable
             actividades={filteredActividades}
@@ -554,7 +534,7 @@ export function ActividadUsuariosView() {
         </div>
 
         {/* COLUMNA DERECHA (~35%): Panel Dinámico Reactivo */}
-        <div className="lg:col-span-4 lg:sticky lg:top-4">
+        <div className="lg:col-span-4 lg:sticky lg:top-4" ref={panelRef}>
           <DynamicChartPanel
             contextTitle={dynamicContext.title}
             contextSubtitle={dynamicContext.subtitle}
@@ -566,6 +546,8 @@ export function ActividadUsuariosView() {
           />
         </div>
       </div>
+      </div>
+    </div>
     </div>
   );
 }

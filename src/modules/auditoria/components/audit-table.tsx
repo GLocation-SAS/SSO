@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
+import { InteractiveCard } from "@/components/ui/data-display";
 import { StatusBadge } from "./status-badge";
 import { AuditEmptyState } from "./empty-state";
 import { LogGestionItem } from "../data/logs.mock";
@@ -43,6 +44,7 @@ import { cn } from "@/lib/utils";
 // 1. LOGS DE GESTIÓN TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface LogsTableProps {
+  isLoading?: boolean;
   logs: LogGestionItem[];
   selectedId?: string | null;
   onSelectRow?: (log: LogGestionItem) => void;
@@ -51,6 +53,7 @@ interface LogsTableProps {
 }
 
 export function LogsTable({
+  isLoading,
   logs,
   selectedId,
   onSelectRow,
@@ -59,6 +62,22 @@ export function LogsTable({
 }: LogsTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(7);
+
+  React.useEffect(() => {
+    const calculateItemsPerPage = () => {
+      const container = document.getElementById("logs-table-container");
+      if (container) {
+        const top = container.getBoundingClientRect().top;
+        const availableHeight = window.innerHeight - top - 100; // 100px para footer/margen
+        const calculated = Math.floor(availableHeight / 65); // 65px por fila
+        setItemsPerPage(Math.max(3, Math.min(25, calculated)));
+      }
+    };
+    calculateItemsPerPage();
+    setTimeout(calculateItemsPerPage, 100);
+    window.addEventListener("resize", calculateItemsPerPage);
+    return () => window.removeEventListener("resize", calculateItemsPerPage);
+  }, []);
 
   const totalPages = Math.ceil(logs.length / itemsPerPage) || 1;
   const paginatedLogs = React.useMemo(() => {
@@ -70,35 +89,34 @@ export function LogsTable({
     setCurrentPage(1);
   }, [logs.length]);
 
-  if (logs.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || logs.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="logs-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className="w-[140px]  pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Responsable
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Acción
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Elemento
               </TableHead>
-              <TableHead className="min-w-[180px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
-                Detalle Breve
+
+              <TableHead className="w-[110px] ">
+                Resultado
               </TableHead>
-              <TableHead className="w-[110px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
-                Estado
-              </TableHead>
-              <TableHead className="w-[90px] text-right text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -133,14 +151,13 @@ export function LogsTable({
                         {log.fecha.split(" ")[0]}
                       </span>
                     </div>
+
                   </TableCell>
 
                   {/* Responsable */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {log.responsable.nombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{log.responsable.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{log.responsable.nombre}</TooltipContent></Tooltip>
                       <span className="text-[11px] text-muted-foreground dark:text-neutral-300 line-clamp-1">
                         {log.responsable.cargo}
                       </span>
@@ -155,45 +172,91 @@ export function LogsTable({
                   {/* Elemento */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {log.elementoNombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{log.elementoNombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{log.elementoNombre}</TooltipContent></Tooltip>
                       <span className="text-[10px] text-muted-foreground dark:text-neutral-300">
                         {log.tipoElemento} &bull; {log.aplicacion}
                       </span>
                     </div>
                   </TableCell>
 
-                  {/* Detalle breve */}
-                  <TableCell className="text-xs text-muted-foreground dark:text-neutral-300">
-                    <p className="line-clamp-2 leading-relaxed">{log.detalleBreve}</p>
-                  </TableCell>
 
-                  {/* Estado */}
+
+                  {/* Resultado */}
                   <TableCell className="text-xs">
                     <StatusBadge status={log.estado} />
                   </TableCell>
 
                   {/* Acción "Ver detalle" */}
                   <TableCell className="text-right text-xs pr-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewDetail(log);
-                      }}
-                      className="h-8 px-2.5 text-xs text-primary dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 hover:bg-primary/10 dark:hover:bg-primary-900/40 gap-1 font-semibold"
-                    >
-                      <Eye className="size-3.5" />
-                      <span>Detalle</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetail(log);
+                          }}
+                          aria-label="Ver detalle de auditoría"
+                          className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" variant="info">
+                        <p>Ver detalle</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedLogs.map((log) => {
+            const isSelected = selectedId === log.id;
+            return (
+              <InteractiveCard
+                key={log.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectRow?.(log)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{log.responsable.nombre}</span>
+                    <span className="text-xs text-muted-foreground">{log.fechaRelativa}</span>
+                  </div>
+                  <StatusBadge status={log.accion} />
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  {log.detalleBreve}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Elemento</span>
+                    <span className="text-foreground font-medium truncate">{log.elementoNombre}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Estado</span>
+                    <StatusBadge status={log.estado} />
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewDetail(log); }} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
+                </div>
+              </InteractiveCard>
+            );
+          })}
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -213,6 +276,7 @@ export function LogsTable({
 // 2. INGRESOS A APLICACIONES TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface AccesosTableProps {
+  isLoading?: boolean;
   accesos: AccesoAplicacionItem[];
   selectedId?: string | null;
   onSelectRow?: (acceso: AccesoAplicacionItem) => void;
@@ -221,6 +285,7 @@ interface AccesosTableProps {
 }
 
 export function AccesosTable({
+  isLoading,
   accesos,
   selectedId,
   onSelectRow,
@@ -229,6 +294,22 @@ export function AccesosTable({
 }: AccesosTableProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(7);
+
+  React.useEffect(() => {
+    const calculateItemsPerPage = () => {
+      const container = document.getElementById("accesos-table-container");
+      if (container) {
+        const top = container.getBoundingClientRect().top;
+        const availableHeight = window.innerHeight - top - 100; // 100px para footer/margen
+        const calculated = Math.floor(availableHeight / 65); // 65px por fila
+        setItemsPerPage(Math.max(3, Math.min(25, calculated)));
+      }
+    };
+    calculateItemsPerPage();
+    setTimeout(calculateItemsPerPage, 100);
+    window.addEventListener("resize", calculateItemsPerPage);
+    return () => window.removeEventListener("resize", calculateItemsPerPage);
+  }, []);
 
   const totalPages = Math.ceil(accesos.length / itemsPerPage) || 1;
   const paginatedAccesos = React.useMemo(() => {
@@ -240,35 +321,36 @@ export function AccesosTable({
     setCurrentPage(1);
   }, [accesos.length]);
 
-  if (accesos.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || accesos.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="accesos-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className="w-[140px]  pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Usuario
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Aplicación
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Rol
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Sede
               </TableHead>
-              <TableHead className="w-[110px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="w-[110px] ">
                 Resultado
               </TableHead>
-              <TableHead className="w-[90px] text-right text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -308,9 +390,7 @@ export function AccesosTable({
                   {/* Usuario */}
                   <TableCell className="text-xs">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                        {acc.usuario.nombre}
-                      </span>
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{acc.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{acc.usuario.nombre}</TooltipContent></Tooltip>
                       <span className="text-[11px] text-muted-foreground dark:text-neutral-300 line-clamp-1 font-mono">
                         {acc.usuario.email}
                       </span>
@@ -341,24 +421,72 @@ export function AccesosTable({
 
                   {/* Ver detalle */}
                   <TableCell className="text-right text-xs pr-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewDetail(acc);
-                      }}
-                      className="h-8 px-2.5 text-xs text-primary dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-200 hover:bg-primary/10 dark:hover:bg-primary-900/40 gap-1 font-semibold"
-                    >
-                      <Eye className="size-3.5" />
-                      <span>Detalle</span>
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewDetail(acc);
+                          }}
+                          aria-label="Ver detalle de acceso"
+                          className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" variant="info">
+                        <p>Ver detalle</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedAccesos.map((acc) => {
+            const isSelected = selectedId === acc.id;
+            return (
+              <InteractiveCard
+                key={acc.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectRow?.(acc)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{acc.usuario.nombre}</span>
+                    <span className="text-xs text-muted-foreground">{acc.fechaRelativa}</span>
+                  </div>
+                  <StatusBadge status={acc.resultado} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Aplicación</span>
+                    <span className="text-foreground font-medium truncate">{acc.aplicacion}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1 text-[11px]">Sede</span>
+                    <span className="text-foreground font-medium truncate">{acc.sede}</span>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/60 flex items-center justify-end">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewDetail(acc); }} className="size-8 text-muted-foreground hover:text-primary"><Eye className="size-4" /></Button>
+                </div>
+              </InteractiveCard>
+            );
+          })}
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -378,6 +506,7 @@ export function AccesosTable({
 // 3. ACTIVIDAD DE USUARIOS (AGREGADA) TABLE
 // ─────────────────────────────────────────────────────────────────────────────
 interface ActividadTableProps {
+  isLoading?: boolean;
   actividades: UsuarioActividadItem[];
   selectedUserId?: string | null;
   onSelectUser: (user: UsuarioActividadItem | null) => void;
@@ -385,6 +514,7 @@ interface ActividadTableProps {
 }
 
 export function ActividadTable({
+  isLoading,
   actividades,
   selectedUserId,
   onSelectUser,
@@ -403,32 +533,33 @@ export function ActividadTable({
     setCurrentPage(1);
   }, [actividades.length]);
 
-  if (actividades.length === 0) {
-    return <AuditEmptyState onResetFilters={onResetFilters} />;
+  if (isLoading || actividades.length === 0) {
+    return <AuditEmptyState isLoading={isLoading} onResetFilters={onResetFilters} />;
   }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div id="actividad-table-container" className="flex flex-col gap-4 w-full">
-        <Table>
+        <div className="hidden lg:block overflow-x-auto w-full">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pl-4">
+              <TableHead className=" pl-4">
                 Usuario
               </TableHead>
-              <TableHead className="min-w-[160px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="min-w-[160px] ">
                 Aplicaciones Utilizadas
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Rol
               </TableHead>
-              <TableHead className="text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="">
                 Sede
               </TableHead>
-              <TableHead className="w-[120px] text-center text-[11px] font-bold uppercase tracking-wider text-white dark:text-white">
+              <TableHead className="w-[120px] text-center ">
                 Cant. Accesos
               </TableHead>
-              <TableHead className="w-[130px] text-[11px] font-bold uppercase tracking-wider text-white dark:text-white pr-4">
+              <TableHead className="w-[130px]  pr-4">
                 Última Actividad
               </TableHead>
             </TableRow>
@@ -457,29 +588,11 @@ export function ActividadTable({
                 >
                   {/* Usuario */}
                   <TableCell className="text-xs pl-4">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={cn(
-                          "size-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-colors",
-                          isSelected
-                            ? "bg-primary text-primary-foreground dark:bg-primary dark:text-white shadow-xs"
-                            : "bg-muted dark:bg-neutral-800 text-muted-foreground dark:text-neutral-300"
-                        )}
-                      >
-                        {isSelected ? (
-                          <Check className="size-3.5 stroke-[3]" />
-                        ) : (
-                          act.usuario.nombre[0]
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1">
-                          {act.usuario.nombre}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground dark:text-neutral-300 font-mono line-clamp-1">
-                          {act.usuario.email}
-                        </span>
-                      </div>
+                    <div className="flex flex-col">
+                      <Tooltip><TooltipTrigger asChild><span className="font-semibold text-foreground dark:text-neutral-100 line-clamp-1 cursor-default">{act.usuario.nombre}</span></TooltipTrigger><TooltipContent variant="info" side="top">{act.usuario.nombre}</TooltipContent></Tooltip>
+                      <span className="text-[11px] text-muted-foreground dark:text-neutral-300 font-mono line-clamp-1">
+                        {act.usuario.email}
+                      </span>
                     </div>
                   </TableCell>
 
@@ -534,8 +647,8 @@ export function ActividadTable({
                         act.totalAccesos > 100
                           ? "bg-primary/15 dark:bg-primary-900/40 text-primary dark:text-primary-300"
                           : act.totalAccesos > 0
-                          ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-neutral-200"
-                          : "text-muted-foreground dark:text-neutral-400"
+                            ? "bg-muted dark:bg-neutral-800 text-foreground dark:text-neutral-200"
+                            : "text-muted-foreground dark:text-neutral-400"
                       )}
                     >
                       {act.totalAccesos}
@@ -558,6 +671,59 @@ export function ActividadTable({
             })}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Vista Mobile */}
+        <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          {paginatedItems.map((act) => {
+            const isSelected = selectedUserId === act.usuario.id;
+            return (
+              <InteractiveCard
+                key={act.id}
+                className={cn(
+                  "flex flex-col gap-3 text-left transition-colors duration-150",
+                  isSelected && "border-primary bg-primary/5 dark:bg-primary/20"
+                )}
+                color="default"
+                hideChevron
+                onClick={() => onSelectUser(isSelected ? null : act)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-foreground">{act.usuario.nombre}</span>
+                    <span className="text-[11px] text-muted-foreground font-mono">{act.usuario.email}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-muted-foreground">Accesos</span>
+                    <span className="font-mono font-bold text-sm">{act.totalAccesos}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1 text-xs pt-2 border-t border-border/60">
+                  <span className="text-muted-foreground font-semibold text-[11px]">Aplicaciones utilizadas</span>
+                  <div className="flex flex-wrap items-center gap-1 mt-1">
+                    {act.aplicacionesUtilizadas.length > 0 ? (
+                      act.aplicacionesUtilizadas.map((app) => (
+                        <Badge key={app} tone="neutral" appearance="soft" size="sm" className="text-[10px] font-medium">{app}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground italic">Sin aplicaciones</span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-border/60">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-muted-foreground font-semibold text-[11px]">Rol</span>
+                    <span className="text-foreground font-medium truncate">{act.rolPrincipal}</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className="text-muted-foreground font-semibold text-[11px]">Última actividad</span>
+                    <span className="text-foreground font-medium">{act.ultimaActividadRelativa}</span>
+                  </div>
+                </div>
+              </InteractiveCard>
+            );
+          })}
+        </div>
 
         {/* Paginación */}
         <TablePaginationBar
@@ -595,31 +761,26 @@ function TablePaginationBar({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 text-xs text-muted-foreground dark:text-neutral-300">
-      <div className="flex items-center gap-2">
-        <span>
-          Mostrando <strong className="text-foreground dark:text-neutral-100">{startItem}-{endItem}</strong> de{" "}
-          <strong className="text-foreground dark:text-neutral-100">{totalItems}</strong> registros
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
+        <span className="text-xs text-muted-foreground">
+          Mostrando {startItem}–{endItem} de {totalItems}
         </span>
-        <div className="flex items-center gap-1.5 ml-2">
-          <span>Filas:</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">por pág:</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 text-xs gap-1 border-border bg-background dark:bg-muted/40 text-foreground dark:text-neutral-200 hover:bg-muted/50 dark:hover:bg-muted"
-              >
-                {itemsPerPage}
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2 gap-1">
+                <span>{itemsPerPage}</span>
                 <ChevronDown className="size-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-[60px] bg-popover dark:bg-neutral-900 border-border">
+            <DropdownMenuContent align="start" className="min-w-[60px]">
               {[5, 7, 10, 20].map((size) => (
                 <DropdownMenuItem
                   key={size}
                   onClick={() => onItemsPerPageChange(size)}
-                  className="text-xs cursor-pointer justify-center text-popover-foreground dark:text-neutral-200"
+                  className="text-xs cursor-pointer justify-center"
                 >
                   {size}
                 </DropdownMenuItem>
@@ -638,10 +799,7 @@ function TablePaginationBar({
                 e.preventDefault();
                 onPageChange(Math.max(1, currentPage - 1));
               }}
-              className={cn(
-                "dark:text-neutral-200 dark:hover:bg-muted/60",
-                currentPage === 1 && "pointer-events-none opacity-50"
-              )}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
           {Array.from({ length: totalPages }).map((_, i) => (
@@ -653,10 +811,6 @@ function TablePaginationBar({
                   e.preventDefault();
                   onPageChange(i + 1);
                 }}
-                className={cn(
-                  "dark:text-neutral-200 dark:hover:bg-muted/60",
-                  currentPage === i + 1 && "dark:bg-primary dark:text-white font-bold"
-                )}
               >
                 {i + 1}
               </PaginationLink>
@@ -669,10 +823,7 @@ function TablePaginationBar({
                 e.preventDefault();
                 onPageChange(Math.min(totalPages, currentPage + 1));
               }}
-              className={cn(
-                "dark:text-neutral-200 dark:hover:bg-muted/60",
-                (currentPage === totalPages || totalPages === 0) && "pointer-events-none opacity-50"
-              )}
+              className={(currentPage === totalPages || totalPages === 0) ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
         </PaginationContent>

@@ -1,4 +1,10 @@
 "use client";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SubSection } from "./sub-section";
 
 import * as React from "react";

@@ -1,19 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  ChevronDown,
   User,
   LogOut,
-  ChevronDown,
-  ChevronLeft
+  ChevronLeft,
+  LayoutDashboard,
+  LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,11 +27,25 @@ import { useRouter } from "next/navigation";
 export function UserMenu() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const { user, logout } = useAuth();
   const router = useRouter();
+  const { user, profile, logout, isStandardUser, isDocente } = useAuth();
 
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
-  const displayEmail = user?.email || "usuario@mineduc.cl";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Paula Rozo";
+  const email =
+    user?.email ||
+    (isDocente
+      ? "docente@mineduc.gob.ec"
+      : isStandardUser
+      ? "prueba2@gmail.com"
+      : "paula.rozo@geoportal.gob.ec");
+  const roleLabel = isDocente
+    ? (user?.cargo || "Docente")
+    : isStandardUser
+    ? (user?.cargo || "Usuario Estándar")
+    : profile?.isAdmin
+    ? "Administrador"
+    : "Administradora";
+
   const initials = displayName
     .split(" ")
     .map((n: string) => n[0])
@@ -37,12 +53,17 @@ export function UserMenu() {
     .slice(0, 2)
     .join("")
     .toUpperCase() || "U";
-  const photoURL = user?.photoURL || undefined;
+  const photoURL = user?.photoURL || user?.avatar || undefined;
 
   const handleLogout = async () => {
     setOpen(false);
     await logout();
     router.replace("/login-sso");
+  };
+
+  const handleNavigate = (path: string) => {
+    setOpen(false);
+    router.push(path);
   };
 
   const TriggerButton = (
@@ -55,7 +76,7 @@ export function UserMenu() {
         <div className="flex flex-col text-left leading-tight">
           <span className="text-sm font-semibold text-foreground">{displayName}</span>
           <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <span className="text-primary font-bold text-xs leading-none">•</span> Autenticado
+            <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
           </span>
         </div>
         <ChevronDown
@@ -104,18 +125,38 @@ export function UserMenu() {
               <div className="flex flex-col">
                 <span className="text-body font-bold text-foreground">{displayName}</span>
                 <span className="text-caption text-muted-foreground mt-0.5 flex items-center gap-1">
-                  <span className="text-primary font-bold text-xs leading-none">•</span> Autenticado
+                  <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
                 </span>
-                <span className="text-caption text-muted-foreground/80 mt-0.5">{displayEmail}</span>
+                <span className="text-caption text-muted-foreground/80 mt-0.5">{email}</span>
               </div>
             </div>
 
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
+              {(isStandardUser || isDocente) && (
+                <>
+                  <MobileMenuItem
+                    icon={LayoutDashboard}
+                    label={isDocente ? "Inicio (Notas)" : "Dashboard"}
+                    onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
+                  />
+                  <MobileMenuItem
+                    icon={LayoutGrid}
+                    label="Mis aplicaciones"
+                    onClick={() => handleNavigate("/mis-aplicaciones")}
+                  />
+                  <div className="h-px bg-border/60 mx-2 my-1" />
+                </>
+              )}
               <MobileMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
               <div className="h-px bg-border my-1 mx-2" />
-              <MobileMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={handleLogout} />
+              <MobileMenuItem
+                icon={LogOut}
+                label="Cerrar sesión"
+                isWarning
+                onClick={handleLogout}
+              />
             </div>
           </div>
         </SheetContent>
@@ -149,16 +190,36 @@ export function UserMenu() {
           <div className="flex flex-col min-w-0">
             <span className="text-body-sm font-bold text-foreground truncate">{displayName}</span>
             <span className="text-caption text-muted-foreground flex items-center gap-1 truncate">
-              <span className="text-primary font-bold text-xs leading-none">•</span> Autenticado
+              <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
             </span>
           </div>
         </div>
         <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <div className="flex flex-col gap-1 px-1">
+          {(isStandardUser || isDocente) && (
+            <>
+              <DesktopMenuItem
+                icon={LayoutDashboard}
+                label={isDocente ? "Inicio (Notas)" : "Dashboard"}
+                onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
+              />
+              <DesktopMenuItem
+                icon={LayoutGrid}
+                label="Mis aplicaciones"
+                onClick={() => handleNavigate("/mis-aplicaciones")}
+              />
+              <DropdownMenuSeparator className="my-1 bg-border/50" />
+            </>
+          )}
           <DesktopMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
           <DropdownMenuSeparator className="my-1.5 bg-border/50" />
-          <DesktopMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={handleLogout} />
+          <DesktopMenuItem
+            icon={LogOut}
+            label="Cerrar sesión"
+            isWarning
+            onClick={handleLogout}
+          />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

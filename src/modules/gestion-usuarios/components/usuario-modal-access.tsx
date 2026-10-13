@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { getRoleBadgeStyle } from "@/lib/role-badge";
 import {
   Table,
   TableHeader,
@@ -245,11 +246,11 @@ export function UsuarioModalAccess({
     
     setConfirmDialog({
       open: true,
-      title: isActivo ? "¿Inactivar acceso?" : "¿Activar acceso?",
+      title: isActivo ? "¿Desactivar acceso?" : "¿Activar acceso?",
       description: isActivo 
-        ? `Estás a punto de inactivar el acceso a ${asig.aplicacionNombre}.` 
+        ? `Estás a punto de desactivar el acceso a ${asig.aplicacionNombre}.` 
         : `Estás a punto de activar el acceso a ${asig.aplicacionNombre}.`,
-      confirmText: isActivo ? "Inactivar" : "Activar",
+      confirmText: isActivo ? "Desactivar" : "Activar",
       variant: isActivo ? "warning" : "success",
       onConfirm: () => {
         const sedesCopy = usuario.sedes.map((s) => ({
@@ -273,7 +274,7 @@ export function UsuarioModalAccess({
   const handleRemoveAsig = (asig: UsuarioSedeRolAplicacion) => {
     setConfirmDialog({
       open: true,
-      title: "¿Quitar acceso?",
+      title: "Â¿Quitar acceso?",
       description: `Estás a punto de eliminar el acceso a ${asig.aplicacionNombre}. Esta acción no se puede deshacer.`,
       confirmText: "Quitar",
       variant: "danger",
@@ -304,8 +305,8 @@ export function UsuarioModalAccess({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        size="xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-background"
+        size="2xl"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-surface"
         onInteractOutside={(e) => {
           if ((e.target as Element)?.closest?.('[data-slot="combobox-content"]')) {
             e.preventDefault();
@@ -313,9 +314,9 @@ export function UsuarioModalAccess({
         }}
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
           <div className="space-y-0.5">
-            <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+            <DialogTitle className="text-xl font-heading font-bold text-primary">
               Accesos del usuario
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -325,7 +326,7 @@ export function UsuarioModalAccess({
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-5 bg-background">
+        <div className="overflow-y-auto flex-1 p-6 space-y-5 bg-surface">
           {/* Barra de acción destacada para Agregar Acceso */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
             <div className="flex items-center gap-3">
@@ -359,7 +360,7 @@ export function UsuarioModalAccess({
 
           {/* Formulario Inline para Agregar Acceso */}
           {isAdding && (
-            <div className="p-4 rounded-xl border border-border bg-background space-y-4 animate-in fade-in-50 duration-200">
+            <div className="p-4 rounded-xl border border-border bg-surface space-y-4 animate-in fade-in-50 duration-200">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
                   <ShieldCheck className="size-4" />
@@ -477,7 +478,7 @@ export function UsuarioModalAccess({
               <div className="flex justify-end items-center gap-2 pt-2 border-t border-border/40">
                 <Button
                   variant="neutral"
-                  size="sm"
+                  size="default"
                   onClick={() => {
                     setIsAdding(false);
                     setEditingAsigId(null);
@@ -488,10 +489,10 @@ export function UsuarioModalAccess({
                 </Button>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="default"
                   onClick={handleSaveAssignment}
                   disabled={!selectedSede || !selectedApp || !selectedRol}
-                  className="text-xs"
+                  className="text-sm"
                 >
                   {editingAsigId ? "Guardar Cambios" : "Agregar acceso"}
                 </Button>
@@ -513,13 +514,13 @@ export function UsuarioModalAccess({
                 return (
                   <div
                     key={sedeKey}
-                    className="rounded-xl border border-border overflow-hidden bg-background"
+                    className="rounded-xl border border-primary/20 overflow-hidden bg-primary-50/20 dark:bg-primary-900/10"
                   >
                     {/* Header Sede sin Tooltip global */}
-                    <button
+                      <button
                       type="button"
                       onClick={() => toggleSedeExpand(sedeKey)}
-                      className="w-full bg-background hover:bg-muted/15 transition-colors px-4 py-3 border-b border-border flex items-center justify-between text-left cursor-pointer"
+                      className="w-full bg-primary-50/50 dark:bg-primary-900/20 hover:bg-primary-100/50 dark:hover:bg-primary-900/30 transition-colors px-4 py-3 border-b border-primary/20 flex items-center justify-between text-left cursor-pointer"
                       aria-expanded={isExpanded}
                     >
                       <div className="flex items-center gap-2 text-sm font-bold text-foreground">
@@ -549,7 +550,7 @@ export function UsuarioModalAccess({
                                 )}
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent side="top">
+                            <TooltipContent variant="info" side="top">
                               {isExpanded ? "Ocultar sede" : "Desplegar sede"}
                             </TooltipContent>
                           </Tooltip>
@@ -559,61 +560,57 @@ export function UsuarioModalAccess({
 
                     {/* Tabla de asignaciones de la sede */}
                     {isExpanded && (
-                      <div className="p-4 bg-background border-t border-border/50">
-                        <div className="overflow-x-auto rounded-lg border border-border/60">
+                      <div className="pt-2 px-2 pb-4">
+                        <div className="overflow-x-auto">
                           <Table>
                             <TableHeader>
-                              <TableRow className="border-b border-primary/30 bg-primary">
-                                <TableHead className="text-xs font-semibold h-9 text-white pl-4">
-                                  Aplicación
-                                </TableHead>
-                                <TableHead className="text-xs font-semibold h-9 text-white">
-                                  Rol
-                                </TableHead>
-                                <TableHead className="text-xs font-semibold h-9 text-center text-white w-28">
-                                  Estado
-                                </TableHead>
-                                <TableHead className="text-xs font-semibold h-9 text-white whitespace-nowrap">
-                                  Fecha de asignación
-                                </TableHead>
-                                <TableHead className="text-xs font-semibold h-9 text-right pr-4 text-white w-32">
-                                  Acciones
-                                </TableHead>
+                              <TableRow>
+                                <TableHead>Aplicación</TableHead>
+                                <TableHead>Rol</TableHead>
+                                <TableHead className="text-center w-28">Estado</TableHead>
+                                <TableHead className="whitespace-nowrap">Fecha de asignación</TableHead>
+                                <TableHead className="text-right w-32">Acciones</TableHead>
                               </TableRow>
                             </TableHeader>
-                            <TableBody className="bg-background">
+                            <TableBody>
                               {sede.asignaciones.map((asig) => (
-                                <TableRow
-                                  key={asig.id}
-                                  className="bg-background border-b border-border/40 hover:bg-muted/15 last:border-b-0"
-                                >
-                                  <TableCell className="py-2.5 pl-4 text-xs font-semibold text-foreground">
+                                <TableRow key={asig.id}>
+                                  <TableCell className="font-semibold text-foreground">
                                     {asig.aplicacionNombre}
                                   </TableCell>
-                                  <TableCell className="py-2.5 text-xs text-muted-foreground font-medium">
-                                    {asig.rolNombre}
+                                  <TableCell>
+                                    {(() => {
+                                      const style = getRoleBadgeStyle(asig.rolNombre);
+                                      return (
+                                        <Badge
+                                          tone={style.tone}
+                                          appearance={style.appearance}
+                                          size="sm"
+                                          className={style.className}
+                                        >
+                                          <ShieldCheck className="size-3" />
+                                          {asig.rolNombre}
+                                        </Badge>
+                                      );
+                                    })()}
                                   </TableCell>
-                                  <TableCell className="py-2.5 text-center">
+                                  <TableCell className="text-center">
                                     <Badge
-                                      tone={
-                                        asig.estado === "Activo"
-                                          ? "success"
-                                          : "neutral"
-                                      }
+                                      tone={asig.estado === "Activo" ? "success" : "neutral"}
                                       appearance="soft"
                                       className={cn(
-                                        "font-semibold border text-xs",
-                                        asig.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                                        asig.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700"
+                                        "font-semibold text-xs",
+                                        asig.estado === "Activo" && "bg-success/15 text-success-800 dark:text-success-300",
+                                        asig.estado === "Inactivo" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300"
                                       )}
                                     >
                                       {asig.estado}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                                  <TableCell className="text-muted-foreground whitespace-nowrap">
                                     {asig.fechaAsignacion || "—"}
                                   </TableCell>
-                                  <TableCell className="py-2.5 pr-4 text-right whitespace-nowrap">
+                                  <TableCell className="text-right whitespace-nowrap">
                                     <div className="inline-flex items-center justify-end gap-1">
                                       <TooltipProvider delayDuration={150}>
                                         <Tooltip>
@@ -640,7 +637,7 @@ export function UsuarioModalAccess({
                                               <Edit className="size-3.5" />
                                             </Button>
                                           </TooltipTrigger>
-                                          <TooltipContent side="top">Editar acceso</TooltipContent>
+                                          <TooltipContent variant="info" side="top">Editar acceso</TooltipContent>
                                         </Tooltip>
 
                                         <Tooltip>
@@ -649,7 +646,7 @@ export function UsuarioModalAccess({
                                               variant="ghost"
                                               size="icon"
                                               onClick={() => handleToggleAsigStatus(asig)}
-                                              aria-label={asig.estado === "Activo" ? "Inactivar acceso" : "Activar acceso"}
+                                              aria-label={asig.estado === "Activo" ? "Desactivar acceso" : "Activar acceso"}
                                               className={cn(
                                                 "size-7",
                                                 asig.estado === "Activo"
@@ -664,8 +661,8 @@ export function UsuarioModalAccess({
                                               )}
                                             </Button>
                                           </TooltipTrigger>
-                                          <TooltipContent side="top">
-                                            {asig.estado === "Activo" ? "Inactivar acceso" : "Activar acceso"}
+                                          <TooltipContent variant="info" side="top">
+                                            {asig.estado === "Activo" ? "Desactivar acceso" : "Activar acceso"}
                                           </TooltipContent>
                                         </Tooltip>
 
@@ -681,7 +678,7 @@ export function UsuarioModalAccess({
                                               <Trash2 className="size-3.5" />
                                             </Button>
                                           </TooltipTrigger>
-                                          <TooltipContent side="top">Quitar acceso</TooltipContent>
+                                          <TooltipContent variant="info" side="top">Quitar acceso</TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
                                     </div>
@@ -701,7 +698,7 @@ export function UsuarioModalAccess({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-surface shrink-0 flex flex-row items-center justify-between sm:justify-between w-full">
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}

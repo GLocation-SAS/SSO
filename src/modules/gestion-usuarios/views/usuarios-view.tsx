@@ -294,10 +294,11 @@ export function UsuariosView() {
       setConfirmDialog({
         open: true,
         variant: "warning",
-        title: "¿Inactivar usuario?",
-        description: `Estás a punto de inactivar a este usuario. Esta acción suspenderá su acceso a todas las aplicaciones asignadas.`,
-        confirmText: "Inactivar",
+        title: "¿Desactivar usuario?",
+        description: `Estás a punto de desactivar a este usuario. Esta acción suspenderá su acceso a todas las aplicaciones asignadas.`,
+        confirmText: "Desactivar",
         cancelText: "Cerrar",
+
         onConfirm: async () => {
           try {
             const updated = await updateUsuarioApi(usuario.id, { estado: "Inactivo" });
@@ -313,6 +314,7 @@ export function UsuariosView() {
               description: error.message || "No se pudo inactivar el usuario en Firestore.",
             });
           }
+
         },
       });
     } else {
@@ -583,7 +585,7 @@ export function UsuariosView() {
           {/* Cabecera */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
                 Usuarios
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
