@@ -27,19 +27,20 @@ const dialogVariants = cva(
   {
     variants: {
       variant: {
-        default: "rounded-2xl border border-border bg-background shadow-xl p-6",
-        success: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-success/15",
-        danger: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-danger/15",
-        warning: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-warning/15",
-        info: "rounded-3xl border border-border/80 bg-background/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-info/15",
+        default: "rounded-2xl border border-border bg-surface shadow-xl p-6",
+        success: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-success/15",
+        danger: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-danger/15",
+        warning: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-warning/15",
+        info: "rounded-3xl border border-border/80 bg-surface/98 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-info/15",
       },
       size: {
-        sm: "max-w-sm",
-        default: "max-w-md",
-        lg: "max-w-lg",
-        xl: "max-w-3xl sm:max-w-4xl",
-        "2xl": "max-w-5xl",
-        "3xl": "max-w-6xl",
+        sm: "max-w-md",
+        default: "max-w-lg",
+        lg: "max-w-2xl",
+        xl: "max-w-5xl",
+        "2xl": "max-w-6xl",
+        "3xl": "max-w-7xl",
+        full: "max-w-[95vw] w-[95vw]",
       },
     },
     defaultVariants: {
@@ -95,14 +96,14 @@ function DialogIcon({ variant }: { variant?: DialogVariant }) {
   const icons = {
     success: <Check className="size-8 text-success stroke-[2.8px]" />,
     danger: <X className="size-8 text-danger stroke-[2.5px]" />,
-    warning: <AlertTriangle className="size-8 text-amber-500 dark:text-warning stroke-[2.2px]" />,
+    warning: <AlertTriangle className="size-8 text-warning stroke-[2.2px]" />,
     info: <Info className="size-8 text-info stroke-[2.2px]" />,
   }
 
   const outerBg = {
     success: "bg-success/15 shadow-success/20",
     danger: "bg-danger/15 shadow-danger/20",
-    warning: "bg-amber-500/15 shadow-warning/20",
+    warning: "bg-warning/15 shadow-warning/20",
     info: "bg-info/15 shadow-info/20",
   }
 
@@ -185,8 +186,8 @@ function DialogContent({
                     </Button>
                   </DialogPrimitive.Close>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={4}>
-                  <p className="text-xs">Cerrar</p>
+                <TooltipContent side="bottom" sideOffset={4} variant="info">
+                  <p className="text-xs">Cerrar ventana</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

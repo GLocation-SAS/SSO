@@ -52,6 +52,13 @@ export function IngresosAplicacionesView() {
 
   // Selección de fila interactiva
   const [selectedAcceso, setSelectedAcceso] = React.useState<AccesoAplicacionItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedAcceso && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedAcceso]);
 
   // Modal de Detalle
   const [detailModalOpen, setDetailModalOpen] = React.useState(false);
@@ -422,30 +429,14 @@ export function IngresosAplicacionesView() {
 
   return (
     <div className="flex flex-col gap-5 w-full h-full pb-6">
-      {/* 1. BREADCRUMB */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/auditoria/logs-gestion">Auditoría y trazabilidad</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Ingresos a aplicaciones</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Contenedor Principal */}
       <div className="border border-border rounded-xl bg-surface p-5 sm:p-6 shadow-sm flex flex-col gap-6">
         {/* Cabecera de Título y Descripción */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
               Ingresos a aplicaciones
             </h1>
-            <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
           </div>
           <p className="text-sm md:text-base text-muted-foreground max-w-3xl">
             Consulta los accesos realizados por los usuarios a las aplicaciones vinculadas al SSO.
@@ -461,21 +452,22 @@ export function IngresosAplicacionesView() {
 
         <Separator />
 
+        <AuditFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Buscar por nombre, correo o cédula..."
+          selectFilters={selectFilterConfigs}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          hasActiveFilters={hasActiveFilters}
+          onReset={handleResetFilters}
+          activeChips={activeChips}
+        />
+
         {/* Layout Principal: Izquierda 65% / Derecha 35% */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* IZQUIERDA (~65%): Tabla y Filtros */}
           <div className="lg:col-span-8 flex flex-col gap-5 w-full">
-            <AuditFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Buscar por nombre, correo o cédula..."
-              selectFilters={selectFilterConfigs}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              hasActiveFilters={hasActiveFilters}
-              onReset={handleResetFilters}
-              activeChips={activeChips}
-            />
 
             <AccesosTable
               accesos={filteredAccesos}
@@ -496,7 +488,7 @@ export function IngresosAplicacionesView() {
           </div>
 
           {/* DERECHA (~35%): Panel Gráfico Dinámico */}
-          <div className="lg:col-span-4 w-full sticky top-4">
+          <div className="lg:col-span-4 w-full lg:sticky lg:top-4" ref={panelRef}>
             <DynamicChartPanel
               title="Análisis Dinámico"
               contextTitle={dynamicContext.title}

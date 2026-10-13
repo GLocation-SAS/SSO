@@ -43,7 +43,7 @@ export interface IntranetNavItem {
   label: string;
   icon: React.ElementType;
   href: string;
-  group: "inicio" | "principal" | "cuenta" | "gestion-usuarios";
+  group: "inicio" | "principal" | "gestion-usuarios";
   disabled?: boolean;
   badge?: number;
 }
@@ -61,16 +61,12 @@ export const INTRANET_NAV_ITEMS: IntranetNavItem[] = [
   { id: "rutas", label: "Rutas", icon: MapPinned, href: "/intranet/rutas", group: "principal" },
   { id: "contacto", label: "Contacto", icon: Inbox, href: "/intranet/contacto", group: "principal" },
   { id: "talento-humano", label: "Talento Humano", icon: Users, href: "/intranet/talento-humano", group: "principal" },
-
-  // Cuenta
-  { id: "mi-cuenta", label: "Mi Cuenta", icon: IdCard, href: "/intranet/mi-cuenta", group: "cuenta" },
 ];
 
 const GROUP_LABELS: Record<IntranetNavItem["group"], string> = {
   inicio: "Inicio",
   "gestion-usuarios": "Gestión de usuarios",
   principal: "Principal",
-  cuenta: "Cuenta",
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -145,6 +141,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={110}
               height={26}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[26px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
             <Image
@@ -153,6 +150,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={110}
               height={26}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[26px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
 
@@ -163,6 +161,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={22}
               height={22}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[22px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
             <Image
@@ -171,6 +170,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={22}
               height={22}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[22px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
           </div>

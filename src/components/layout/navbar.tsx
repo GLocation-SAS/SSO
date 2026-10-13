@@ -126,6 +126,7 @@ export function Navbar() {
                 alt="MINEDEC Logo Light"
                 width={240}
                 height={64}
+                style={{ width: "auto" }}
                 className="relative z-10 h-14 w-auto dark:hidden"
                 priority
                 unoptimized
@@ -135,6 +136,7 @@ export function Navbar() {
                 alt="MINEDEC Logo Dark"
                 width={240}
                 height={64}
+                style={{ width: "auto" }}
                 className="relative z-10 h-14 w-auto hidden dark:block"
                 priority
                 unoptimized
@@ -200,6 +202,7 @@ export function Navbar() {
                       alt="MINEDEC Logo Light"
                       width={180}
                       height={48}
+                      style={{ width: "auto" }}
                       className="relative z-10 h-12 w-auto dark:hidden"
                       priority
                       unoptimized
@@ -209,6 +212,7 @@ export function Navbar() {
                       alt="MINEDEC Logo Dark"
                       width={180}
                       height={48}
+                      style={{ width: "auto" }}
                       className="relative z-10 h-12 w-auto hidden dark:block"
                       priority
                       unoptimized

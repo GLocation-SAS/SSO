@@ -98,12 +98,14 @@ export function BaseCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface InteractiveCardProps {
-  title: string
+  title?: string
   subtitle?: string
   description?: string
   icon?: React.ReactNode
   decorativeIcon?: React.ReactNode
   meta?: React.ReactNode
+  rightElement?: React.ReactNode
+  children?: React.ReactNode
   color?: "default" | "neutral" | "primary" | "info" | "warning" | "success" | "danger" | "purple"
   href?: string
   onClick?: () => void
@@ -115,6 +117,9 @@ export interface InteractiveCardProps {
   shadowless?: boolean
   iconContainerClassName?: string
   activeInnerBgClassName?: string
+  titleClassName?: string
+  truncateTitle?: boolean
+  as?: React.ElementType
 }
 
 const INTERACTIVE_COLORS: Record<string, string> = {
@@ -179,6 +184,8 @@ export function InteractiveCard({
   icon,
   decorativeIcon,
   meta,
+  rightElement,
+  children,
   color = "default",
   onClick,
   disabled,
@@ -189,6 +196,9 @@ export function InteractiveCard({
   shadowless = false,
   iconContainerClassName,
   activeInnerBgClassName,
+  titleClassName,
+  truncateTitle = true,
+  as: Component = onClick ? "button" : "div",
 }: InteractiveCardProps) {
   const colorClass = INTERACTIVE_COLORS[color] || INTERACTIVE_COLORS.default;
   const innerBgClass = isActive
@@ -198,9 +208,8 @@ export function InteractiveCard({
   const iconBgClass = INTERACTIVE_ICON_BG[color] || INTERACTIVE_ICON_BG.default;
 
   return (
-    <button
-      type="button"
-      disabled={disabled}
+    <Component
+      {...(Component === "button" ? { type: "button", disabled } : {})}
       onClick={onClick}
       className={cn(
         "group relative w-full text-left rounded-xl transition-all duration-200 outline-none overflow-hidden",
@@ -242,7 +251,7 @@ export function InteractiveCard({
         </div>
       )}
 
-      <div className="relative z-10 p-5 flex items-start gap-4">
+      <div className="relative z-10 p-5 flex items-center gap-4">
         {icon && (
           <div
             className={cn(
@@ -257,20 +266,30 @@ export function InteractiveCard({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-bold text-foreground leading-tight truncate">{title}</h3>
-            {!hideChevron && <ChevronRight className="size-4 text-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5" />}
+          <div className="flex flex-col gap-1 w-full">
+            {(title || !children) && (
+              <div className="flex items-center justify-between gap-2">
+                <h3 className={cn("text-sm font-bold text-foreground leading-tight", truncateTitle && "truncate", titleClassName)}>{title}</h3>
+                {!hideChevron && <ChevronRight className="size-4 text-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5" />}
+              </div>
+            )}
+            {subtitle && (
+              <p className="text-xs text-foreground/70 font-medium mt-0.5 flex items-center gap-1">
+                <MapPin className="size-3 shrink-0" />{subtitle}
+              </p>
+            )}
+            {description && <p className="text-xs text-foreground/60 mt-1">{description}</p>}
+            {meta && <div className="mt-4">{meta}</div>}
+            {children && <div className={cn("w-full", (title || subtitle || description) ? "mt-2" : "")}>{children}</div>}
           </div>
-          {subtitle && (
-            <p className="text-xs text-foreground/70 font-medium mt-0.5 flex items-center gap-1">
-              <MapPin className="size-3 shrink-0" />{subtitle}
-            </p>
-          )}
-          {description && <p className="text-xs text-foreground/60 mt-1">{description}</p>}
-          {meta && <div className="mt-4">{meta}</div>}
         </div>
+        {rightElement && (
+          <div className="shrink-0 flex items-center justify-end ml-2 self-center">
+            {rightElement}
+          </div>
+        )}
       </div>
-    </button>
+    </Component>
   )
 }
 

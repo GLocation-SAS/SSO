@@ -49,11 +49,20 @@ export function LogsGestionView() {
   const [selectedAccion, setSelectedAccion] = React.useState("Todas");
   const [selectedElemento, setSelectedElemento] = React.useState("Todos");
   const [selectedApp, setSelectedApp] = React.useState("Todas");
+  const [selectedResultado, setSelectedResultado] = React.useState("Todos");
+  const [selectedResponsable, setSelectedResponsable] = React.useState("Todos");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
   const [selectedKpiFilter, setSelectedKpiFilter] = React.useState<string | null>(null);
 
   // Selección de fila para análisis interactivo
   const [selectedLog, setSelectedLog] = React.useState<LogGestionItem | null>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (selectedLog && panelRef.current && window.innerWidth < 1024) {
+      panelRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedLog]);
 
   // Modal de Detalle
   const [detailModalOpen, setDetailModalOpen] = React.useState(false);
@@ -102,9 +111,19 @@ export function LogsGestionView() {
         return false;
       }
 
+      // Resultado
+      if (selectedResultado !== "Todos" && item.estado !== selectedResultado) {
+        return false;
+      }
+
+      // Responsable
+      if (selectedResponsable !== "Todos" && item.responsable.nombre !== selectedResponsable) {
+        return false;
+      }
+
       return true;
     });
-  }, [logs, selectedKpiFilter, searchTerm, selectedAccion, selectedElemento, selectedApp]);
+  }, [logs, selectedKpiFilter, searchTerm, selectedAccion, selectedElemento, selectedApp, selectedResultado, selectedResponsable]);
 
   // Si el log seleccionado ya no está en los filtrados, se limpia la selección de fila
   React.useEffect(() => {
@@ -225,6 +244,33 @@ export function LogsGestionView() {
       onChange: setSelectedApp,
       width: "170px",
     },
+    {
+      id: "resultado",
+      label: "Resultado",
+      value: selectedResultado,
+      options: [
+        { label: "Todos los resultados", value: "Todos" },
+        { label: "Exitoso", value: "Exitoso" },
+        { label: "Fallido", value: "Fallido" },
+        { label: "Requiere revisión", value: "Requiere revisión" },
+      ],
+      onChange: setSelectedResultado,
+      width: "170px",
+    },
+    {
+      id: "responsable",
+      label: "Responsable",
+      value: selectedResponsable,
+      options: [
+        { label: "Todos los responsables", value: "Todos" },
+        // This should theoretically be dynamic based on the logs, but for mock, hardcode a few
+        { label: "Carlos Xavier Andrade", value: "Carlos Xavier Andrade" },
+        { label: "Estefanía Patricia Morales", value: "Estefanía Patricia Morales" },
+        { label: "Diana Marisol Vega", value: "Diana Marisol Vega" },
+      ],
+      onChange: setSelectedResponsable,
+      width: "200px",
+    },
   ];
 
   const hasActiveFilters =
@@ -232,6 +278,8 @@ export function LogsGestionView() {
     selectedAccion !== "Todas" ||
     selectedElemento !== "Todos" ||
     selectedApp !== "Todas" ||
+    selectedResultado !== "Todos" ||
+    selectedResponsable !== "Todos" ||
     selectedKpiFilter !== null ||
     dateRange !== undefined;
 
@@ -240,6 +288,8 @@ export function LogsGestionView() {
     setSelectedAccion("Todas");
     setSelectedElemento("Todos");
     setSelectedApp("Todas");
+    setSelectedResultado("Todos");
+    setSelectedResponsable("Todos");
     setSelectedKpiFilter(null);
     setDateRange(undefined);
     setSelectedLog(null);
@@ -272,6 +322,20 @@ export function LogsGestionView() {
       id: "app",
       label: `App: ${selectedApp}`,
       onRemove: () => setSelectedApp("Todas"),
+    });
+  }
+  if (selectedResultado !== "Todos") {
+    activeChips.push({
+      id: "resultado",
+      label: `Resultado: ${selectedResultado}`,
+      onRemove: () => setSelectedResultado("Todos"),
+    });
+  }
+  if (selectedResponsable !== "Todos") {
+    activeChips.push({
+      id: "responsable",
+      label: `Responsable: ${selectedResponsable}`,
+      onRemove: () => setSelectedResponsable("Todos"),
     });
   }
   if (selectedKpiFilter) {
@@ -316,7 +380,9 @@ export function LogsGestionView() {
   // Donut: Distribución de acciones en el dataset filtrado
   const donutData = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    const dataset = selectedLog ? [selectedLog] : filteredLogs;
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
 
     dataset.forEach((item) => {
       counts[item.accion] = (counts[item.accion] || 0) + 1;
@@ -347,7 +413,9 @@ export function LogsGestionView() {
 
   // Barras horizontales: Elementos más modificados o aplicaciones
   const barsData = React.useMemo(() => {
-    const dataset = selectedLog ? [selectedLog] : filteredLogs;
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
     const counts: Record<string, number> = {};
 
     dataset.forEach((item) => {
@@ -376,46 +444,39 @@ export function LogsGestionView() {
 
   // Trend temporal de eventos
   const trendData = React.useMemo(() => {
+    const dataset = selectedLog 
+      ? filteredLogs.filter(log => log.elementoNombre === selectedLog.elementoNombre)
+      : filteredLogs;
+      
+    // Generar evolución mockeada pero reactiva al dataset
+    const baseValue = Math.max(1, Math.floor(dataset.length / 3));
+    
     return {
       title: "Evolución de eventos en el periodo",
       unit: "Cambios",
       points: [
-        { label: "01/10", value: 2 },
-        { label: "02/10", value: 3 },
-        { label: "03/10", value: 2 },
-        { label: "04/10", value: 4 },
-        { label: "05/10", value: 6 },
-        { label: "06/10", value: filteredLogs.length },
+        { label: "01/10", value: baseValue },
+        { label: "02/10", value: Math.floor(baseValue * 1.5) },
+        { label: "03/10", value: baseValue },
+        { label: "04/10", value: Math.floor(baseValue * 2) },
+        { label: "05/10", value: Math.floor(baseValue * 2.5) },
+        { label: "06/10", value: dataset.length },
       ],
     };
-  }, [filteredLogs.length]);
+  }, [filteredLogs, selectedLog]);
 
   return (
     <div className="flex flex-col gap-5 w-full h-full pb-6">
-      {/* 1. BREADCRUMB */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/auditoria/logs-gestion">Auditoría y trazabilidad</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Logs de gestión</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+
 
       {/* Contenedor Principal */}
       <div className="border border-border rounded-xl bg-surface p-5 sm:p-6 shadow-sm flex flex-col gap-6">
         {/* Cabecera de Título y Descripción */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
               Logs de gestión
             </h1>
-            <Badge tone="warning" appearance="soft" size="sm">Mockup en desarrollo</Badge>
           </div>
           <p className="text-sm md:text-base text-muted-foreground max-w-3xl">
             Consulta los cambios realizados sobre usuarios, aplicaciones, roles y accesos del sistema.
@@ -431,22 +492,22 @@ export function LogsGestionView() {
 
         <Separator />
 
+        <AuditFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Buscar usuario o elemento afectado..."
+          selectFilters={selectFilterConfigs}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          hasActiveFilters={hasActiveFilters}
+          onReset={handleResetFilters}
+          activeChips={activeChips}
+        />
+
         {/* Layout Principal: Izquierda 65% / Derecha 35% */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* IZQUIERDA (~65% / col-span-8): Consulta de Eventos */}
           <div className="lg:col-span-8 flex flex-col gap-5 w-full">
-            {/* Barra de Filtros */}
-            <AuditFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Buscar usuario o elemento afectado..."
-              selectFilters={selectFilterConfigs}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              hasActiveFilters={hasActiveFilters}
-              onReset={handleResetFilters}
-              activeChips={activeChips}
-            />
 
             {/* Tabla de Logs */}
             <LogsTable
@@ -468,13 +529,14 @@ export function LogsGestionView() {
           </div>
 
           {/* DERECHA (~35% / col-span-4): Análisis Dinámico */}
-          <div className="lg:col-span-4 w-full sticky top-4">
+          <div className="lg:col-span-4 w-full lg:sticky lg:top-4" ref={panelRef}>
             <DynamicChartPanel
               title="Análisis Dinámico"
               contextTitle={dynamicContext.title}
               contextSubtitle={dynamicContext.subtitle}
               hasSelection={dynamicContext.hasSelection}
               onClearSelection={() => setSelectedLog(null)}
+              selectedLog={selectedLog}
               donutData={donutData}
               barsData={barsData}
               trendData={trendData}

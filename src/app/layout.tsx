@@ -1,5 +1,4 @@
 import { Montserrat, Barlow } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../messages/es.json";
 import { getAssetPath } from "@/lib/assets";
+import Script from "next/script";
 
 /*
   TIPOGRAFÍAS
@@ -91,10 +91,10 @@ export default async function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body>
-        <script
+      <head>
+        <Script
           id="theme-script"
-          suppressHydrationWarning
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -111,6 +111,8 @@ export default async function RootLayout({
             `,
           }}
         />
+      </head>
+      <body>
         <NextIntlClientProvider
           locale="es"
           messages={messages}

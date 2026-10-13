@@ -1,3 +1,3 @@
 "use client";
 
-export { useAuth, AuthProvider, type AuthContextType } from "@/context/auth-context";
+export * from "@/context/auth-context";

@@ -112,7 +112,7 @@ export function UsuariosFilterBar({
         </div>
 
         {/* Filtro por Estado */}
-        <div className="w-[170px] shrink-0 flex flex-col gap-1.5">
+        <div className="w-[170px] shrink-0 flex flex-col gap-1.5" title="Filtrar resultados por estado del usuario">
           <label className="text-[11px] font-semibold text-muted-foreground uppercase">Estado</label>
           <Combobox
             value={selectedEstado}
@@ -135,7 +135,7 @@ export function UsuariosFilterBar({
         </div>
 
         {/* Filtro por Sede */}
-        <div className="w-[240px] shrink-0 flex flex-col gap-1.5">
+        <div className="w-[240px] shrink-0 flex flex-col gap-1.5" title="Filtrar resultados por sede institucional">
           <label className="text-[11px] font-semibold text-muted-foreground uppercase">Sede</label>
           <Combobox
             value={selectedSede}
@@ -162,7 +162,7 @@ export function UsuariosFilterBar({
         </div>
 
         {/* Filtro por Aplicación */}
-        <div className="w-[230px] shrink-0 flex flex-col gap-1.5">
+        <div className="w-[230px] shrink-0 flex flex-col gap-1.5" title="Filtrar resultados por aplicación asignada">
           <label className="text-[11px] font-semibold text-muted-foreground uppercase">Aplicación</label>
           <Combobox
             value={selectedApp}
@@ -188,7 +188,7 @@ export function UsuariosFilterBar({
         </div>
 
         {/* Filtro por Rol (Dependiente de Aplicación y Sede) */}
-        <div className="w-[260px] shrink-0 flex flex-col gap-1.5">
+        <div className="w-[260px] shrink-0 flex flex-col gap-1.5" title="Filtrar resultados por rol de usuario">
           <label className="text-[11px] font-semibold text-muted-foreground uppercase">Rol</label>
           <Combobox
             value={selectedRol}

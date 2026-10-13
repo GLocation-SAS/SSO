@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { PortalSidebar } from "./portal-sidebar";
 import { GeoportalHeader } from "@/components/layout/geoportal-header";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { PortalRouteGuard } from "./portal-route-guard";
 
 export default function PortalLayout({
   children,
@@ -30,10 +31,10 @@ export default function PortalLayout({
               </Suspense>
             </div>
 
-            {/* Main content wrapper */}
+            {/* Main content wrapper with Route Guard */}
             <main className="flex-1 overflow-y-auto w-full">
               <div className="w-full">
-                {children}
+                <PortalRouteGuard>{children}</PortalRouteGuard>
               </div>
             </main>
           </div>

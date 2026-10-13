@@ -136,12 +136,19 @@ export function DobleFactorForm({ className }: { className?: string }) {
       toast.success("Verificación exitosa", {
         description: "Has ingresado correctamente. Redirigiendo...",
       });
-
-      // Verificar si requiere cambio obligatorio de contraseña
+      // Verificar si requiere cambio obligatorio de contraseña o redirección según perfil
       try {
         const profile = await fetchCurrentAuthProfile();
         if (profile?.debeCambiarPassword) {
           router.replace("/login-sso?mustChange=true");
+          return;
+        }
+        if (profile?.isNotasUser || profile?.usuario?.cargo === "Docente") {
+          router.replace("/inicio");
+          return;
+        }
+        if (profile?.isAdmin === false) {
+          router.replace("/mi-dashboard");
           return;
         }
       } catch {

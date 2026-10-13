@@ -33,7 +33,17 @@ export function DobleFactorView() {
     setTimeout(() => {
       setIsLoading(false);
       toast.success("Código verificado correctamente.");
-      router.push("/dashboard");
+      const rawUser = typeof window !== "undefined" ? window.localStorage.getItem("mineduc_sso_user") : null;
+      const isDocente = rawUser?.includes('"docente"') || rawUser?.includes("docente@mineduc.gob.ec");
+      const isStandard = rawUser?.includes("prueba2@gmail.com");
+
+      if (isDocente) {
+        router.push("/inicio");
+      } else if (isStandard) {
+        router.push("/mi-dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }, 1500);
   };
 
@@ -70,7 +80,7 @@ export function DobleFactorView() {
 
         <div className="mb-8 text-left">
           <h1 className="sr-only font-heading text-h2 font-bold">Conecta MINEDUC</h1>
-          <h2 className="font-heading text-h2 font-semibold mb-2 text-primary-500 dark:text-primary-300">
+          <h2 className="font-heading text-h2 font-semibold mb-2 text-primary">
             Verificación en dos pasos
           </h2>
           <p className="font-sans text-body-sm text-muted-foreground text-balance">
