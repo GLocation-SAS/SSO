@@ -1,9 +1,19 @@
 import "server-only";
 import { adminDb, adminAuth } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
-import { UsuarioItem } from "../types/usuario";
+import {
+  UsuarioItem,
+  UsuarioSede,
+  UsuarioSedeRolAplicacion,
+} from "../types/usuario";
+import {
+  SEDES_CATALOGO,
+  APLICACIONES_CATALOGO,
+  ROLES_APLICACION,
+} from "../data/usuarios-data";
 
 const COLLECTION_NAME = "usuarios";
+const INDICES_COLLECTION = "usuarios_indices";
 
 export async function getUsuarios(): Promise<UsuarioItem[]> {
   const snapshot = await adminDb.collection(COLLECTION_NAME).get();
@@ -62,6 +72,31 @@ export async function getUsuarioByEmail(email: string): Promise<UsuarioItem | nu
   } as UsuarioItem;
 }
 
+export async function getUsuarioByDocumento(identificacion: string): Promise<UsuarioItem | null> {
+  const docSanitized = identificacion.trim();
+  const querySnap = await adminDb
+    .collection(COLLECTION_NAME)
+    .where("documentoIdentificacion", "==", docSanitized)
+    .limit(1)
+    .get();
+
+  if (!querySnap.empty) {
+    return { id: querySnap.docs[0].id, ...querySnap.docs[0].data() } as UsuarioItem;
+  }
+
+  const fallbackSnap = await adminDb
+    .collection(COLLECTION_NAME)
+    .where("identificacion", "==", docSanitized)
+    .limit(1)
+    .get();
+
+  if (!fallbackSnap.empty) {
+    return { id: fallbackSnap.docs[0].id, ...fallbackSnap.docs[0].data() } as UsuarioItem;
+  }
+
+  return null;
+}
+
 export async function getUsuarioByAuthUid(authUid: string): Promise<UsuarioItem | null> {
   const querySnap = await adminDb
     .collection(COLLECTION_NAME)
@@ -79,23 +114,154 @@ export async function getUsuarioByAuthUid(authUid: string): Promise<UsuarioItem 
   } as UsuarioItem;
 }
 
+/**
+ * Resuelve una asignación vinculando el ID real del usuario y el ID canónico del rol y aplicación
+ */
+function resolveCanonicalAssignment(
+  asig: Partial<UsuarioSedeRolAplicacion>,
+  sedeId: string,
+  sedeNombre: string,
+  userId: string
+): UsuarioSedeRolAplicacion {
+  const matchedRole = ROLES_APLICACION.find(
+    (ra) =>
+      ra.aplicacionNombre.toLowerCase() === (asig.aplicacionNombre || "").trim().toLowerCase() &&
+      ra.rolNombre.toLowerCase() === (asig.rolNombre || "").trim().toLowerCase()
+  );
+
+  const matchedApp = APLICACIONES_CATALOGO.find(
+    (a) => a.nombre.toLowerCase() === (asig.aplicacionNombre || "").trim().toLowerCase()
+  );
+
+  const canonicalRolAplicacionId =
+    matchedRole?.id ||
+    asig.rolAplicacionId ||
+    `ra-${(matchedApp?.codigo || "app").toLowerCase()}-${(asig.rolNombre || "rol").toLowerCase().replace(/\s+/g, "-")}`;
+
+  return {
+    id: asig.id && !asig.id.startsWith("asig-temp")
+      ? asig.id
+      : `asig-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    usuarioId: userId,
+    sedeId,
+    sedeNombre,
+    rolAplicacionId: canonicalRolAplicacionId,
+    aplicacionNombre: matchedApp?.nombre || asig.aplicacionNombre || "",
+    rolNombre: matchedRole?.rolNombre || asig.rolNombre || "",
+    estado: asig.estado || "Activo",
+    fechaAsignacion: asig.fechaAsignacion || new Date().toLocaleDateString("es-EC", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }),
+    permisos: Array.isArray(asig.permisos) ? asig.permisos : [],
+  };
+}
+
 export async function createUsuario(data: Omit<UsuarioItem, "id">): Promise<UsuarioItem> {
   const now = Timestamp.now().toMillis();
+  const normalizedEmail = data.email.trim().toLowerCase();
+  const sanitizedDoc = (data.documentoIdentificacion || data.identificacion || "").trim();
+
+  // 1. Verificación previa de usuarios históricos en la colección principal
+  const existingByEmail = await getUsuarioByEmail(normalizedEmail);
+  if (existingByEmail) {
+    const error: any = new Error("El correo electrónico ya se encuentra registrado.");
+    error.statusCode = 409;
+    error.code = "EMAIL_ALREADY_EXISTS";
+    throw error;
+  }
+
+  if (sanitizedDoc) {
+    const existingByDoc = await getUsuarioByDocumento(sanitizedDoc);
+    if (existingByDoc) {
+      const error: any = new Error("El documento de identificación ya se encuentra registrado.");
+      error.statusCode = 409;
+      error.code = "DOCUMENT_ALREADY_EXISTS";
+      throw error;
+    }
+  }
+
+  // 2. Pre-asignar referencia de Firestore para obtener el ID definitivo
+  const userDocRef = adminDb.collection(COLLECTION_NAME).doc();
+  const emailIndexRef = adminDb.collection(INDICES_COLLECTION).doc(`email_${normalizedEmail}`);
+  const docIndexRef = sanitizedDoc
+    ? adminDb.collection(INDICES_COLLECTION).doc(`doc_${sanitizedDoc}`)
+    : null;
+
+  // 3. Vincular sedes y asignaciones con el ID definitivo del usuario y catálogo canónico
+  const userSedes: UsuarioSede[] = (data.sedes || []).map((s) => {
+    const matchedSede = SEDES_CATALOGO.find(
+      (sc) => sc.nombre.toLowerCase() === s.sedeNombre.trim().toLowerCase() || sc.id === s.sedeId
+    );
+    const realSedeId = matchedSede?.id || s.sedeId || "sede-pc";
+    const realSedeNombre = matchedSede?.nombre || s.sedeNombre;
+
+    const realAsignaciones = (s.asignaciones || []).map((a) =>
+      resolveCanonicalAssignment(a, realSedeId, realSedeNombre, userDocRef.id)
+    );
+
+    return {
+      sedeId: realSedeId,
+      sedeNombre: realSedeNombre,
+      asignaciones: realAsignaciones,
+    };
+  });
+
   const isActive = data.active !== undefined ? Boolean(data.active) : data.estado === "Activo";
-  const usuarioToSave = {
+  const usuarioToSave: Omit<UsuarioItem, "id"> = {
     ...data,
-    email: data.email.trim().toLowerCase(),
-    correo: data.email.trim().toLowerCase(),
+    email: normalizedEmail,
+    correo: normalizedEmail,
+    documentoIdentificacion: sanitizedDoc,
+    identificacion: sanitizedDoc,
+    tipoDocumento: data.tipoDocumento || "Cédula",
     active: isActive,
     estado: data.estado || (isActive ? "Activo" : "Inactivo"),
+    sedes: userSedes,
     createdAt: data.createdAt || now,
     updatedAt: now,
   };
 
-  const docRef = await adminDb.collection(COLLECTION_NAME).add(usuarioToSave);
+  // 4. Transacción atómica en Firestore para garantizar unicidad ante concurrencia
+  // REGLA OBLIGATORIA DE FIRESTORE: Todas las lecturas se ejecutan antes de cualquier escritura
+  await adminDb.runTransaction(async (transaction) => {
+    // --- LECTURAS PRIMERO ---
+    const emailIndexSnap = await transaction.get(emailIndexRef);
+    const docIndexSnap = docIndexRef ? await transaction.get(docIndexRef) : null;
+
+    if (emailIndexSnap.exists && emailIndexSnap.data()?.usuarioId !== userDocRef.id) {
+      const error: any = new Error("El correo electrónico ya se encuentra registrado.");
+      error.statusCode = 409;
+      error.code = "EMAIL_ALREADY_EXISTS";
+      throw error;
+    }
+
+    if (docIndexSnap && docIndexSnap.exists && docIndexSnap.data()?.usuarioId !== userDocRef.id) {
+      const error: any = new Error("El documento de identificación ya se encuentra registrado.");
+      error.statusCode = 409;
+      error.code = "DOCUMENT_ALREADY_EXISTS";
+      throw error;
+    }
+
+    // --- ESCRITURAS DESPUÉS DE LAS LECTURAS ---
+    transaction.set(userDocRef, usuarioToSave);
+    transaction.set(emailIndexRef, {
+      usuarioId: userDocRef.id,
+      email: normalizedEmail,
+      createdAt: now,
+    });
+    if (docIndexRef) {
+      transaction.set(docIndexRef, {
+        usuarioId: userDocRef.id,
+        documentoIdentificacion: sanitizedDoc,
+        createdAt: now,
+      });
+    }
+  });
 
   return {
-    id: docRef.id,
+    id: userDocRef.id,
     ...usuarioToSave,
   };
 }
@@ -109,6 +275,48 @@ export async function updateUsuario(id: string, data: Partial<UsuarioItem>): Pro
   }
 
   const existingData = docSnap.data() as UsuarioItem;
+  const newEmail = data.email ? data.email.trim().toLowerCase() : undefined;
+  const oldEmail = existingData.email ? existingData.email.trim().toLowerCase() : undefined;
+  const newDoc = (data.documentoIdentificacion || data.identificacion)
+    ? (data.documentoIdentificacion || data.identificacion)!.trim()
+    : undefined;
+  const oldDoc = (existingData.documentoIdentificacion || existingData.identificacion)
+    ? (existingData.documentoIdentificacion || existingData.identificacion)!.trim()
+    : undefined;
+
+  // Verificación de conflictos si cambia el correo
+  if (newEmail && newEmail !== oldEmail) {
+    const existingByEmail = await getUsuarioByEmail(newEmail);
+    if (existingByEmail && existingByEmail.id !== id) {
+      const error: any = new Error("El correo electrónico ya se encuentra registrado por otro usuario.");
+      error.statusCode = 409;
+      error.code = "EMAIL_ALREADY_EXISTS";
+      throw error;
+    }
+  }
+
+  // Verificación de conflictos si cambia el documento
+  if (newDoc && newDoc !== oldDoc) {
+    const existingByDoc = await getUsuarioByDocumento(newDoc);
+    if (existingByDoc && existingByDoc.id !== id) {
+      const error: any = new Error("El documento de identificación ya se encuentra registrado por otro usuario.");
+      error.statusCode = 409;
+      error.code = "DOCUMENT_ALREADY_EXISTS";
+      throw error;
+    }
+  }
+
+  let formattedSedes = data.sedes;
+  if (Array.isArray(data.sedes)) {
+    formattedSedes = data.sedes.map((s) => ({
+      ...s,
+      asignaciones: (s.asignaciones || []).map((a) => ({
+        ...a,
+        usuarioId: id,
+      })),
+    }));
+  }
+
   let active = data.active;
   if (active === undefined && data.estado !== undefined) {
     active = data.estado === "Activo";
@@ -118,18 +326,67 @@ export async function updateUsuario(id: string, data: Partial<UsuarioItem>): Pro
 
   const updateData: Record<string, any> = {
     ...data,
-    ...(data.email && {
-      email: data.email.trim().toLowerCase(),
-      correo: data.email.trim().toLowerCase(),
-    }),
+    ...(formattedSedes !== undefined && { sedes: formattedSedes }),
+    ...(newEmail && { email: newEmail, correo: newEmail }),
+    ...(newDoc && { documentoIdentificacion: newDoc, identificacion: newDoc }),
     ...(active !== undefined && { active }),
     updatedAt: Timestamp.now().toMillis(),
   };
 
-  // Evitar sobreescribir el ID dentro del data si viene presente
   delete updateData.id;
 
-  await docRef.update(updateData);
+  // Transacción atómica si cambiaron identificadores para sincronizar los índices
+  if ((newEmail && newEmail !== oldEmail) || (newDoc && newDoc !== oldDoc)) {
+    const newEmailIndexRef = newEmail ? adminDb.collection(INDICES_COLLECTION).doc(`email_${newEmail}`) : null;
+    const newDocIndexRef = newDoc ? adminDb.collection(INDICES_COLLECTION).doc(`doc_${newDoc}`) : null;
+    const oldEmailIndexRef = oldEmail ? adminDb.collection(INDICES_COLLECTION).doc(`email_${oldEmail}`) : null;
+    const oldDocIndexRef = oldDoc ? adminDb.collection(INDICES_COLLECTION).doc(`doc_${oldDoc}`) : null;
+
+    await adminDb.runTransaction(async (transaction) => {
+      // --- LECTURAS PRIMERO ---
+      const newEmailSnap = newEmailIndexRef ? await transaction.get(newEmailIndexRef) : null;
+      const newDocSnap = newDocIndexRef ? await transaction.get(newDocIndexRef) : null;
+
+      if (newEmailSnap && newEmailSnap.exists && newEmailSnap.data()?.usuarioId !== id) {
+        const error: any = new Error("El correo electrónico ya se encuentra registrado.");
+        error.statusCode = 409;
+        error.code = "EMAIL_ALREADY_EXISTS";
+        throw error;
+      }
+
+      if (newDocSnap && newDocSnap.exists && newDocSnap.data()?.usuarioId !== id) {
+        const error: any = new Error("El documento de identificación ya se encuentra registrado.");
+        error.statusCode = 409;
+        error.code = "DOCUMENT_ALREADY_EXISTS";
+        throw error;
+      }
+
+      // --- ESCRITURAS DESPUÉS DE LECTURAS ---
+      transaction.update(docRef, updateData);
+      if (oldEmailIndexRef && newEmail && newEmail !== oldEmail) {
+        transaction.delete(oldEmailIndexRef);
+      }
+      if (newEmailIndexRef) {
+        transaction.set(newEmailIndexRef, {
+          usuarioId: id,
+          email: newEmail,
+          updatedAt: Timestamp.now().toMillis(),
+        });
+      }
+      if (oldDocIndexRef && newDoc && newDoc !== oldDoc) {
+        transaction.delete(oldDocIndexRef);
+      }
+      if (newDocIndexRef) {
+        transaction.set(newDocIndexRef, {
+          usuarioId: id,
+          documentoIdentificacion: newDoc,
+          updatedAt: Timestamp.now().toMillis(),
+        });
+      }
+    });
+  } else {
+    await docRef.update(updateData);
+  }
 
   const updatedSnap = await docRef.get();
   return {
@@ -155,7 +412,19 @@ export async function deleteUsuario(id: string): Promise<boolean> {
     }
   }
 
-  await docRef.delete();
+  const emailKey = userData.email?.trim().toLowerCase();
+  const docKey = (userData.documentoIdentificacion || userData.identificacion)?.trim();
+
+  const batch = adminDb.batch();
+  batch.delete(docRef);
+  if (emailKey) {
+    batch.delete(adminDb.collection(INDICES_COLLECTION).doc(`email_${emailKey}`));
+  }
+  if (docKey) {
+    batch.delete(adminDb.collection(INDICES_COLLECTION).doc(`doc_${docKey}`));
+  }
+  await batch.commit();
+
   return true;
 }
 

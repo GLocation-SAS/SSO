@@ -47,6 +47,7 @@ import {
   AlertCircle,
   ChevronDown,
   FileText,
+  Loader2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -64,6 +65,7 @@ import {
   UsuarioSedeRolAplicacion,
   SEDES_CATALOGO,
   APLICACIONES_CATALOGO,
+  ROLES_APLICACION,
   ROLES_POR_APLICACION,
   ESTADOS_USUARIO,
   TIPOS_DOCUMENTO,
@@ -76,7 +78,7 @@ interface UsuarioModalFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   usuarioToEdit?: UsuarioItem | null;
-  onSave: (usuario: UsuarioItem) => void;
+  onSave: (usuario: UsuarioItem) => Promise<void> | void;
 }
 
 const stepperSteps: Step[] = [
@@ -94,6 +96,7 @@ export function UsuarioModalForm({
   const isEditing = Boolean(usuarioToEdit);
   const [activeStep, setActiveStep] = React.useState(0);
   const [completedSteps, setCompletedSteps] = React.useState<number[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Paso 1: Identificación
   const [tipoDocumento, setTipoDocumento] = React.useState<"Cédula">("Cédula");
@@ -292,69 +295,90 @@ export function UsuarioModalForm({
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateStep(activeStep)) return;
+    if (isSubmitting) return;
 
-    // Estructurar usuario con sedes y asignaciones
-    const userSedes: UsuarioSede[] = selectedSedes.map((sedeName) => {
-      const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === sedeName);
-      const sedeId = sedeInfo?.id || `sede-${Date.now()}`;
+    setIsSubmitting(true);
+    try {
+      // Estructurar usuario con sedes y asignaciones canónicas
+      const userSedes: UsuarioSede[] = selectedSedes.map((sedeName) => {
+        const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === sedeName);
+        const sedeId = sedeInfo?.id || `sede-pc`;
 
-      const sedeAsignaciones: UsuarioSedeRolAplicacion[] = asignaciones
-        .filter((a) => a.sede === sedeName)
-        .map((a) => ({
-          id: a.id,
-          usuarioId: usuarioToEdit ? usuarioToEdit.id : `usr-${Date.now()}`,
+        const sedeAsignaciones: UsuarioSedeRolAplicacion[] = asignaciones
+          .filter((a) => a.sede === sedeName)
+          .map((a) => {
+            const matchedRole = ROLES_APLICACION.find(
+              (ra) => ra.aplicacionNombre === a.app && ra.rolNombre === a.rol
+            );
+            const matchedApp = APLICACIONES_CATALOGO.find((ap) => ap.nombre === a.app);
+            const canonicalRolAplicacionId =
+              matchedRole?.id ||
+              `ra-${(matchedApp?.codigo || "app").toLowerCase()}-${a.rol.toLowerCase().replace(/\s+/g, "-")}`;
+
+            return {
+              id: a.id,
+              usuarioId: usuarioToEdit ? usuarioToEdit.id : "",
+              sedeId,
+              sedeNombre: sedeName,
+              rolAplicacionId: canonicalRolAplicacionId,
+              aplicacionNombre: a.app,
+              rolNombre: a.rol,
+              estado: "Activo",
+              fechaAsignacion: new Date().toLocaleDateString("es-EC", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              permisos: [],
+            };
+          });
+
+        return {
           sedeId,
           sedeNombre: sedeName,
-          rolAplicacionId: `ra-${Date.now()}`,
-          aplicacionNombre: a.app,
-          rolNombre: a.rol,
-          estado: "Activo",
-          fechaAsignacion: new Date().toLocaleDateString("es-EC", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }),
-          permisos: [],
-        }));
+          asignaciones: sedeAsignaciones,
+        };
+      });
 
-      return {
-        sedeId,
-        sedeNombre: sedeName,
-        asignaciones: sedeAsignaciones,
+      const finalUser: UsuarioItem = {
+        id: usuarioToEdit ? usuarioToEdit.id : "",
+        nombre: nombre.trim(),
+        apellidos: apellidos.trim(),
+        tipoDocumento,
+        documentoIdentificacion: identificacion.trim(),
+        identificacion: identificacion.trim(),
+        email: correo.trim().toLowerCase(),
+        correo: correo.trim().toLowerCase(),
+        telefono: telefono.trim(),
+        cargo: cargo.trim() || undefined,
+        estado,
+        fechaCreacion: usuarioToEdit
+          ? usuarioToEdit.fechaCreacion
+          : new Date().toLocaleDateString("es-EC", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            }),
+        sedes: userSedes,
       };
-    });
 
-    const finalUser: UsuarioItem = {
-      id: usuarioToEdit ? usuarioToEdit.id : `usr-${Date.now()}`,
-      nombre: nombre.trim(),
-      apellidos: apellidos.trim(),
-      tipoDocumento,
-      documentoIdentificacion: identificacion.trim(),
-      identificacion: identificacion.trim(),
-      email: correo.trim(),
-      correo: correo.trim(),
-      telefono: telefono.trim(),
-      cargo: cargo.trim() || undefined,
-      estado,
-      fechaCreacion: usuarioToEdit
-        ? usuarioToEdit.fechaCreacion
-        : new Date().toLocaleDateString("es-EC", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }),
-      sedes: userSedes,
-    };
-
-    onSave(finalUser);
-    toast.success(
-      isEditing
-        ? `Usuario ${finalUser.nombre} ${finalUser.apellidos} actualizado exitosamente.`
-        : `Usuario ${finalUser.nombre} ${finalUser.apellidos} registrado exitosamente.`
-    );
-    onOpenChange(false);
+      await onSave(finalUser);
+      toast.success(
+        isEditing
+          ? `Usuario ${finalUser.nombre} ${finalUser.apellidos} actualizado exitosamente.`
+          : `Usuario ${finalUser.nombre} ${finalUser.apellidos} registrado exitosamente.`
+      );
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error al guardar usuario en formulario:", error);
+      toast.error("Error al registrar usuario", {
+        description: error.message || "No se pudo completar el registro.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Opciones para Multiselect de Sedes
@@ -1101,6 +1125,7 @@ export function UsuarioModalForm({
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
           >
             Cancelar
           </Button>
@@ -1110,6 +1135,7 @@ export function UsuarioModalForm({
               <Button
                 variant="secondary"
                 onClick={handlePrev}
+                disabled={isSubmitting}
                 className="gap-1.5"
               >
                 <ArrowLeft className="size-3.5" />
@@ -1120,6 +1146,7 @@ export function UsuarioModalForm({
               <Button
                 variant="primary"
                 onClick={handleNext}
+                disabled={isSubmitting}
                 className="gap-1.5"
               >
                 <span>Siguiente</span>
@@ -1129,10 +1156,20 @@ export function UsuarioModalForm({
               <Button
                 variant="primary"
                 onClick={handleSave}
-                className="gap-1.5"
+                disabled={isSubmitting}
+                className="gap-1.5 min-w-32"
               >
-                <Check className="size-3.5" />
-                <span>{isEditing ? "Guardar cambios" : "Crear usuario"}</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    <span>{isEditing ? "Guardando..." : "Creando..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="size-3.5" />
+                    <span>{isEditing ? "Guardar cambios" : "Crear usuario"}</span>
+                  </>
+                )}
               </Button>
             )}
           </div>

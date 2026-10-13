@@ -26,6 +26,8 @@ export function LoginSSOForm({
   description = "Conecta MINEDUC centraliza la administración de accesos y permisos a las aplicaciones y recursos institucionales.",
   targetApp,
   redirectTo = "/dashboard",
+  mfaRedirectTo,
+  mfaSendOtpUrl,
 }: LoginSSOFormProps) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +36,13 @@ export function LoginSSOForm({
   const [showPassword, setShowPassword] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [showMustChangePassword, setShowMustChangePassword] = useState(false);
+
+  const resolvedMfaRedirect =
+    mfaRedirectTo ||
+    (targetApp === "notas" ? "/login-notas/verificar-codigo" : "/doble-factor");
+  const resolvedSendOtpUrl =
+    mfaSendOtpUrl ||
+    (targetApp === "notas" ? "/api/notas/auth/send-otp" : "/api/auth/send-otp");
 
   // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
   useEffect(() => {
@@ -50,7 +59,7 @@ export function LoginSSOForm({
           const errMsg = err?.message || "";
           if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
             // Sesión con doble factor pendiente: redirigir a doble factor sin cerrar sesión
-            router.replace("/doble-factor");
+            router.replace(resolvedMfaRedirect);
             return;
           }
           const { signOut } = await import("firebase/auth");
@@ -58,7 +67,7 @@ export function LoginSSOForm({
           await signOut(auth).catch(() => {});
         });
     }
-  }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo]);
+  }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo, resolvedMfaRedirect]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -172,7 +181,7 @@ export function LoginSSOForm({
       // Despachar el OTP inicial de forma automática y redirigir a la pantalla de 2FA
       try {
         const token = await userCredential.user.getIdToken();
-        await fetch("/api/auth/send-otp", {
+        await fetch(resolvedSendOtpUrl, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -185,7 +194,7 @@ export function LoginSSOForm({
         console.error("Error al enviar OTP automático:", sendErr);
       }
 
-      router.replace("/doble-factor");
+      router.replace(resolvedMfaRedirect);
     } catch (error: any) {
       console.error("Error al autenticar credenciales:", error);
       let errorMsg = "Correo institucional o contraseña incorrectos.";

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { UsuarioModalForm } from "../usuario-modal-form";
 
 // Mock sonner toast
@@ -113,5 +113,112 @@ describe("UsuarioModalForm - Document and Phone Validations", () => {
     expect(
       screen.getByText("El teléfono debe tener entre 7 y 15 dígitos numéricos.")
     ).toBeTruthy();
+  });
+
+  it("retains modal open and does not call onOpenChange(false) when onSave throws an error", async () => {
+    const errorOnSaveMock = jest.fn().mockRejectedValue(new Error("Error de duplicado 409"));
+
+    render(
+      <UsuarioModalForm
+        open={true}
+        onOpenChange={onOpenChangeMock}
+        onSave={errorOnSaveMock}
+        usuarioToEdit={{
+          id: "usr-1",
+          nombre: "Ana",
+          apellidos: "Perez",
+          tipoDocumento: "Cédula",
+          documentoIdentificacion: "1719874563",
+          email: "ana.perez@mineduc.gob.ec",
+          estado: "Activo",
+          fechaCreacion: "01/01/2026",
+          sedes: [
+            {
+              sedeId: "sede-pc",
+              sedeNombre: "Planta Central",
+              asignaciones: [
+                {
+                  id: "asig-1",
+                  usuarioId: "usr-1",
+                  sedeId: "sede-pc",
+                  sedeNombre: "Planta Central",
+                  rolAplicacionId: "ra-sso-sa",
+                  aplicacionNombre: "SSO",
+                  rolNombre: "Super Administrador",
+                  estado: "Activo",
+                  permisos: [],
+                },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+
+    // Step 0 -> Step 1 -> Step 2
+    fireEvent.click(screen.getByRole("button", { name: /siguiente/i })); // to Step 1
+    fireEvent.click(screen.getByRole("button", { name: /siguiente/i })); // to Step 2
+
+    const saveButton = screen.getByRole("button", { name: /guardar cambios/i });
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    expect(errorOnSaveMock).toHaveBeenCalled();
+    // Verify modal was NOT closed!
+    expect(onOpenChangeMock).not.toHaveBeenCalledWith(false);
+  });
+
+  it("closes modal with onOpenChange(false) when onSave succeeds", async () => {
+    const successOnSaveMock = jest.fn().mockResolvedValue(undefined);
+
+    render(
+      <UsuarioModalForm
+        open={true}
+        onOpenChange={onOpenChangeMock}
+        onSave={successOnSaveMock}
+        usuarioToEdit={{
+          id: "usr-1",
+          nombre: "Ana",
+          apellidos: "Perez",
+          tipoDocumento: "Cédula",
+          documentoIdentificacion: "1719874563",
+          email: "ana.perez@mineduc.gob.ec",
+          estado: "Activo",
+          fechaCreacion: "01/01/2026",
+          sedes: [
+            {
+              sedeId: "sede-pc",
+              sedeNombre: "Planta Central",
+              asignaciones: [
+                {
+                  id: "asig-1",
+                  usuarioId: "usr-1",
+                  sedeId: "sede-pc",
+                  sedeNombre: "Planta Central",
+                  rolAplicacionId: "ra-sso-sa",
+                  aplicacionNombre: "SSO",
+                  rolNombre: "Super Administrador",
+                  estado: "Activo",
+                  permisos: [],
+                },
+              ],
+            },
+          ],
+        }}
+      />
+    );
+
+    // Navigate to step 2
+    fireEvent.click(screen.getByRole("button", { name: /siguiente/i }));
+    fireEvent.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    const saveButton = screen.getByRole("button", { name: /guardar cambios/i });
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+
+    expect(successOnSaveMock).toHaveBeenCalled();
+    expect(onOpenChangeMock).toHaveBeenCalledWith(false);
   });
 });

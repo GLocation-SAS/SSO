@@ -274,9 +274,7 @@ export function UsuariosView() {
       }
     } catch (error: any) {
       console.error("Error al guardar usuario:", error);
-      toast.error("Error al guardar usuario", {
-        description: error.message || "No se pudo guardar el usuario en Firestore.",
-      });
+      throw error;
     }
   };
 

@@ -13,4 +13,6 @@ export interface LoginAuthConfig {
   redirectTo?: string;
   backgroundImages?: BackgroundImagesConfig;
   className?: string;
+  mfaRedirectTo?: string;
+  mfaSendOtpUrl?: string;
 }

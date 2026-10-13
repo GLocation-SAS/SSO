@@ -58,6 +58,7 @@ import {
   UsuarioSedeRolAplicacion,
   SEDES_CATALOGO,
   APLICACIONES_CATALOGO,
+  ROLES_APLICACION,
   ROLES_POR_APLICACION,
 } from "../data/usuarios-data";
 import { toast } from "sonner";
@@ -143,8 +144,16 @@ export function UsuarioModalAccess({
     }
 
     const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === selectedSede);
-    const sedeId = sedeInfo?.id || `sede-${Date.now()}`;
+    const sedeId = sedeInfo?.id || "sede-pc";
     let sedesCopy = JSON.parse(JSON.stringify(usuario.sedes)) as typeof usuario.sedes;
+
+    const matchedRole = ROLES_APLICACION.find(
+      (ra) => ra.aplicacionNombre === selectedApp && ra.rolNombre === selectedRol
+    );
+    const matchedApp = APLICACIONES_CATALOGO.find((ap) => ap.nombre === selectedApp);
+    const canonicalRolAplicacionId =
+      matchedRole?.id ||
+      `ra-${(matchedApp?.codigo || "app").toLowerCase()}-${selectedRol.toLowerCase().replace(/\s+/g, "-")}`;
 
     if (editingAsigId) {
       // Remover de la sede antigua si cambió, o simplemente borrarlo para re-insertarlo
@@ -160,7 +169,7 @@ export function UsuarioModalAccess({
         usuarioId: usuario.id,
         sedeId,
         sedeNombre: selectedSede,
-        rolAplicacionId: `ra-${Date.now()}`,
+        rolAplicacionId: canonicalRolAplicacionId,
         aplicacionNombre: selectedApp,
         rolNombre: selectedRol,
         estado: "Activo",
@@ -185,11 +194,11 @@ export function UsuarioModalAccess({
       toast.success(`Acceso a ${selectedApp} actualizado correctamente.`);
     } else {
       const newAssignment: UsuarioSedeRolAplicacion = {
-        id: `asig-${Date.now()}`,
+        id: `asig-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         usuarioId: usuario.id,
         sedeId,
         sedeNombre: selectedSede,
-        rolAplicacionId: `ra-${Date.now()}`,
+        rolAplicacionId: canonicalRolAplicacionId,
         aplicacionNombre: selectedApp,
         rolNombre: selectedRol,
         estado: "Activo",
