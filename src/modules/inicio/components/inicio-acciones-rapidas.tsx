@@ -7,8 +7,11 @@ import {
   FileSpreadsheet,
   FileCheck,
   Zap,
+  ChevronRight,
 } from "lucide-react";
 import { InteractiveCard } from "@/components/ui/data-display";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface InicioAccionesRapidasProps {
   onRegistrarCalificaciones: () => void;
@@ -31,6 +34,8 @@ export function InicioAccionesRapidas({
       icon: FileEdit,
       onClick: onRegistrarCalificaciones,
       color: "primary" as const,
+      iconContainer: "bg-primary/15 text-primary",
+      activeBg: "bg-primary-100/90 dark:bg-muted/30",
     },
     {
       id: "consultar",
@@ -39,6 +44,8 @@ export function InicioAccionesRapidas({
       icon: GraduationCap,
       onClick: onConsultarCursos,
       color: "neutral" as const,
+      iconContainer: "bg-muted-foreground/25 dark:bg-muted-foreground/35 text-foreground dark:text-neutral-200",
+      activeBg: "bg-muted/80 dark:bg-muted/60",
     },
     {
       id: "carga",
@@ -47,6 +54,8 @@ export function InicioAccionesRapidas({
       icon: FileSpreadsheet,
       onClick: onCargaMasiva,
       color: "success" as const,
+      iconContainer: "bg-success/15 text-success-700 dark:text-success-300",
+      activeBg: "bg-success-100/90 dark:bg-success-900/50",
     },
     {
       id: "rectificaciones",
@@ -55,6 +64,8 @@ export function InicioAccionesRapidas({
       icon: FileCheck,
       onClick: onGestionarRectificaciones,
       color: "warning" as const,
+      iconContainer: "bg-warning/15 text-warning-700 dark:text-warning-300",
+      activeBg: "bg-warning-100/90 dark:bg-warning-900/50",
       badge: "1 pendiente",
     },
   ];
@@ -78,8 +89,8 @@ export function InicioAccionesRapidas({
         </div>
       </div>
 
-      {/* Grid de tarjetas interactivas del UI Kit */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Grid de tarjetas interactivas como en /usuarios */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
         {acciones.map((acc) => {
           const Icon = acc.icon;
 
@@ -88,15 +99,34 @@ export function InicioAccionesRapidas({
               key={acc.id}
               title={acc.titulo}
               description={acc.descripcion}
-              icon={<Icon className="size-4.5" />}
               color={acc.color}
+              hideChevron
+              borderless
+              shadowless
+              truncateTitle={false}
+              iconContainerClassName={acc.iconContainer}
+              activeInnerBgClassName={acc.activeBg}
               onClick={acc.onClick}
+              icon={<Icon className="size-5" />}
+              decorativeIcon={<Icon className="size-full" />}
+              className={cn(
+                "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110",
+                "bg-surface hover:bg-muted/40"
+              )}
               rightElement={
-                acc.badge ? (
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/25">
-                    {acc.badge}
-                  </span>
-                ) : undefined
+                <div className="flex items-center gap-2 shrink-0 py-1">
+                  {acc.badge && (
+                    <Badge
+                      tone={acc.color}
+                      appearance="soft"
+                      size="sm"
+                      className="px-2 py-0.5 h-5 font-semibold"
+                    >
+                      {acc.badge}
+                    </Badge>
+                  )}
+                  <ChevronRight className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground shrink-0" />
+                </div>
               }
             />
           );

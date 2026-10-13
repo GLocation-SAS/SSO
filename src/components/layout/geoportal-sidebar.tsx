@@ -201,10 +201,6 @@ function checkIsPathActive(currentPath: string | null | undefined, targetHref: s
     return current === "/mis-aplicaciones";
   }
 
-  if (target === "/mi-perfil") {
-    return current === "/mi-perfil";
-  }
-
   if (target === "/gestion/dashboard") {
     return current === "/gestion/dashboard" || current === "/gestion-usuarios/dashboard";
   }

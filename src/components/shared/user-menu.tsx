@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  User,
   LogOut,
   ChevronDown,
   ChevronLeft,
@@ -125,11 +124,6 @@ export function UserMenu() {
                     label="Mis aplicaciones"
                     onClick={() => handleNavigate("/mis-aplicaciones")}
                   />
-                  <MobileMenuItem
-                    icon={User}
-                    label="Mi perfil"
-                    onClick={() => handleNavigate("/mi-perfil")}
-                  />
                   <div className="h-px bg-border/60 mx-2 my-1" />
                 </>
               )}
@@ -190,11 +184,6 @@ export function UserMenu() {
                 icon={LayoutGrid}
                 label="Mis aplicaciones"
                 onClick={() => handleNavigate("/mis-aplicaciones")}
-              />
-              <DesktopMenuItem
-                icon={User}
-                label="Mi perfil"
-                onClick={() => handleNavigate("/mi-perfil")}
               />
               <DropdownMenuSeparator className="my-1 bg-border/50" />
             </>

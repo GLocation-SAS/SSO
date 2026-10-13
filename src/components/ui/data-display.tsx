@@ -117,6 +117,8 @@ export interface InteractiveCardProps {
   shadowless?: boolean
   iconContainerClassName?: string
   activeInnerBgClassName?: string
+  titleClassName?: string
+  truncateTitle?: boolean
   as?: React.ElementType
 }
 
@@ -194,6 +196,8 @@ export function InteractiveCard({
   shadowless = false,
   iconContainerClassName,
   activeInnerBgClassName,
+  titleClassName,
+  truncateTitle = true,
   as: Component = onClick ? "button" : "div",
 }: InteractiveCardProps) {
   const colorClass = INTERACTIVE_COLORS[color] || INTERACTIVE_COLORS.default;
@@ -265,7 +269,7 @@ export function InteractiveCard({
           <div className="flex flex-col gap-1 w-full">
             {(title || !children) && (
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-bold text-foreground leading-tight truncate">{title}</h3>
+                <h3 className={cn("text-sm font-bold text-foreground leading-tight", truncateTitle && "truncate", titleClassName)}>{title}</h3>
                 {!hideChevron && <ChevronRight className="size-4 text-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5" />}
               </div>
             )}
