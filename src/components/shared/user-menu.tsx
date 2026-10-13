@@ -13,19 +13,37 @@ import {
   User,
   LogOut,
   ChevronDown,
-  ChevronLeft
+  ChevronLeft,
+  LayoutDashboard,
+  LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/routing";
 
 export function UserMenu() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { user, logout, isStandardUser, isDocente } = useAuth();
+
+  const displayName = user?.displayName || "Paula Rozo";
+  const email = user?.email || (isDocente ? "docente@mineduc.gob.ec" : isStandardUser ? "prueba2@gmail.com" : "paula.rozo@geoportal.gob.ec");
+  const roleLabel = isDocente ? (user?.cargo || "Docente") : isStandardUser ? (user?.cargo || "Usuario Estándar") : "Administradora";
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await logout();
+    router.push("/login-sso");
+  };
+
+  const handleNavigate = (path: string) => {
+    setOpen(false);
+    router.push(path);
+  };
 
   const TriggerButton = (
     <button className="group flex items-center gap-2.5 rounded-full outline-none pr-2 pl-1 py-1 hover:bg-transparent data-[state=open]:bg-transparent transition-all cursor-pointer">
@@ -35,9 +53,9 @@ export function UserMenu() {
       </Avatar>
       <div className="hidden sm:flex items-center gap-2 text-foreground/80 transition-colors group-hover:text-foreground">
         <div className="flex flex-col text-left leading-tight">
-          <span className="text-sm font-semibold text-foreground">Paula Rozo</span>
+          <span className="text-sm font-semibold text-foreground">{displayName}</span>
           <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-            <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+            <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
           </span>
         </div>
         <ChevronDown
@@ -84,18 +102,43 @@ export function UserMenu() {
                 <AvatarFallback>PR</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-body font-bold text-foreground">Paula Rozo</span>
+                <span className="text-body font-bold text-foreground">{displayName}</span>
                 <span className="text-caption text-muted-foreground mt-0.5 flex items-center gap-1">
-                  <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+                  <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
                 </span>
-                <span className="text-caption text-muted-foreground/80 mt-0.5">paula.rozo@geoportal.gob.ec</span>
+                <span className="text-caption text-muted-foreground/80 mt-0.5">{email}</span>
               </div>
             </div>
 
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
-              <MobileMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
+              {(isStandardUser || isDocente) && (
+                <>
+                  <MobileMenuItem
+                    icon={LayoutDashboard}
+                    label={isDocente ? "Inicio (Notas)" : "Dashboard"}
+                    onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
+                  />
+                  <MobileMenuItem
+                    icon={LayoutGrid}
+                    label="Mis aplicaciones"
+                    onClick={() => handleNavigate("/mis-aplicaciones")}
+                  />
+                  <MobileMenuItem
+                    icon={User}
+                    label="Mi perfil"
+                    onClick={() => handleNavigate("/mi-perfil")}
+                  />
+                  <div className="h-px bg-border/60 mx-2 my-1" />
+                </>
+              )}
+              <MobileMenuItem
+                icon={LogOut}
+                label="Cerrar sesión"
+                isWarning
+                onClick={handleLogout}
+              />
             </div>
           </div>
         </SheetContent>
@@ -127,16 +170,41 @@ export function UserMenu() {
             <AvatarFallback>PR</AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="text-body-sm font-bold text-foreground truncate">Paula Rozo</span>
+            <span className="text-body-sm font-bold text-foreground truncate">{displayName}</span>
             <span className="text-caption text-muted-foreground flex items-center gap-1 truncate">
-              <span className="text-primary font-bold text-xs leading-none">•</span> Administradora
+              <span className="text-primary font-bold text-xs leading-none">•</span> {roleLabel}
             </span>
           </div>
         </div>
         <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <div className="flex flex-col gap-1 px-1">
-          <DesktopMenuItem icon={LogOut} label="Cerrar sesión" isWarning onClick={() => setOpen(false)} />
+          {(isStandardUser || isDocente) && (
+            <>
+              <DesktopMenuItem
+                icon={LayoutDashboard}
+                label={isDocente ? "Inicio (Notas)" : "Dashboard"}
+                onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
+              />
+              <DesktopMenuItem
+                icon={LayoutGrid}
+                label="Mis aplicaciones"
+                onClick={() => handleNavigate("/mis-aplicaciones")}
+              />
+              <DesktopMenuItem
+                icon={User}
+                label="Mi perfil"
+                onClick={() => handleNavigate("/mi-perfil")}
+              />
+              <DropdownMenuSeparator className="my-1 bg-border/50" />
+            </>
+          )}
+          <DesktopMenuItem
+            icon={LogOut}
+            label="Cerrar sesión"
+            isWarning
+            onClick={handleLogout}
+          />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

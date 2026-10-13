@@ -296,13 +296,13 @@ export function UsuariosTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[20%] min-w-[180px] dark:text-white pl-6">Usuario</TableHead>
-                <TableHead className="w-[15%] min-w-[130px] dark:text-white">Documento</TableHead>
-                <TableHead className="w-[22%] min-w-[200px] dark:text-white">Correo</TableHead>
-                <TableHead className="w-[18%] min-w-[160px] dark:text-white">Accesos</TableHead>
-                <TableHead className="w-[10%] min-w-[100px] text-center dark:text-white">Estado</TableHead>
-                <TableHead className="w-[10%] min-w-[130px] dark:text-white">Fecha de creación</TableHead>
-                <TableHead className="w-[5%] min-w-[90px] text-right dark:text-white pr-6">Acciones</TableHead>
+                <TableHead className="w-[20%] min-w-[180px] pl-6">Usuario</TableHead>
+                <TableHead className="w-[15%] min-w-[130px]">Documento</TableHead>
+                <TableHead className="w-[22%] min-w-[200px]">Correo</TableHead>
+                <TableHead className="w-[18%] min-w-[160px]">Accesos</TableHead>
+                <TableHead className="w-[10%] min-w-[100px] text-center">Estado</TableHead>
+                <TableHead className="w-[10%] min-w-[130px]">Fecha de creación</TableHead>
+                <TableHead className="w-[5%] min-w-[90px] text-right pr-6">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

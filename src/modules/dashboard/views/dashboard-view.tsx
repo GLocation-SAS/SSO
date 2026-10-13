@@ -577,9 +577,9 @@ export function DashboardView() {
             <CardFooter className="relative z-10 py-4 px-6 border-t border-border/50 mt-auto flex justify-center items-center w-full">
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="text-sm font-semibold text-foreground hover:text-primary-300 transition-colors flex items-center gap-1.5 group/link outline-none">
+                  <Button variant="ghost" className="text-sm font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1.5 group/link outline-none p-0 h-auto hover:bg-transparent">
                     Ver detalle de roles <ArrowRight className="size-4 transition-transform group-hover/link:translate-x-0.5" />
-                  </button>
+                  </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[700px] gap-0 p-0 overflow-hidden">
                   <DialogHeader className="p-6 pb-4 border-b border-border/50 bg-muted/20">

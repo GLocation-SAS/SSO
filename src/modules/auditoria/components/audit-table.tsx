@@ -100,23 +100,23 @@ export function LogsTable({
           <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px]  dark:text-white pl-4">
+              <TableHead className="w-[140px]  pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Responsable
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Acción
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Elemento
               </TableHead>
 
-              <TableHead className="w-[110px]  dark:text-white">
+              <TableHead className="w-[110px] ">
                 Resultado
               </TableHead>
-              <TableHead className="w-[90px] text-right  dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -332,25 +332,25 @@ export function AccesosTable({
           <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px]  dark:text-white pl-4">
+              <TableHead className="w-[140px]  pl-4">
                 Fecha y Hora
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Usuario
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Aplicación
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Rol
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Sede
               </TableHead>
-              <TableHead className="w-[110px]  dark:text-white">
+              <TableHead className="w-[110px] ">
                 Resultado
               </TableHead>
-              <TableHead className="w-[90px] text-right  dark:text-white pr-4">
+              <TableHead className="w-[90px] text-right  pr-4">
                 Acción
               </TableHead>
             </TableRow>
@@ -544,22 +544,22 @@ export function ActividadTable({
           <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className=" dark:text-white pl-4">
+              <TableHead className=" pl-4">
                 Usuario
               </TableHead>
-              <TableHead className="min-w-[160px]  dark:text-white">
+              <TableHead className="min-w-[160px] ">
                 Aplicaciones Utilizadas
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Rol
               </TableHead>
-              <TableHead className=" dark:text-white">
+              <TableHead className="">
                 Sede
               </TableHead>
-              <TableHead className="w-[120px] text-center  dark:text-white">
+              <TableHead className="w-[120px] text-center ">
                 Cant. Accesos
               </TableHead>
-              <TableHead className="w-[130px]  dark:text-white pr-4">
+              <TableHead className="w-[130px]  pr-4">
                 Última Actividad
               </TableHead>
             </TableRow>

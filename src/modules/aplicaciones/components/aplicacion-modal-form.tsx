@@ -150,16 +150,16 @@ export function AplicacionModalForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-card"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border shrink-0 items-start text-left bg-white dark:bg-zinc-950">
+        <DialogHeader className="px-6 py-5 border-b border-border shrink-0 items-start text-left bg-card">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Layers className="size-5" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+              <DialogTitle className="text-xl font-heading font-bold text-primary">
                 {isEditing ? "Editar aplicación" : "Nueva aplicación"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
@@ -175,7 +175,7 @@ export function AplicacionModalForm({
         <form
           id="aplicacion-form"
           onSubmit={handleSubmit}
-          className="overflow-y-auto flex-1 p-6 space-y-5 bg-white dark:bg-zinc-950"
+          className="overflow-y-auto flex-1 p-6 space-y-5 bg-card"
         >
           {/* Banner de flujo arquitectónico */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-3">
@@ -195,25 +195,58 @@ export function AplicacionModalForm({
             {/* Nombre */}
             <div className="md:col-span-2 space-y-1.5">
               <label className="text-xs font-semibold text-foreground">
+                Nombre de la aplicación <span className="text-danger">*</span>
+              </label>
+              <InputGroup size="sm" state={errors.nombre ? "error" : "default"}>
+                <InputGroupInput
+                  placeholder="Ej. Gestión Docente, SIGE, Portal Estudiantil"
+                  value={nombre}
+                  onChange={(e) => handleNombreChange(e.target.value)}
+                  className="text-sm bg-card"
+                />
+              </InputGroup>
+              {errors.nombre && (
+                <p className="text-[11px] text-danger flex items-center gap-1 mt-1">
+                  <AlertCircle className="size-3 shrink-0" />
+                  {errors.nombre}
+                </p>
+              )}
+            </div>
+
+            {/* Código / Sigla */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-foreground">
+                Código / Sigla
+              </label>
+              <InputGroup size="sm">
+                <InputGroupInput
+                  placeholder="Ej. SGD, SIGE, TH"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                  className="text-sm font-mono uppercase bg-card"
+                />
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* Descripción */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-foreground">
                 Descripción institucional <span className="text-danger">*</span>
               </label>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-muted-foreground">
-                  Finalidad funcional del sistema
-                </span>
-                <span className="text-[11px] font-normal text-muted-foreground">
-                  {descripcion.length}/100
-                </span>
-              </div>
+              <span className="text-[11px] font-normal text-muted-foreground">
+                {descripcion.length}/100
+              </span>
             </div>
             <InputGroup multiline state={errors.descripcion ? "error" : "default"}>
               <InputGroupTextarea
                 placeholder="Describe el propósito del sistema, los procesos institucionales que atiende y el tipo de personal que interactúa con él..."
                 rows={3}
                 maxLength={100}
-                  value={descripcion}
+                value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
-                className="text-sm bg-white dark:bg-zinc-950"
+                className="text-sm bg-card"
               />
             </InputGroup>
             {errors.descripcion && (
@@ -236,7 +269,7 @@ export function AplicacionModalForm({
                   placeholder="https://sistema.mineduc.gob.ec"
                   value={urlAcceso}
                   onChange={(e) => setUrlAcceso(e.target.value)}
-                  className="text-sm font-mono bg-white dark:bg-zinc-950"
+                  className="text-sm font-mono bg-card"
                 />
               </InputGroup>
               {errors.urlAcceso && (
@@ -262,7 +295,7 @@ export function AplicacionModalForm({
                   placeholder="Seleccionar estado"
                   showClear={false}
                   size="sm"
-                  className="w-full text-xs bg-white dark:bg-zinc-950"
+                  className="w-full text-xs bg-card"
                 />
                 <ComboboxContent className="min-w-full">
                   <ComboboxList>
@@ -276,7 +309,7 @@ export function AplicacionModalForm({
         </form>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-end gap-3 bg-white dark:bg-zinc-950">
+        <DialogFooter className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-end gap-3 bg-card">
           <Button
             type="button"
             variant="neutral"

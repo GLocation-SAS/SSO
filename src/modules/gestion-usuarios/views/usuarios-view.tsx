@@ -528,7 +528,7 @@ export function UsuariosView() {
           {/* Cabecera */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+              <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
                 Usuarios
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-2xl">

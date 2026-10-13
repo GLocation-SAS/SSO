@@ -406,12 +406,12 @@ export function AplicacionesView() {
     <div className="flex flex-col gap-4 w-full h-full pb-4">
       <div className="flex flex-col gap-6 w-full h-full">
         {/* Main Applications Container */}
-        <div className="border border-border rounded-xl bg-surface p-6 shadow-sm flex flex-col gap-6">
+        <div className="border border-border rounded-xl bg-surface p-4 sm:p-6 shadow-sm flex flex-col gap-6">
           {/* Cabecera */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+                <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
                   Gestión de aplicaciones
                 </h1>
               </div>

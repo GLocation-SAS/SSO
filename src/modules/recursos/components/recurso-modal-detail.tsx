@@ -99,18 +99,18 @@ export function RecursoModalDetail({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
+        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-card"
       >
         <TooltipProvider delayDuration={150}>
           {/* HEADER */}
-          <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 text-left">
+          <DialogHeader className="px-6 py-5 border-b border-border bg-card shrink-0 text-left">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning-700 dark:text-warning-300 shrink-0">
                   <FolderTree className="size-5" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+                  <DialogTitle className="text-xl font-heading font-bold text-primary">
                     Detalle del recurso
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground mt-0.5">
@@ -123,7 +123,7 @@ export function RecursoModalDetail({
           </DialogHeader>
 
           {/* BODY */}
-          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-white dark:bg-zinc-950">
+          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-card">
             {/* Panel de Metadatos del Recurso */}
             <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -425,7 +425,7 @@ export function RecursoModalDetail({
           </div>
 
           {/* FOOTER */}
-          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex flex-row items-center justify-end w-full">
+          <DialogFooter className="px-6 py-4 border-t border-border bg-card shrink-0 flex flex-row items-center justify-end w-full">
             <Button
               type="button"
               variant="neutral"

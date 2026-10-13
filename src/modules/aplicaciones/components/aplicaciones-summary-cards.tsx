@@ -100,7 +100,7 @@ export function AplicacionesSummaryCards({
             activeInnerBgClassName={c.activeBg}
             onClick={() => onSelectFilter(c.id)}
             icon={<Icon className="size-5" />}
-            decorativeIcon={<Icon className="size-full opacity-10" />}
+            decorativeIcon={<Icon className="size-full" />}
             className={cn(
               "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110",
               isActive ? "bg-primary/5" : "bg-surface hover:bg-muted/40"

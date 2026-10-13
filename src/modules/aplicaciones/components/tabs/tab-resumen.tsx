@@ -74,7 +74,7 @@ export function TabResumen({ aplicacion, onNavigateTab }: TabResumenProps) {
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Información general
           </h3>
-          <div className="rounded-xl border border-border bg-white dark:bg-zinc-950 p-5 flex flex-col gap-5">
+          <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="flex flex-col gap-1">
                 <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Nombre</span>
@@ -124,7 +124,7 @@ export function TabResumen({ aplicacion, onNavigateTab }: TabResumenProps) {
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Estado de configuración
           </h3>
-          <div className="rounded-xl border border-border bg-white dark:bg-zinc-950 p-6 flex flex-col items-center justify-center text-center gap-4 h-[calc(100%-28px)]">
+          <div className="rounded-xl border border-border bg-card p-6 flex flex-col items-center justify-center text-center gap-4 h-[calc(100%-28px)]">
             {aplicacion.requiereAtencion ? (
               <>
                 <div className="size-12 rounded-full bg-warning/15 text-warning-600 flex items-center justify-center mb-1">
@@ -274,17 +274,17 @@ export function TabResumen({ aplicacion, onNavigateTab }: TabResumenProps) {
             </TooltipContent>
           </Tooltip>
         </div>
-        <div className="rounded-xl border border-border bg-white dark:bg-zinc-950 p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="relative pl-12 space-y-8 before:absolute before:left-[11.5px] before:top-3 before:bottom-3 before:w-px before:bg-border/60">
             {historial.map((item, index) => (
               <div key={item.id} className="relative">
                 {/* Icon */}
                 {index === 0 ? (
-                  <div className="absolute -left-[48px] top-0.5 size-6 rounded-full bg-primary flex items-center justify-center ring-4 ring-white dark:ring-zinc-950 z-10">
-                    <CheckCircle2 className="size-3.5 text-white" />
+                  <div className="absolute -left-[48px] top-0.5 size-6 rounded-full bg-primary flex items-center justify-center ring-4 ring-card z-10">
+                    <CheckCircle2 className="size-3.5 text-primary-foreground" />
                   </div>
                 ) : (
-                  <div className="absolute -left-[48px] top-0.5 size-6 rounded-full border-[1.5px] border-muted-foreground/40 bg-surface flex items-center justify-center ring-4 ring-white dark:ring-zinc-950 z-10">
+                  <div className="absolute -left-[48px] top-0.5 size-6 rounded-full border-[1.5px] border-muted-foreground/40 bg-surface flex items-center justify-center ring-4 ring-card z-10">
                     <Clock className="size-3 text-muted-foreground/60" />
                   </div>
                 )}

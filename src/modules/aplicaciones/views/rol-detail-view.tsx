@@ -267,26 +267,26 @@ export function RolDetailView({ appId, rolId }: RolDetailViewProps) {
         </div>
 
         {/* 4. MATRIZ DE PERMISOS */}
-        <div className="border border-border rounded-xl overflow-hidden bg-surface">
+        <div className="border border-border rounded-xl overflow-x-auto bg-surface">
           <Table>
             <TableHeader>
               <TableRow className="border-b border-primary/30 dark:border-primary-800/60">
-                <TableHead className="w-[380px] pl-6 text-white dark:text-white font-semibold">
+                <TableHead className="w-[380px] pl-6 font-semibold">
                   Recurso institucional
                 </TableHead>
-                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                <TableHead className="w-[110px] text-center font-semibold">
                   Ver
                 </TableHead>
-                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                <TableHead className="w-[110px] text-center font-semibold">
                   Crear
                 </TableHead>
-                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                <TableHead className="w-[110px] text-center font-semibold">
                   Editar
                 </TableHead>
-                <TableHead className="w-[110px] text-center text-white dark:text-white font-semibold">
+                <TableHead className="w-[110px] text-center font-semibold">
                   Eliminar
                 </TableHead>
-                <TableHead className="w-[140px] text-right text-white dark:text-white font-semibold pr-6">
+                <TableHead className="w-[140px] text-right font-semibold pr-6">
                   Acción rápida
                 </TableHead>
               </TableRow>

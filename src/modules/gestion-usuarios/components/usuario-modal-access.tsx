@@ -307,7 +307,7 @@ export function UsuarioModalAccess({
         {/* HEADER */}
         <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
           <div className="space-y-0.5">
-            <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+            <DialogTitle className="text-xl font-heading font-bold text-primary">
               Accesos del usuario
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">

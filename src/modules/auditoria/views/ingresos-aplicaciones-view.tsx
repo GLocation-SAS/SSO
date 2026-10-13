@@ -434,7 +434,7 @@ export function IngresosAplicacionesView() {
         {/* Cabecera de Título y Descripción */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary dark:text-white">
+            <h1 className="text-2xl md:text-3xl font-heading font-bold text-primary">
               Ingresos a aplicaciones
             </h1>
           </div>

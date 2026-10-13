@@ -175,17 +175,17 @@ export function RecursoModalForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="xl"
-        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
+        className="p-0 gap-0 max-h-[90vh] flex flex-col overflow-hidden bg-card"
       >
         <TooltipProvider delayDuration={150}>
           {/* HEADER */}
-          <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 items-start text-left">
+          <DialogHeader className="px-6 py-5 border-b border-border bg-card shrink-0 items-start text-left">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning-700 dark:text-warning-300 shrink-0">
                 <FolderTree className="size-5" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+                <DialogTitle className="text-xl font-heading font-bold text-primary">
                   {isEditing ? "Editar recurso" : "Nuevo recurso"}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
@@ -198,7 +198,7 @@ export function RecursoModalForm({
           </DialogHeader>
 
           {/* BODY */}
-          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-white dark:bg-zinc-950">
+          <div className="px-6 py-6 overflow-y-auto space-y-6 flex-1 bg-card">
             {/* Context Note */}
             <div className="rounded-lg border border-warning/20 bg-warning/5 p-3.5 flex items-start gap-3">
               <Sparkles className="size-4 text-warning-700 dark:text-warning-300 shrink-0 mt-0.5" />
@@ -417,7 +417,7 @@ export function RecursoModalForm({
           </div>
 
           {/* FOOTER */}
-          <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between">
+          <DialogFooter className="px-6 py-4 border-t border-border bg-card shrink-0 flex items-center justify-between">
             <div className="text-[11px] text-muted-foreground">
               <span className="text-danger">*</span> Campos obligatorios
             </div>

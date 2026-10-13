@@ -116,25 +116,25 @@ export function AplicacionesTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[300px] min-w-[280px] dark:text-white pl-6">
+                <TableHead className="w-[300px] min-w-[280px] pl-6">
                   Aplicación
                 </TableHead>
-                <TableHead className="w-[120px] min-w-[110px] text-left dark:text-white">
+                <TableHead className="w-[120px] min-w-[110px] text-left">
                   Estado
                 </TableHead>
-                <TableHead className="w-[130px] min-w-[120px] text-left dark:text-white">
+                <TableHead className="w-[130px] min-w-[120px] text-left">
                   Usuarios
                 </TableHead>
-                <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                <TableHead className="w-[120px] min-w-[110px] text-left">
                   Roles
                 </TableHead>
-                <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                <TableHead className="w-[120px] min-w-[110px] text-left">
                   Recursos
                 </TableHead>
-                <TableHead className="w-[170px] min-w-[160px] dark:text-white">
+                <TableHead className="w-[170px] min-w-[160px]">
                   Última actualización
                 </TableHead>
-                <TableHead className="w-[160px] min-w-[150px] text-right dark:text-white pr-6">
+                <TableHead className="w-[160px] min-w-[150px] text-right pr-6">
                   Acciones
                 </TableHead>
               </TableRow>
@@ -186,10 +186,11 @@ export function AplicacionesTable({
                               </TooltipTrigger>
                               <TooltipContent
                                 side="top"
-                                className="max-w-xs"
+                                className="flex flex-col items-start gap-1 max-w-xs text-left p-2.5 text-white"
                                 variant="info"
                               >
-                                <p className="text-sm">{app.descripcion}</p>
+                                <p className="font-bold text-white text-xs leading-tight">{app.nombre}</p>
+                                <p className="text-white/95 text-xs leading-normal">{app.descripcion}</p>
                               </TooltipContent>
                             </Tooltip>
                           </div>
@@ -222,7 +223,7 @@ export function AplicacionesTable({
                       </TableCell>
 
                       {/* 4. Roles */}
-                      <TableCell className="text-center">
+                      <TableCell className="text-left">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
                           <ShieldCheck className="size-3.5 text-secondary-600 dark:text-secondary-300" />
                           <span>{app.rolesCount}</span>
@@ -230,7 +231,7 @@ export function AplicacionesTable({
                       </TableCell>
 
                       {/* 5. Recursos */}
-                      <TableCell className="text-center">
+                      <TableCell className="text-left">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
                           <FolderTree className="size-3.5 text-warning-600 dark:text-warning-400" />
                           <span>{app.recursosCount}</span>

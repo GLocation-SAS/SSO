@@ -141,6 +141,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={110}
               height={26}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[26px] w-auto dark:hidden group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
             <Image
@@ -149,6 +150,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={110}
               height={26}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[26px] w-auto hidden dark:group-data-[state=expanded]:block group-data-[state=collapsed]:hidden animate-in fade-in duration-300"
             />
 
@@ -159,6 +161,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={22}
               height={22}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[22px] w-auto dark:hidden group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
             <Image
@@ -167,6 +170,7 @@ export function IntranetSidebar({ activeItem = "home", hideUser = false, navItem
               width={22}
               height={22}
               unoptimized
+              style={{ width: "auto" }}
               className="h-[22px] w-auto hidden dark:group-data-[state=collapsed]:block group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300"
             />
           </div>

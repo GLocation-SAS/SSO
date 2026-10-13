@@ -4,6 +4,7 @@ import * as React from "react";
 import { InteractiveCard } from "@/components/ui/data-display";
 import { FolderTree, CheckCircle2, XCircle, AppWindow } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export type RecursoSummaryFilterType = "total" | "activos" | "inactivos" | "apps";
 
@@ -72,8 +73,8 @@ export function RecursosSummaryCards({
       microText: "Sistemas con catálogo activo",
       icon: AppWindow,
       color: "info" as const,
-      iconContainer: "bg-info/15 text-info",
-      activeBg: "bg-info/10 dark:bg-muted/30",
+      iconContainer: "bg-info/15 text-info-700 dark:text-info-300",
+      activeBg: "bg-info-100/90 dark:bg-info-900/50",
     },
   ];
 
@@ -97,11 +98,11 @@ export function RecursosSummaryCards({
             activeInnerBgClassName={c.activeBg}
             onClick={() => onSelectFilter(c.id)}
             icon={<Icon className="size-5" />}
-            decorativeIcon={<Icon className="size-full opacity-10" />}
-            className={
-              "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110" +
-              (isActive ? " bg-primary/5" : " bg-surface hover:bg-muted/40")
-            }
+            decorativeIcon={<Icon className="size-full" />}
+            className={cn(
+              "cursor-pointer select-none transition-all duration-200 border-none shadow-none hover:shadow-none hover:brightness-95 dark:hover:brightness-110",
+              isActive ? "bg-primary/5" : "bg-surface hover:bg-muted/40"
+            )}
             rightElement={
               <div className="flex flex-col items-end justify-center gap-1 py-2.5">
                 <div className="flex items-baseline gap-1.5">

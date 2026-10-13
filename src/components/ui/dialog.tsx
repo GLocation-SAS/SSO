@@ -96,14 +96,14 @@ function DialogIcon({ variant }: { variant?: DialogVariant }) {
   const icons = {
     success: <Check className="size-8 text-success stroke-[2.8px]" />,
     danger: <X className="size-8 text-danger stroke-[2.5px]" />,
-    warning: <AlertTriangle className="size-8 text-amber-500 dark:text-warning stroke-[2.2px]" />,
+    warning: <AlertTriangle className="size-8 text-warning stroke-[2.2px]" />,
     info: <Info className="size-8 text-info stroke-[2.2px]" />,
   }
 
   const outerBg = {
     success: "bg-success/15 shadow-success/20",
     danger: "bg-danger/15 shadow-danger/20",
-    warning: "bg-amber-500/15 shadow-warning/20",
+    warning: "bg-warning/15 shadow-warning/20",
     info: "bg-info/15 shadow-info/20",
   }
 

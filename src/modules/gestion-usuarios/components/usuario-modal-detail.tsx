@@ -70,7 +70,7 @@ export function UsuarioModalDetail({
       >
         {/* HEADER */}
         <DialogHeader className="px-6 py-5 border-b border-border bg-surface shrink-0 items-start text-left">
-          <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+          <DialogTitle className="text-xl font-heading font-bold text-primary">
             Detalle del usuario
           </DialogTitle>
         </DialogHeader>

@@ -183,6 +183,15 @@ const buttonVariants = cva(
           "hover:text-foreground",
           "hover:shadow-xs",
         ].join(" "),
+
+        link: [
+          "border-transparent",
+          "bg-transparent",
+          "text-primary",
+          "underline-offset-4",
+          "hover:underline",
+          "shadow-none",
+        ].join(" "),
       },
 
       size: {

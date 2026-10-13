@@ -73,8 +73,8 @@ const ROLE_COLORS = [
   "var(--info)",
   "var(--warning)",
   "var(--success)",
-  "#818cf8", // Indigo
-  "#f472b6", // Pink
+  "var(--secondary)",
+  "var(--government-accent-3)",
 ];
 
 // ── Componente Reutilizable SVG Donut Ring ───────────────────────────────────
@@ -417,7 +417,7 @@ export function DashboardUsuariosView() {
                               ? "text-danger"
                               : caso.tipo === "warning"
                                 ? "text-warning"
-                                : "text-amber-500"
+                                : "text-warning"
                           )}
                         />
                         <span className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">

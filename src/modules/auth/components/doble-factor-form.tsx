@@ -84,8 +84,12 @@ export function DobleFactorForm({ className }: { className?: string }) {
       toast.success("Verificación exitosa", {
         description: "Has ingresado correctamente. Redirigiendo...",
       });
-      // Aquí iría la redirección al dashboard
-      router.push('/dashboard');
+      const isStandard = typeof window !== "undefined" && window.localStorage.getItem("mineduc_sso_user")?.includes("prueba2@gmail.com");
+      if (isStandard) {
+        router.push("/mi-dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }, 1500);
   };
 

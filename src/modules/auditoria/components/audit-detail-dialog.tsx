@@ -70,7 +70,7 @@ function LogDetailContent({
     <div className="flex flex-col gap-6">
       {/* Cabecera */}
       <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary dark:text-white">
+        <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary">
           Detalle del Cambio Administrativo
         </DialogTitle>
         <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
@@ -246,7 +246,7 @@ function AccesoDetailContent({
     <div className="flex flex-col gap-6">
       {/* Cabecera */}
       <DialogHeader className="space-y-1.5 text-left">
-        <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary dark:text-white">
+        <DialogTitle className="text-xl sm:text-2xl font-bold font-heading text-primary">
           Detalle del Acceso a Aplicación
         </DialogTitle>
         <DialogDescription className="text-xs sm:text-sm text-muted-foreground">

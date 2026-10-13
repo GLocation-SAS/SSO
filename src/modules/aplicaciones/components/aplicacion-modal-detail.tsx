@@ -84,16 +84,16 @@ export function AplicacionModalDetail({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         size="3xl"
-        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
+        className="p-0 gap-0 max-h-[88vh] flex flex-col overflow-hidden bg-card"
       >
         {/* HEADER */}
-        <DialogHeader className="px-6 py-5 border-b border-border bg-white dark:bg-zinc-950 shrink-0 items-start text-left">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-card shrink-0 items-start text-left">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <IconComponent className="size-5" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-heading font-bold text-primary dark:text-white">
+              <DialogTitle className="text-xl font-heading font-bold text-primary">
                 Detalle de la aplicación
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
@@ -105,7 +105,7 @@ export function AplicacionModalDetail({
         </DialogHeader>
 
         {/* CONTENT WITH INNER SCROLL */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-6 bg-white dark:bg-zinc-950">
+        <div className="overflow-y-auto flex-1 p-6 space-y-6 bg-card">
           {/* Header de resumen */}
           <InteractiveCard
             hideChevron
@@ -180,10 +180,11 @@ export function AplicacionModalDetail({
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="max-w-xs"
+                    className="flex flex-col items-start gap-1 max-w-xs text-left p-2.5 text-white"
                     variant="info"
                   >
-                    <p className="text-sm">{aplicacion.descripcion}</p>
+                    <p className="font-bold text-white text-xs leading-tight">{aplicacion.nombre}</p>
+                    <p className="text-white/95 text-xs leading-normal">{aplicacion.descripcion}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -275,7 +276,7 @@ export function AplicacionModalDetail({
         </div>
 
         {/* FOOTER */}
-        <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 flex items-center justify-between sm:justify-between">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-card shrink-0 flex items-center justify-between sm:justify-between">
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}
