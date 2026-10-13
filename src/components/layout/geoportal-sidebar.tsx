@@ -331,7 +331,9 @@ export function GeoportalSidebar({
     if (isAdmin) {
       return navSections;
     }
-    return navSections.filter((s) => s.title === "Inicio");
+    return navSections.filter(
+      (s) => s.title === "Inicio" || s.title === "Gestión de aplicaciones"
+    );
   }, [isAdmin]);
 
   const showUser = variant === "full";

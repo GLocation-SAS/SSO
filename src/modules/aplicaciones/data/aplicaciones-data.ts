@@ -15,6 +15,19 @@ export interface AplicacionItem {
   icono?: string;
 }
 
+export interface CatalogoAppItem {
+  id: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  urlAcceso: string;
+  estado: "Activa" | "Inactiva";
+  sedeId?: string;
+  sedeNombre?: string;
+  rolNombre?: string;
+  icono?: string;
+}
+
 export interface AplicacionUsuarioAccess {
   id: string;
   usuarioId: string;

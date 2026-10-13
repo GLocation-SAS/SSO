@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useRouter } from "@/routing";
+import { useAuth } from "@/hooks/useAuth";
 
 import {
   AplicacionItem,
@@ -27,8 +28,9 @@ import { AplicacionesFilterBar } from "../components/aplicaciones-filter-bar";
 import { AplicacionesTable } from "../components/aplicaciones-table";
 import { AplicacionModalForm } from "../components/aplicacion-modal-form";
 import { AplicacionModalDetail } from "../components/aplicacion-modal-detail";
+import { UserAplicacionesCatalogView } from "../components/user-aplicaciones-catalog-view";
 
-export function AplicacionesView() {
+function AdminAplicacionesView() {
   const router = useRouter();
   const [aplicaciones, setAplicaciones] =
     React.useState<AplicacionItem[]>(mockAplicacionesData);
@@ -336,5 +338,23 @@ export function AplicacionesView() {
       />
     </div>
   );
+}
+
+export function AplicacionesView() {
+  const { profile, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex w-full items-center justify-center p-12">
+        <span className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (profile?.isAdmin) {
+    return <AdminAplicacionesView />;
+  }
+
+  return <UserAplicacionesCatalogView />;
 }
 

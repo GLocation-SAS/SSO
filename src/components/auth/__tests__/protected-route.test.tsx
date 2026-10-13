@@ -195,4 +195,63 @@ describe("ProtectedRoute Component", () => {
       expect(mockReplace).toHaveBeenCalledWith("/login-sso");
     });
   });
+
+  it("should allow standard non-admin user on /aplicaciones route and trailing slash /aplicaciones/", async () => {
+    currentMockPathname = "/aplicaciones/";
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "user-standard", email: "user@mineduc.gob.ec" },
+      profile: {
+        uid: "user-standard",
+        email: "user@mineduc.gob.ec",
+        isAdmin: false,
+        usuario: { id: "usr-docente", active: true },
+      },
+      loading: false,
+      logout: mockLogout,
+      refreshProfile: jest.fn(),
+    });
+
+    render(
+      <ProtectedRoute>
+        <div>Catálogo de Aplicaciones</div>
+      </ProtectedRoute>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Catálogo de Aplicaciones")).toBeTruthy();
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+
+  it("should block standard non-admin user on administrative subroute /aplicaciones/gestion-docente", async () => {
+    currentMockPathname = "/aplicaciones/gestion-docente";
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "user-standard", email: "user@mineduc.gob.ec" },
+      profile: {
+        uid: "user-standard",
+        email: "user@mineduc.gob.ec",
+        isAdmin: false,
+        usuario: { id: "usr-docente", active: true },
+      },
+      loading: false,
+      logout: mockLogout,
+      refreshProfile: jest.fn(),
+    });
+
+    render(
+      <ProtectedRoute>
+        <div>Detalle Administrativo</div>
+      </ProtectedRoute>
+    );
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Acceso denegado", {
+        description: "No tienes permisos administrativos para acceder a este módulo.",
+      });
+      expect(mockReplace).toHaveBeenCalledWith("/dashboard");
+    });
+  });
 });
+
+

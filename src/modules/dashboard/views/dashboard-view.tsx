@@ -50,6 +50,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams } from "next/navigation";
 import { UserApplicationsView } from "./user-applications-view";
 import { NotasWelcomeView } from "./notas-welcome-view";
+import { UserAplicacionesCatalogView } from "@/modules/aplicaciones/components/user-aplicaciones-catalog-view";
 
 const ATTENTION_ITEMS = [
   {
@@ -899,7 +900,7 @@ function DashboardViewContent() {
       return <NotasWelcomeView />;
     }
     // Si no tiene sesión de Notas verificada en el servidor, mostrar su vista correspondiente sin escalamiento
-    return profile?.isAdmin ? <SuperadminDashboardView /> : <UserApplicationsView />;
+    return profile?.isAdmin ? <SuperadminDashboardView /> : <UserAplicacionesCatalogView />;
   }
 
   // Si el usuario es Super Admin, renderizar el tablero estratégico completo
@@ -907,8 +908,8 @@ function DashboardViewContent() {
     return <SuperadminDashboardView />;
   }
 
-  // Para usuarios estándar de SSO, mostrar su catálogo de aplicaciones asignadas
-  return <UserApplicationsView />;
+  // Para usuarios estándar de SSO, mostrar el catálogo institucional de aplicaciones
+  return <UserAplicacionesCatalogView />;
 }
 
 export function DashboardView() {

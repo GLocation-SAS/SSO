@@ -41,8 +41,11 @@ import {
   KeyRound,
   MapPin,
   FolderTree,
+  Building2,
+  Shield,
+  ArrowRight,
 } from "lucide-react";
-import { AplicacionItem } from "../data/aplicaciones-data";
+import { AplicacionItem, CatalogoAppItem } from "../data/aplicaciones-data";
 import {
   Pagination,
   PaginationContent,
@@ -55,10 +58,13 @@ import { Link } from "@/routing";
 import { cn } from "@/lib/utils";
 
 interface AplicacionesTableProps {
-  aplicaciones: AplicacionItem[];
-  onViewDetail: (app: AplicacionItem) => void;
-  onEdit: (app: AplicacionItem) => void;
-  onToggleStatus: (app: AplicacionItem) => void;
+  aplicaciones: (AplicacionItem | CatalogoAppItem | any)[];
+  mode?: "admin" | "catalog";
+  onViewDetail?: (app: AplicacionItem) => void;
+  onEdit?: (app: AplicacionItem) => void;
+  onToggleStatus?: (app: AplicacionItem) => void;
+  onLaunchApp?: (app: any) => void;
+  redirectingAppId?: string | null;
 }
 
 const getAppIcon = (iconName?: string) => {
@@ -80,10 +86,14 @@ const getAppIcon = (iconName?: string) => {
 
 export function AplicacionesTable({
   aplicaciones,
-  onViewDetail,
-  onEdit,
-  onToggleStatus,
+  mode = "admin",
+  onViewDetail = () => {},
+  onEdit = () => {},
+  onToggleStatus = () => {},
+  onLaunchApp,
+  redirectingAppId = null,
 }: AplicacionesTableProps) {
+  const isCatalog = mode === "catalog";
   const [currentPage, setCurrentPage] = React.useState(1);
   const [itemsPerPage, setItemsPerPage] = React.useState(6);
   const totalPages = Math.ceil(aplicaciones.length / itemsPerPage) || 1;
@@ -99,39 +109,62 @@ export function AplicacionesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[300px] min-w-[280px] dark:text-white pl-6">
-                Aplicación
-              </TableHead>
-              <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
-                Estado
-              </TableHead>
-              <TableHead className="w-[130px] min-w-[120px] text-center dark:text-white">
-                Usuarios
-              </TableHead>
-              <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
-                Roles
-              </TableHead>
-              <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
-                Recursos
-              </TableHead>
-              <TableHead className="w-[170px] min-w-[160px] dark:text-white">
-                Última actualización
-              </TableHead>
-              <TableHead className="w-[160px] min-w-[150px] text-right dark:text-white pr-6">
-                Acciones
-              </TableHead>
+              {isCatalog ? (
+                <>
+                  <TableHead className="w-[320px] min-w-[280px] dark:text-white pl-6">
+                    Aplicación
+                  </TableHead>
+                  <TableHead className="w-[180px] min-w-[150px] dark:text-white">
+                    Sede
+                  </TableHead>
+                  <TableHead className="w-[180px] min-w-[150px] dark:text-white">
+                    Rol asignado
+                  </TableHead>
+                  <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                    Estado
+                  </TableHead>
+                  <TableHead className="w-[180px] min-w-[160px] text-right dark:text-white pr-6">
+                    Acción
+                  </TableHead>
+                </>
+              ) : (
+                <>
+                  <TableHead className="w-[300px] min-w-[280px] dark:text-white pl-6">
+                    Aplicación
+                  </TableHead>
+                  <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                    Estado
+                  </TableHead>
+                  <TableHead className="w-[130px] min-w-[120px] text-center dark:text-white">
+                    Usuarios
+                  </TableHead>
+                  <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                    Roles
+                  </TableHead>
+                  <TableHead className="w-[120px] min-w-[110px] text-center dark:text-white">
+                    Recursos
+                  </TableHead>
+                  <TableHead className="w-[170px] min-w-[160px] dark:text-white">
+                    Última actualización
+                  </TableHead>
+                  <TableHead className="w-[160px] min-w-[150px] text-right dark:text-white pr-6">
+                    Acciones
+                  </TableHead>
+                </>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={isCatalog ? 5 : 7} className="h-24 text-center">
                   No se encontraron aplicaciones disponibles.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedApps.map((app) => {
                 const IconComponent = getAppIcon(app.icono);
+
 
                 return (
                   <TableRow key={app.id}>
@@ -168,138 +201,193 @@ export function AplicacionesTable({
                       </div>
                     </TableCell>
 
-                    {/* 2. Estado */}
-                    <TableCell className="text-center">
-                      <Badge
-                        tone={app.estado === "Activa" ? "success" : "neutral"}
-                        appearance="soft"
-                        className={cn(
-                          "font-semibold border text-xs px-2.5 py-0.5",
-                          app.estado === "Activa" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
-                          app.estado === "Inactiva" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700"
-                        )}
-                      >
-                        {app.estado}
-                      </Badge>
-                    </TableCell>
+                    {isCatalog ? (
+                      <>
+                        {/* 2. Sede */}
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-neutral-300">
+                            <Building2 className="size-4 shrink-0 text-primary/70" />
+                            <span className="truncate max-w-[170px]" title={app.sedeNombre || "Sede Central"}>
+                              {app.sedeNombre || "Sede Central"}
+                            </span>
+                          </div>
+                        </TableCell>
 
-                    {/* 3. Usuarios */}
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
-                        <Users className="size-3.5 text-primary dark:text-primary-300" />
-                        <span>{app.usuariosCount.toLocaleString("es-EC")}</span>
-                      </div>
-                    </TableCell>
+                        {/* 3. Rol */}
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-neutral-300">
+                            <Shield className="size-4 shrink-0 text-info/70" />
+                            <span className="truncate max-w-[170px]" title={app.rolNombre || "Usuario"}>
+                              {app.rolNombre || "Usuario"}
+                            </span>
+                          </div>
+                        </TableCell>
 
-                    {/* 4. Roles */}
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
-                        <ShieldCheck className="size-3.5 text-secondary-600 dark:text-secondary-300" />
-                        <span>{app.rolesCount}</span>
-                      </div>
-                    </TableCell>
+                        {/* 4. Estado */}
+                        <TableCell className="text-center">
+                          <Badge
+                            tone={app.estado === "Activa" ? "success" : "neutral"}
+                            appearance="soft"
+                            className={cn(
+                              "font-semibold border text-xs px-2.5 py-0.5",
+                              app.estado === "Activa" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
+                              app.estado === "Inactiva" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700"
+                            )}
+                          >
+                            {app.estado || "Activa"}
+                          </Badge>
+                        </TableCell>
 
-                    {/* 5. Recursos */}
-                    <TableCell className="text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
-                        <FolderTree className="size-3.5 text-warning-600 dark:text-warning-400" />
-                        <span>{app.recursosCount}</span>
-                      </div>
-                    </TableCell>
+                        {/* 5. Acción de ingreso */}
+                        <TableCell className="text-right pr-6">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="gap-2 font-bold shadow-xs text-xs justify-center shrink-0"
+                            disabled={redirectingAppId === app.id}
+                            onClick={() => onLaunchApp?.(app)}
+                          >
+                            {redirectingAppId === app.id ? "Iniciando..." : "Ingresar a la aplicación"}
+                            <ArrowRight className="size-3.5" />
+                          </Button>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        {/* 2. Estado */}
+                        <TableCell className="text-center">
+                          <Badge
+                            tone={app.estado === "Activa" ? "success" : "neutral"}
+                            appearance="soft"
+                            className={cn(
+                              "font-semibold border text-xs px-2.5 py-0.5",
+                              app.estado === "Activa" && "bg-success/15 text-success-800 dark:text-success-300 border-success/30",
+                              app.estado === "Inactiva" && "bg-neutral-500/15 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-700"
+                            )}
+                          >
+                            {app.estado}
+                          </Badge>
+                        </TableCell>
 
-                    {/* 6. Última actualización */}
-                    <TableCell>
-                      <span className="text-xs text-muted-foreground dark:text-neutral-300 whitespace-nowrap">
-                        {app.ultimaActualizacion}
-                      </span>
-                    </TableCell>
+                        {/* 3. Usuarios */}
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
+                            <Users className="size-3.5 text-primary dark:text-primary-300" />
+                            <span>{app.usuariosCount?.toLocaleString("es-EC") ?? 0}</span>
+                          </div>
+                        </TableCell>
 
-                    {/* 7. Acciones */}
-                    <TableCell className="text-right pr-6">
-                      <div className="flex items-center justify-end gap-1">
-                        {/* Ver Detalle Directo (Modal) */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onViewDetail(app)}
-                              aria-label="Ver detalle"
-                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
-                            >
-                              <Eye className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Ver detalle</TooltipContent>
-                        </Tooltip>
+                        {/* 4. Roles */}
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
+                            <ShieldCheck className="size-3.5 text-secondary-600 dark:text-secondary-300" />
+                            <span>{app.rolesCount ?? 0}</span>
+                          </div>
+                        </TableCell>
 
-                        {/* Editar Directo */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onEdit(app)}
-                              aria-label="Editar aplicación"
-                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
-                            >
-                              <Edit className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Editar</TooltipContent>
-                        </Tooltip>
+                        {/* 5. Recursos */}
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/40 dark:bg-muted/80 border border-border/60 dark:border-border text-xs font-semibold text-foreground">
+                            <FolderTree className="size-3.5 text-warning-600 dark:text-warning-400" />
+                            <span>{app.recursosCount ?? 0}</span>
+                          </div>
+                        </TableCell>
 
-                        {/* Menú Contextual */}
-                        {/* Abrir URL de acceso */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              asChild
-                              className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
-                            >
-                              <a
-                                href={app.urlAcceso}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label="Abrir URL de acceso"
-                              >
-                                <ExternalLink className="size-4" />
-                              </a>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">Abrir URL</TooltipContent>
-                        </Tooltip>
+                        {/* 6. Última actualización */}
+                        <TableCell>
+                          <span className="text-xs text-muted-foreground dark:text-neutral-300 whitespace-nowrap">
+                            {app.ultimaActualizacion ?? "-"}
+                          </span>
+                        </TableCell>
 
-                        {/* Cambiar Estado */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onToggleStatus(app)}
-                              aria-label={app.estado === "Activa" ? "Inactivar aplicación" : "Activar aplicación"}
-                              className={cn(
-                                "size-8",
-                                app.estado === "Activa"
-                                  ? "text-danger hover:text-danger hover:bg-danger/10"
-                                  : "text-success hover:text-success hover:bg-success/10"
-                              )}
-                            >
-                              {app.estado === "Activa" ? (
-                                <PowerOff className="size-4" />
-                              ) : (
-                                <Power className="size-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            {app.estado === "Activa" ? "Inactivar" : "Activar"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
+                        {/* 7. Acciones */}
+                        <TableCell className="text-right pr-6">
+                          <div className="flex items-center justify-end gap-1">
+                            {/* Ver Detalle Directo (Modal) */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onViewDetail(app)}
+                                  aria-label="Ver detalle"
+                                  className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                                >
+                                  <Eye className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Ver detalle</TooltipContent>
+                            </Tooltip>
+
+                            {/* Editar Directo */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onEdit(app)}
+                                  aria-label="Editar aplicación"
+                                  className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                                >
+                                  <Edit className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Editar</TooltipContent>
+                            </Tooltip>
+
+                            {/* Menú Contextual */}
+                            {/* Abrir URL de acceso */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  asChild
+                                  className="size-8 text-muted-foreground dark:text-neutral-300 hover:text-primary dark:hover:text-primary-300 hover:bg-primary/10 dark:hover:bg-primary-900/40"
+                                >
+                                  <a
+                                    href={app.urlAcceso}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Abrir URL de acceso"
+                                  >
+                                    <ExternalLink className="size-4" />
+                                  </a>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Abrir URL</TooltipContent>
+                            </Tooltip>
+
+                            {/* Cambiar Estado */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onToggleStatus(app)}
+                                  aria-label={app.estado === "Activa" ? "Inactivar aplicación" : "Activar aplicación"}
+                                  className={cn(
+                                    "size-8",
+                                    app.estado === "Activa"
+                                      ? "text-danger hover:text-danger hover:bg-danger/10"
+                                      : "text-success hover:text-success hover:bg-success/10"
+                                  )}
+                                >
+                                  {app.estado === "Activa" ? (
+                                    <PowerOff className="size-4" />
+                                  ) : (
+                                    <Power className="size-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                {app.estado === "Activa" ? "Inactivar" : "Activar"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 );
               })

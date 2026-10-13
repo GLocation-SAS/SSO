@@ -6,10 +6,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { fetchCurrentAuthProfile } from "@/modules/gestion-usuarios/services/client-usuarios";
 import { toast } from "sonner";
 
+function normalizeRoutePath(p: string | null | undefined): string {
+  if (!p) return "";
+  let clean = p.split("?")[0].split("#")[0];
+  clean = clean.replace(/^\/SSO(?=\/|$)/i, "");
+  clean = clean.replace(/^\/(?:es|en)(?=\/|$)/i, "");
+  clean = clean.replace(/\/+$/, "");
+  return clean === "" ? "/" : clean;
+}
+
 const ADMIN_ROUTE_PREFIXES = [
   "/gestion-usuarios",
   "/gestion",
-  "/aplicaciones",
   "/auditoria",
 ];
 
@@ -42,10 +50,18 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
               return;
             }
 
+            // Normalizar ruta para evitar falsos positivos con trailing slashes (ej: /aplicaciones/) o prefijos
+            const normalizedPath = normalizeRoutePath(pathname);
+
             // Validar si la ruta requiere permisos administrativos
-            const isAdminRoute = ADMIN_ROUTE_PREFIXES.some(
-              (prefix) => pathname === prefix || pathname?.startsWith(prefix + "/")
-            );
+            // Nota: /aplicaciones raíz es pública para usuarios autenticados; sus subrutas (/aplicaciones/*) son administrativas.
+            const isAplicacionesAdminSubroute =
+              normalizedPath !== "/aplicaciones" && normalizedPath.startsWith("/aplicaciones/");
+
+            const isAdminRoute =
+              ADMIN_ROUTE_PREFIXES.some(
+                (prefix) => normalizedPath === prefix || normalizedPath.startsWith(prefix + "/")
+              ) || isAplicacionesAdminSubroute;
 
             if (isAdminRoute && !currentProfile?.isAdmin) {
               toast.error("Acceso denegado", {
