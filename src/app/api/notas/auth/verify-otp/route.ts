@@ -1,0 +1,152 @@
+import { NextResponse } from "next/server";
+import {
+  verifyAuthToken,
+  hasUserApplicationAccess,
+  AuthorizationError,
+} from "@/lib/auth/server-auth";
+import { getUsuarioByEmail } from "@/modules/gestion-usuarios/services/server-usuarios";
+import { verifyNotasOTP } from "@/modules/notas/services/server-notas-otp";
+import { adminAuth, getAdminAuthForProject } from "@/lib/firebase/admin";
+
+export interface VerifyNotasOTPResponse {
+  success?: boolean;
+  message?: string;
+  error?: string;
+  code?: string;
+  remainingAttempts?: number;
+}
+
+export async function POST(request: Request) {
+  let decodedToken;
+  try {
+    decodedToken = await verifyAuthToken(request);
+  } catch (error: any) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      );
+    }
+    return NextResponse.json(
+      { error: "No autorizado. Token inválido o ausente.", code: "UNAUTHORIZED" },
+      { status: 401 }
+    );
+  }
+
+  const email = decodedToken.email;
+  if (!email || typeof email !== "string" || !email.trim()) {
+    return NextResponse.json(
+      { error: "No se encontró un correo electrónico válido en la sesión.", code: "NO_EMAIL" },
+      { status: 400 }
+    );
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Cuerpo de solicitud inválido.", code: "INVALID_BODY" },
+      { status: 400 }
+    );
+  }
+
+  const code = body?.code;
+  if (!code || typeof code !== "string" || code.trim().length !== 6) {
+    return NextResponse.json(
+      { error: "El código de verificación debe contener 6 dígitos.", code: "INVALID_CODE" },
+      { status: 400 }
+    );
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    // 1. Validar existencia y estado activo del usuario en Firestore
+    const usuario = await getUsuarioByEmail(normalizedEmail);
+    if (!usuario) {
+      return NextResponse.json(
+        { error: "Tu usuario no está registrado en el sistema.", code: "USER_NOT_REGISTERED" },
+        { status: 403 }
+      );
+    }
+
+    const isActive =
+      usuario.active === true ||
+      (usuario.active === undefined &&
+        typeof usuario.estado === "string" &&
+        usuario.estado.trim().toLowerCase() === "activo");
+
+    if (!isActive) {
+      return NextResponse.json(
+        { error: "Tu usuario está inactivo. Contacta con el administrador.", code: "USER_INACTIVE" },
+        { status: 403 }
+      );
+    }
+
+    // 2. Validar que posea asignaciones activas para el sistema de Notas
+    const hasNotasAccess = hasUserApplicationAccess(usuario, "notas");
+    if (!hasNotasAccess) {
+      return NextResponse.json(
+        {
+          error: "No tienes permisos para acceder a la aplicación Notas.",
+          code: "NOTAS_NO_ACTIVE_ASSIGNMENTS",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Validar el OTP contra la colección aislada notas_otps
+    const verification = await verifyNotasOTP(normalizedEmail, code.trim());
+    if (!verification.success) {
+      return NextResponse.json(
+        {
+          error: verification.error || "Código de verificación inválido.",
+          code: verification.statusCode === 423 ? "MAX_ATTEMPTS_EXCEEDED" : "INVALID_OTP",
+          remainingAttempts: verification.remainingAttempts,
+        },
+        { status: verification.statusCode || 400 }
+      );
+    }
+
+    // 4. Resolver la instancia de Firebase Auth correspondiente al token
+    const authInstance = decodedToken.aud
+      ? getAdminAuthForProject(decodedToken.aud)
+      : adminAuth;
+
+    try {
+      await authInstance.updateUser(decodedToken.uid, { emailVerified: true });
+    } catch {
+      // Ignorar si el emulador no soporta updateUser en esa instancia
+    }
+
+    // 5. Preservar custom claims existentes y elevar exclusivamente notasTwoFactorVerified: true
+    let existingClaims: Record<string, any> = {};
+    if (typeof authInstance.getUser === "function") {
+      try {
+        const userRecord = await authInstance.getUser(decodedToken.uid);
+        if (userRecord?.customClaims) {
+          existingClaims = { ...userRecord.customClaims };
+        }
+      } catch {
+        // Fallback en caso de fallo al consultar claims
+      }
+    }
+
+    await authInstance.setCustomUserClaims(decodedToken.uid, {
+      ...existingClaims,
+      notasTwoFactorVerified: true,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Código verificado correctamente.",
+    });
+  } catch (error: any) {
+    console.error("Error al verificar OTP de Notas:", error);
+    return NextResponse.json(
+      { error: error.message || "Error interno al verificar el código.", code: "INTERNAL_ERROR" },
+      { status: 500 }
+    );
+  }
+}

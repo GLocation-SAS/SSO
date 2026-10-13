@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyActiveUser, AuthorizationError } from "@/lib/auth/server-auth";
+import { verifyAdminUser, AuthorizationError } from "@/lib/auth/server-auth";
 import { setUserPassword } from "@/modules/gestion-usuarios/services/server-usuarios";
 
 interface RouteParams {
@@ -8,7 +8,7 @@ interface RouteParams {
 
 export async function POST(request: Request, { params }: RouteParams) {
   try {
-    await verifyActiveUser(request);
+    await verifyAdminUser(request, { requiredAction: "write" });
   } catch (error: any) {
     if (error instanceof AuthorizationError) {
       return NextResponse.json(

@@ -24,6 +24,7 @@ export interface ActiveUserAuthResult {
 
 export interface VerifyActiveUserOptions {
   targetApp?: string;
+  skipTwoFactorCheck?: boolean;
 }
 
 /**
@@ -131,7 +132,7 @@ export async function verifyActiveUser(
   }
 
   // Verificación de doble factor para autenticación con usuario y contraseña
-  if (signInProvider === "password" && !decodedToken.twoFactorVerified) {
+  if (!options?.skipTwoFactorCheck && signInProvider === "password" && !decodedToken.twoFactorVerified) {
     throw new AuthorizationError(
       "Se requiere completar la verificación en dos pasos.",
       403,
@@ -156,5 +157,109 @@ export async function verifyActiveUser(
     decodedToken,
     usuario,
   };
+}
+
+export interface VerifyAdminUserOptions {
+  requiredAction?: "read" | "write" | "delete";
+}
+
+/**
+ * Comprueba si un usuario tiene rol o permisos administrativos en la aplicación SSO.
+ * - read: Consulta de usuarios (Super Admin, Gestor Zonal, Auditor, Mesa de Ayuda con USR-CONS o puedeVer).
+ * - write: Creación y edición (Super Admin, Gestor Zonal, o permisos con puedeCrear/puedeEditar/ALL-SEC).
+ * - delete: Eliminación (Super Admin, o permisos con puedeEliminar/ALL-SEC).
+ */
+export function isUserAdminInSSO(
+  usuario: UsuarioItem,
+  action: "read" | "write" | "delete" = "write"
+): boolean {
+  if (!usuario || !Array.isArray(usuario.sedes)) {
+    return false;
+  }
+
+  for (const sede of usuario.sedes) {
+    if (!Array.isArray(sede?.asignaciones)) continue;
+    for (const asig of sede.asignaciones) {
+      const isAsigActive =
+        asig.estado === "Activo" || (asig as any).activo === true;
+      if (!isAsigActive) continue;
+
+      const appName = (asig.aplicacionNombre || "").trim().toLowerCase();
+      const appCode = ((asig as any).aplicacionCodigo || (asig as any).codigo || "").trim().toLowerCase();
+      const isSSO =
+        appName === "sso" ||
+        appCode === "sso" ||
+        (asig.rolAplicacionId || "").startsWith("ra-sso-");
+
+      if (!isSSO) continue;
+
+      const rolId = (asig.rolAplicacionId || "").trim().toLowerCase();
+      const rolName = (asig.rolNombre || "").trim().toLowerCase();
+      const permisos = Array.isArray(asig.permisos) ? asig.permisos : [];
+      const hasAllSec = permisos.some((p) => p.recursoCodigo === "ALL-SEC");
+
+      if (action === "read") {
+        if (
+          rolId === "ra-sso-sa" ||
+          rolId === "ra-sso-gz" ||
+          rolId === "ra-sso-aud" ||
+          rolId === "ra-sso-ma" ||
+          rolName.includes("administrador") ||
+          rolName.includes("gestor") ||
+          rolName.includes("auditor") ||
+          rolName.includes("mesa de ayuda") ||
+          hasAllSec ||
+          permisos.some((p) => p.puedeVer)
+        ) {
+          return true;
+        }
+      } else if (action === "delete") {
+        if (
+          rolId === "ra-sso-sa" ||
+          rolName === "super administrador" ||
+          hasAllSec ||
+          permisos.some((p) => p.puedeEliminar)
+        ) {
+          return true;
+        }
+      } else {
+        // write: creación, edición, asignación de contraseñas
+        if (
+          rolId === "ra-sso-sa" ||
+          rolId === "ra-sso-gz" ||
+          rolName === "super administrador" ||
+          rolName === "gestor zonal de usuarios" ||
+          hasAllSec ||
+          permisos.some((p) => p.puedeCrear || p.puedeEditar)
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Valida que la petición provenga de un usuario autenticado y activo,
+ * con permisos administrativos en la aplicación SSO para la acción requerida.
+ */
+export async function verifyAdminUser(
+  request: Request,
+  options?: VerifyAdminUserOptions
+): Promise<ActiveUserAuthResult> {
+  const result = await verifyActiveUser(request, { targetApp: "sso" });
+  const action = options?.requiredAction || "write";
+
+  if (!isUserAdminInSSO(result.usuario, action)) {
+    throw new AuthorizationError(
+      "No tienes permisos administrativos en el SSO para realizar esta acción.",
+      403,
+      "ADMIN_ACCESS_DENIED"
+    );
+  }
+
+  return result;
 }
 

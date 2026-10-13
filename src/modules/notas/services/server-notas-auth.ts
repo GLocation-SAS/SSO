@@ -9,7 +9,18 @@ import type { NotasUserContext, NotasAssignment } from "../types/notas";
 export async function verifyNotasAccess(request: Request): Promise<NotasUserContext> {
   const { decodedToken, usuario } = await verifyActiveUser(request, {
     targetApp: "notas",
+    skipTwoFactorCheck: true,
   });
+
+  const signInProvider =
+    decodedToken.firebase?.sign_in_provider || (decodedToken as any).signInProvider;
+  if (signInProvider === "password" && !decodedToken.notasTwoFactorVerified) {
+    throw new AuthorizationError(
+      "Se requiere completar la verificación en dos pasos de Notas.",
+      403,
+      "NOTAS_MFA_REQUIRED"
+    );
+  }
 
   // Extract only assignments related to the Notas application
   const asignacionesNotas: NotasAssignment[] = [];

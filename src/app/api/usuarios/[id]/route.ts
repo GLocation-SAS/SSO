@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyActiveUser, AuthorizationError } from "@/lib/auth/server-auth";
+import { verifyAdminUser, AuthorizationError } from "@/lib/auth/server-auth";
 import {
   getUsuarioById,
   updateUsuario,
@@ -13,7 +13,7 @@ interface RouteParams {
 
 export async function GET(request: Request, { params }: RouteParams) {
   try {
-    await verifyActiveUser(request);
+    await verifyAdminUser(request, { requiredAction: "read" });
   } catch (error: any) {
     if (error instanceof AuthorizationError) {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
-    await verifyActiveUser(request);
+    await verifyAdminUser(request, { requiredAction: "write" });
   } catch (error: any) {
     if (error instanceof AuthorizationError) {
       return NextResponse.json(
@@ -99,9 +99,16 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error: any) {
+    if (error.statusCode === 409 || error.code === "EMAIL_ALREADY_EXISTS" || error.code === "DOCUMENT_ALREADY_EXISTS") {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: 409 }
+      );
+    }
+
     console.error("Error al actualizar usuario:", error);
     return NextResponse.json(
-      { error: "Error interno al actualizar usuario." },
+      { error: error.message || "Error interno al actualizar usuario." },
       { status: 500 }
     );
   }
@@ -109,7 +116,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
-    await verifyActiveUser(request);
+    await verifyAdminUser(request, { requiredAction: "delete" });
   } catch (error: any) {
     if (error instanceof AuthorizationError) {
       return NextResponse.json(

@@ -1,6 +1,7 @@
 import "server-only";
 import nodemailer from "nodemailer";
 import { renderOTPEmailTemplate } from "./templates/otp-email";
+import { renderNotasOTPEmailTemplate } from "./templates/notas-otp-email";
 
 interface SendMailOptions {
   to: string;
@@ -59,3 +60,19 @@ export async function sendOTPEmail(email: string, otp: string) {
     text,
   });
 }
+
+/**
+ * Genera y envía el correo con la plantilla institucional de OTP para el Sistema de Notas.
+ */
+export async function sendNotasOTPEmail(email: string, otp: string) {
+  const html = renderNotasOTPEmailTemplate(otp);
+  const text = `Sistema de Notas - Conecta MINEDUC - Código de verificación: ${otp}. Válido por 5 minutos.`;
+
+  return sendEmail({
+    to: email,
+    subject: "Código de Verificación - Sistema de Notas - Conecta MINEDUC",
+    html,
+    text,
+  });
+}
+
