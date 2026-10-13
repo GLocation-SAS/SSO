@@ -53,12 +53,8 @@ export function LoginSSOForm({
             if (profile.hasNotasSession) {
               router.replace(redirectTo);
             } else {
-              // Sesión previa de SSO o sin 2FA de Notas verificado: desconectar para login independiente
-              import("firebase/auth").then(({ signOut }) => {
-                import("@/lib/firebase/client").then(({ auth }) => {
-                  signOut(auth).catch(() => {});
-                });
-              });
+              // Sesión con 2FA de Notas pendiente: redirigir a verificación
+              router.replace(resolvedMfaRedirect);
             }
           })
           .catch(async (err: any) => {
