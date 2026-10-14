@@ -21,7 +21,7 @@ const globalForFirebase = globalThis as unknown as {
 
 export function getAdminAppForProject(projectId: string = defaultProjectId): App {
   const existingApp = getApps().find(
-    (a) => a.name === projectId || (projectId === defaultProjectId && a.name === "[DEFAULT]")
+    (a: any) => a.name === projectId || (projectId === defaultProjectId && a.name === "[DEFAULT]")
   );
   if (existingApp) return existingApp;
 

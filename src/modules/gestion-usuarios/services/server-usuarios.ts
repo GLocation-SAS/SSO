@@ -19,7 +19,7 @@ const INDICES_COLLECTION = "usuarios_indices";
 export async function getUsuarios(): Promise<UsuarioItem[]> {
   const snapshot = await adminDb.collection(COLLECTION_NAME).get();
   
-  const usuarios = snapshot.docs.map((doc) => {
+  const usuarios = snapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -28,7 +28,7 @@ export async function getUsuarios(): Promise<UsuarioItem[]> {
   });
 
   // Ordenar por fecha de creación o timestamp descendente
-  return usuarios.sort((a, b) => {
+  return usuarios.sort((a: any, b: any) => {
     const timeA = a.createdAt || 0;
     const timeB = b.createdAt || 0;
     return timeB - timeA;
@@ -244,7 +244,7 @@ export async function createUsuario(data: Omit<UsuarioItem, "id">): Promise<Usua
 
   // 4. Transacción atómica en Firestore para garantizar unicidad ante concurrencia
   // REGLA OBLIGATORIA DE FIRESTORE: Todas las lecturas se ejecutan antes de cualquier escritura
-  await adminDb.runTransaction(async (transaction) => {
+  await adminDb.runTransaction(async (transaction: any) => {
     // --- LECTURAS PRIMERO ---
     const emailIndexSnap = await transaction.get(emailIndexRef);
     const docIndexSnap = docIndexRef ? await transaction.get(docIndexRef) : null;
@@ -361,7 +361,7 @@ export async function updateUsuario(id: string, data: Partial<UsuarioItem>): Pro
     const oldEmailIndexRef = oldEmail ? adminDb.collection(INDICES_COLLECTION).doc(`email_${oldEmail}`) : null;
     const oldDocIndexRef = oldDoc ? adminDb.collection(INDICES_COLLECTION).doc(`doc_${oldDoc}`) : null;
 
-    await adminDb.runTransaction(async (transaction) => {
+    await adminDb.runTransaction(async (transaction: any) => {
       // --- LECTURAS PRIMERO ---
       const newEmailSnap = newEmailIndexRef ? await transaction.get(newEmailIndexRef) : null;
       const newDocSnap = newDocIndexRef ? await transaction.get(newDocIndexRef) : null;
@@ -504,18 +504,18 @@ export async function setUserPassword(
   }
 
   // Configurar Custom Claims en el token de Auth
-  await adminAuth.setCustomUserClaims(authUid, {
+  await adminAuth.setCustomUserClaims(authUid!, {
     debeCambiarPassword: requireResetNextLogin,
   });
 
   // Actualizar estado en Firestore
   const updatedUser = await updateUsuario(usuarioId, {
-    authUid,
+    authUid: authUid!,
     debeCambiarPassword: requireResetNextLogin,
   });
 
   return {
-    authUid,
+    authUid: authUid!,
     usuario: updatedUser!,
   };
 }
