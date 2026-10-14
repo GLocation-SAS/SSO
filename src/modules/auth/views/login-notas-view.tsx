@@ -1,6 +1,6 @@
 import { LoginSSOBackground } from "../components/login-sso-background";
 import { LoginSSOForm } from "../components/login-sso-form";
-import type { LoginAuthConfig } from "../types/auth-config";
+import { DEFAULT_NOTAS_BACKGROUND_IMAGES, type LoginAuthConfig } from "../types/auth-config";
 
 export interface LoginNotasViewProps {
   config?: Partial<LoginAuthConfig>;
@@ -12,9 +12,14 @@ export function LoginNotasView({ config }: LoginNotasViewProps) {
   const defaultDescription =
     "Ingreso exclusivo para la consulta y registro de calificaciones, evaluaciones y gestión académica del sistema de Notas.";
 
+  const backgroundImages = {
+    ...DEFAULT_NOTAS_BACKGROUND_IMAGES,
+    ...config?.backgroundImages,
+  };
+
   return (
     <main className="relative flex min-h-screen lg:h-screen w-full items-center justify-center lg:justify-end p-4 lg:px-10 lg:py-6 xl:px-20 xl:py-8 overflow-hidden bg-background">
-      <LoginSSOBackground images={config?.backgroundImages} />
+      <LoginSSOBackground images={backgroundImages} />
       <LoginSSOForm
         title={config?.title || defaultTitle}
         subtitle={config?.subtitle || defaultSubtitle}

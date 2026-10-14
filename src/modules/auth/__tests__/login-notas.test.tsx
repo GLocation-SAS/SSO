@@ -111,4 +111,13 @@ describe("LoginViews and Configuration", () => {
       expect(fetchAuthProfile).toHaveBeenCalledWith({ targetApp: "notas" });
     });
   });
+
+  it("should render default Notas background images for desktop and mobile", () => {
+    const { container } = render(<LoginNotasView />);
+    const images = container.querySelectorAll("img");
+    const srcList = Array.from(images).map((img) => img.getAttribute("src"));
+
+    expect(srcList.some((src) => src?.includes("fondo-notas.png"))).toBe(true);
+    expect(srcList.some((src) => src?.includes("fondo-mobile-notas.png"))).toBe(true);
+  });
 });

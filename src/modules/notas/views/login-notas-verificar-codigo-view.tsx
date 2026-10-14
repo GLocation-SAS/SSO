@@ -1,6 +1,9 @@
 import { LoginSSOBackground } from "@/modules/auth/components/login-sso-background";
 import { DobleFactorNotasForm } from "../components/doble-factor-notas-form";
-import type { BackgroundImagesConfig } from "@/modules/auth/types/auth-config";
+import {
+  DEFAULT_NOTAS_BACKGROUND_IMAGES,
+  type BackgroundImagesConfig,
+} from "@/modules/auth/types/auth-config";
 
 export interface LoginNotasVerificarCodigoViewProps {
   backgroundImages?: BackgroundImagesConfig;
@@ -11,9 +14,14 @@ export function LoginNotasVerificarCodigoView({
   backgroundImages,
   redirectTo,
 }: LoginNotasVerificarCodigoViewProps = {}) {
+  const images = {
+    ...DEFAULT_NOTAS_BACKGROUND_IMAGES,
+    ...backgroundImages,
+  };
+
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center lg:justify-end p-4 lg:p-12 xl:p-24 overflow-hidden bg-background">
-      <LoginSSOBackground images={backgroundImages} />
+      <LoginSSOBackground images={images} />
       <DobleFactorNotasForm
         className="mr-0 lg:mr-12 xl:mr-24 w-full sm:max-w-lg"
         redirectTo={redirectTo}

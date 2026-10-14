@@ -246,11 +246,16 @@ describe("DobleFactorNotasForm Component", () => {
 
   describe("LoginNotasVerificarCodigoView Layout Component", () => {
     it("should render LoginNotasVerificarCodigoView containing DobleFactorNotasForm and background", () => {
-      render(<LoginNotasVerificarCodigoView />);
+      const { container } = render(<LoginNotasVerificarCodigoView />);
 
       expect(screen.getByRole("heading", { level: 2, name: /verificación de seguridad/i })).toBeTruthy();
       expect(screen.getByText(/acceso a notas/i)).toBeTruthy();
       expect(screen.getAllByRole("textbox")).toHaveLength(6);
+
+      const images = container.querySelectorAll("img");
+      const srcList = Array.from(images).map((img) => img.getAttribute("src"));
+      expect(srcList.some((src) => src?.includes("fondo-notas.png"))).toBe(true);
+      expect(srcList.some((src) => src?.includes("fondo-mobile-notas.png"))).toBe(true);
     });
   });
 });

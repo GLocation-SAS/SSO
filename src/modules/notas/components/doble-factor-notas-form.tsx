@@ -13,9 +13,14 @@ import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/firebase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+import { DEFAULT_NOTAS_BACKGROUND_IMAGES, type BackgroundImagesConfig } from "@/modules/auth/types/auth-config";
+
+export { DEFAULT_NOTAS_BACKGROUND_IMAGES };
+
 export interface DobleFactorNotasFormProps {
   className?: string;
   redirectTo?: string;
+  backgroundImages?: BackgroundImagesConfig;
 }
 
 export function DobleFactorNotasForm({

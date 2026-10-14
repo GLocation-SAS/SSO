@@ -6,13 +6,23 @@ import type { BackgroundImagesConfig } from "../types/auth-config";
 export interface LoginSSOBackgroundProps {
   className?: string;
   images?: BackgroundImagesConfig;
+  desktopPosition?: string;
+  mobilePosition?: string;
 }
 
-export function LoginSSOBackground({ className, images }: LoginSSOBackgroundProps) {
+export function LoginSSOBackground({
+  className,
+  images,
+  desktopPosition,
+  mobilePosition,
+}: LoginSSOBackgroundProps) {
   const mobileLight = images?.mobileLight || "/fondo-mobile.png";
-  const mobileDark = images?.mobileDark || "/fondo-mobile-dark.png";
+  const mobileDark = images?.mobileDark || images?.mobileLight || "/fondo-mobile.png";
   const desktopLight = images?.desktopLight || "/fondo-desktop.png";
-  const desktopDark = images?.desktopDark || "/fondo-desktop-dark.png";
+  const desktopDark = images?.desktopDark || images?.desktopLight || "/fondo-desktop.png";
+
+  const resolvedDesktopPosition = desktopPosition || images?.desktopPosition || "object-left-top";
+  const resolvedMobilePosition = mobilePosition || images?.mobilePosition || "object-top";
 
   return (
     <div className={cn("absolute inset-0 z-0 h-full w-full overflow-hidden", className)}>
@@ -21,7 +31,10 @@ export function LoginSSOBackground({ className, images }: LoginSSOBackgroundProp
         src={getAssetPath(mobileLight)}
         alt="Fondo móvil Conecta MINEDUC Claro"
         fill
-        className="block dark:hidden md:!hidden object-cover object-center"
+        className={cn(
+          "block dark:hidden md:!hidden object-cover",
+          resolvedMobilePosition
+        )}
         priority
         unoptimized
       />
@@ -30,7 +43,10 @@ export function LoginSSOBackground({ className, images }: LoginSSOBackgroundProp
         src={getAssetPath(mobileDark)}
         alt="Fondo móvil Conecta MINEDUC Oscuro"
         fill
-        className="hidden dark:block md:!hidden object-cover object-center"
+        className={cn(
+          "hidden dark:block md:!hidden object-cover",
+          resolvedMobilePosition
+        )}
         priority
         unoptimized
       />
@@ -39,7 +55,11 @@ export function LoginSSOBackground({ className, images }: LoginSSOBackgroundProp
         src={getAssetPath(desktopLight)}
         alt="Persona trabajando en contexto administrativo en MINEDUC Claro"
         fill
-        className="hidden md:block dark:!hidden object-cover object-bottom"
+        className={cn(
+          "hidden md:block dark:!hidden object-cover",
+          resolvedDesktopPosition,
+          className
+        )}
         priority
         unoptimized
       />
@@ -48,7 +68,11 @@ export function LoginSSOBackground({ className, images }: LoginSSOBackgroundProp
         src={getAssetPath(desktopDark)}
         alt="Persona trabajando en contexto administrativo en MINEDUC Oscuro"
         fill
-        className="hidden dark:md:block object-cover object-bottom"
+        className={cn(
+          "hidden dark:md:block object-cover",
+          resolvedDesktopPosition,
+          className
+        )}
         priority
         unoptimized
       />

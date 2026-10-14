@@ -36,6 +36,7 @@ export function LoginSSOForm({
   const [showPassword, setShowPassword] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [showMustChangePassword, setShowMustChangePassword] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const resolvedMfaRedirect =
     mfaRedirectTo ||
@@ -46,7 +47,7 @@ export function LoginSSOForm({
 
   // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
   useEffect(() => {
-    if (!authLoading && user && !showMustChangePassword) {
+    if (!authLoading && user && !showMustChangePassword && !isAuthenticating) {
       if (targetApp === "notas") {
         fetchAuthProfile({ targetApp: "notas" })
           .then((profile) => {
@@ -90,7 +91,11 @@ export function LoginSSOForm({
         })
         .catch(async (err: any) => {
           const errMsg = err?.message || "";
-          if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
+          if (
+            errMsg.includes("verificación en dos pasos") ||
+            errMsg.includes("MFA_REQUIRED") ||
+            err?.code === "MFA_REQUIRED"
+          ) {
             // Sesión con doble factor pendiente: redirigir a doble factor sin cerrar sesión
             router.replace(resolvedMfaRedirect);
             return;
@@ -240,6 +245,7 @@ export function LoginSSOForm({
     }
 
     setIsLoading(true);
+    setIsAuthenticating(true);
     setGlobalError(null);
 
     try {
@@ -260,6 +266,7 @@ export function LoginSSOForm({
             Authorization: `Bearer ${token}`,
           },
         });
+        await userCredential.user.getIdToken(true);
         toast.info("Código de verificación enviado", {
           description: "Revisa tu correo para completar el acceso.",
         });
@@ -269,6 +276,7 @@ export function LoginSSOForm({
 
       router.replace(resolvedMfaRedirect);
     } catch (error: any) {
+      setIsAuthenticating(false);
       console.error("Error al autenticar credenciales:", error);
       let errorMsg = "Correo institucional o contraseña incorrectos.";
       if (
