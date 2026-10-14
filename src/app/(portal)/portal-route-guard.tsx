@@ -19,7 +19,7 @@ const ADMIN_PREFIXES = [
 export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, profile, isLoaded, isStandardUser, isDocente } = useAuth();
+  const { user, profile, isLoaded, isStandardUser, isDocente, refreshProfile } = useAuth();
   const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   useEffect(() => {
@@ -30,8 +30,21 @@ export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
     // 1. Control de acceso estricto a Notas (/inicio): requiere sesión verificada en Notas
     if (cleanPath === "/inicio" || cleanPath.startsWith("/inicio/")) {
       if (!profile?.hasNotasSession) {
-        router.replace("/login-notas");
-        return;
+        let isCurrent = true;
+        refreshProfile()
+          .then((fresh) => {
+            if (isCurrent && !fresh?.hasNotasSession) {
+              router.replace("/login-notas");
+            }
+          })
+          .catch(() => {
+            if (isCurrent) {
+              router.replace("/login-notas");
+            }
+          });
+        return () => {
+          isCurrent = false;
+        };
       }
     }
 

@@ -37,8 +37,18 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       } else {
         const checkAccess = async () => {
           try {
-            const currentProfile =
+            const normalizedPath = normalizeRoutePath(pathname);
+            const isNotasContext =
+              normalizedPath === "/inicio" || normalizedPath.startsWith("/inicio/");
+
+            let currentProfile =
               profile || (await refreshProfile()) || (await fetchCurrentAuthProfile());
+
+            if (isNotasContext && currentProfile && !currentProfile.hasNotasSession) {
+              const fresh = await refreshProfile();
+              if (fresh) currentProfile = fresh;
+            }
+
             if (!isMounted) return;
 
             if (!currentProfile) {
@@ -58,9 +68,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
               router.replace("/login-sso");
               return;
             }
-
-            // Normalizar ruta para evitar falsos positivos con trailing slashes (ej: /aplicaciones/) o prefijos
-            const normalizedPath = normalizeRoutePath(pathname);
 
             // Validar si la ruta requiere permisos administrativos
             // Nota: /aplicaciones raíz es pública para usuarios autenticados; sus subrutas (/aplicaciones/*) son administrativas.
@@ -85,6 +92,25 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
             if (!isMounted) return;
 
             const errMsg = err?.message || "";
+            const currentNormPath = normalizeRoutePath(pathname);
+            const isNotasContext =
+              currentNormPath === "/inicio" || currentNormPath.startsWith("/inicio/");
+
+            if (
+              errMsg.includes("NOTAS_MFA_REQUIRED") ||
+              err?.code === "NOTAS_MFA_REQUIRED" ||
+              (isNotasContext &&
+                (errMsg.includes("verificación en dos pasos") ||
+                  errMsg.includes("MFA_REQUIRED") ||
+                  err?.code === "MFA_REQUIRED"))
+            ) {
+              toast.info("Verificación requerida", {
+                description: "Por favor, completa la verificación de dos pasos de Notas.",
+              });
+              router.replace("/login-notas/verificar-codigo");
+              return;
+            }
+
             if (
               errMsg.includes("verificación en dos pasos") ||
               errMsg.includes("MFA_REQUIRED") ||
@@ -101,7 +127,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
               description: errMsg || "Tu sesión ha expirado o no tienes acceso al sistema.",
             });
             await logout();
-            router.replace("/login-sso");
+            router.replace(isNotasContext ? "/login-notas" : "/login-sso");
           }
         };
 

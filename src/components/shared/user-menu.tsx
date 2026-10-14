@@ -11,11 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   ChevronDown,
-  User,
   LogOut,
-  ChevronLeft,
-  LayoutDashboard,
-  LayoutGrid
+  ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -72,11 +69,6 @@ export function UserMenu() {
     }
     await logout();
     router.replace("/login-sso");
-  };
-
-  const handleNavigate = (path: string) => {
-    setOpen(false);
-    router.push(path);
   };
 
   const TriggerButton = (
@@ -147,23 +139,6 @@ export function UserMenu() {
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
-              {(isStandardUser || isDocente) && (
-                <>
-                  <MobileMenuItem
-                    icon={LayoutDashboard}
-                    label={isDocente ? "Inicio (Notas)" : "Dashboard"}
-                    onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
-                  />
-                  <MobileMenuItem
-                    icon={LayoutGrid}
-                    label="Mis aplicaciones"
-                    onClick={() => handleNavigate("/mis-aplicaciones")}
-                  />
-                  <div className="h-px bg-border/60 mx-2 my-1" />
-                </>
-              )}
-              <MobileMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-              <div className="h-px bg-border my-1 mx-2" />
               <MobileMenuItem
                 icon={LogOut}
                 label="Cerrar sesión"
@@ -210,23 +185,6 @@ export function UserMenu() {
         <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <div className="flex flex-col gap-1 px-1">
-          {(isStandardUser || isDocente) && (
-            <>
-              <DesktopMenuItem
-                icon={LayoutDashboard}
-                label={isDocente ? "Inicio (Notas)" : "Dashboard"}
-                onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
-              />
-              <DesktopMenuItem
-                icon={LayoutGrid}
-                label="Mis aplicaciones"
-                onClick={() => handleNavigate("/mis-aplicaciones")}
-              />
-              <DropdownMenuSeparator className="my-1 bg-border/50" />
-            </>
-          )}
-          <DesktopMenuItem icon={User} label="Perfil" onClick={() => setOpen(false)} />
-          <DropdownMenuSeparator className="my-1.5 bg-border/50" />
           <DesktopMenuItem
             icon={LogOut}
             label="Cerrar sesión"

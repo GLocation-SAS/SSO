@@ -30,7 +30,7 @@ export function LoginSSOForm({
   mfaSendOtpUrl,
 }: LoginSSOFormProps) {
   const router = useRouter();
-  const { user, loading: authLoading, loginWithEmail } = useAuth();
+  const { user, loading: authLoading, loginWithEmail, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -146,6 +146,7 @@ export function LoginSSOForm({
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
+    setIsAuthenticating(true);
     setGlobalError(null);
     try {
       const { signInWithPopup, GoogleAuthProvider, signOut } = await import("firebase/auth");
@@ -171,6 +172,9 @@ export function LoginSSOForm({
             throw new Error(errData.error || "No se pudo iniciar sesión en Notas.");
           }
 
+          await userCredential.user.getIdToken(true);
+          await refreshProfile?.();
+
           toast.success("Sesión iniciada con éxito");
           router.replace(redirectTo);
           return;
@@ -188,6 +192,8 @@ export function LoginSSOForm({
       // Validar autorización del usuario en Firestore mediante el servidor para SSO general
       try {
         const profile = await fetchAuthProfile({ targetApp });
+        await userCredential.user.getIdToken(true);
+        await refreshProfile?.();
 
         if (profile.debeCambiarPassword) {
           setShowMustChangePassword(true);
@@ -218,6 +224,7 @@ export function LoginSSOForm({
       }
     } finally {
       setIsGoogleLoading(false);
+      setIsAuthenticating(false);
     }
   };
 

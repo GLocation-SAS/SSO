@@ -282,6 +282,37 @@ describe("ProtectedRoute Component", () => {
     expect(screen.queryByText("Contenido Protegido")).toBeNull();
   });
 
+  it("should redirect to /login-notas/verificar-codigo when in Notas context and MFA is required", async () => {
+    currentMockPathname = "/inicio";
+    const { fetchCurrentAuthProfile } = require("@/modules/gestion-usuarios/services/client-usuarios");
+    const mfaError = new Error("Se requiere completar la verificación en dos pasos.");
+    (mfaError as any).code = "MFA_REQUIRED";
+    (fetchCurrentAuthProfile as jest.Mock).mockRejectedValue(mfaError);
+
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "user-mfa-notas", email: "docente@educacion.gob.ec" },
+      profile: null,
+      loading: false,
+      logout: mockLogout,
+      refreshProfile: jest.fn().mockResolvedValue(null),
+    });
+
+    render(
+      <ProtectedRoute>
+        <div>Contenido Protegido</div>
+      </ProtectedRoute>
+    );
+
+    await waitFor(() => {
+      expect(toast.info).toHaveBeenCalledWith("Verificación requerida", {
+        description: "Por favor, completa la verificación de dos pasos de Notas.",
+      });
+      expect(mockReplace).toHaveBeenCalledWith("/login-notas/verificar-codigo");
+    });
+    expect(screen.queryByText("Contenido Protegido")).toBeNull();
+    currentMockPathname = "/dashboard";
+  });
+
   it("should logout and redirect to /login-sso when profile cannot be resolved", async () => {
     const { fetchCurrentAuthProfile } = require("@/modules/gestion-usuarios/services/client-usuarios");
     (fetchCurrentAuthProfile as jest.Mock).mockResolvedValue(null);

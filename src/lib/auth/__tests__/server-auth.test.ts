@@ -290,6 +290,165 @@ describe("verifyActiveUser", () => {
     expect(result.usuario).toEqual(mockUserData);
   });
 
+  it("should succeed when sign_in_provider is password, twoFactorVerified is false, but valid notas_session cookie exists for undefined targetApp", async () => {
+    const { signNotasSessionToken } = require("@/modules/notas/services/server-notas-session");
+    const validNotasToken = signNotasSessionToken("session-abc", Date.now() + 60000);
+
+    const request = new Request("http://localhost:3000/api/auth/me", {
+      headers: {
+        Authorization: "Bearer password-token",
+        Cookie: `notas_session=${validNotasToken}`,
+      },
+    });
+
+    const mockDecodedToken = {
+      uid: "user-notas-pwd",
+      email: "docente@educacion.gob.ec",
+      email_verified: true,
+      firebase: { sign_in_provider: "password" },
+      twoFactorVerified: false,
+    };
+
+    (adminAuth.verifyIdToken as jest.Mock).mockResolvedValue(mockDecodedToken);
+
+    const mockUserData = {
+      id: "usr-docente",
+      email: "docente@educacion.gob.ec",
+      active: true,
+      sedes: [
+        {
+          sedeId: "sede-1",
+          asignaciones: [{ estado: "Activo", aplicacionNombre: "notas", rolNombre: "Docente" }],
+        },
+      ],
+    };
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      docs: [{ id: "usr-docente", data: () => mockUserData }],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    (adminDb.collection as jest.Mock).mockReturnValue({
+      where: mockWhere,
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockResolvedValue({
+          exists: true,
+          data: () => ({
+            sessionId: "session-abc",
+            email: "docente@educacion.gob.ec",
+            active: true,
+            expiresAt: Date.now() + 60000,
+          }),
+        }),
+      }),
+    });
+
+    const result = await verifyActiveUser(request);
+    expect(result.decodedToken).toEqual(mockDecodedToken);
+    expect(result.usuario).toEqual(mockUserData);
+  });
+
+  it("should succeed when targetApp is 'notas' and valid notas_session cookie exists", async () => {
+    const { signNotasSessionToken } = require("@/modules/notas/services/server-notas-session");
+    const validNotasToken = signNotasSessionToken("session-xyz", Date.now() + 60000);
+
+    const request = new Request("http://localhost:3000/api/auth/me", {
+      headers: {
+        Authorization: "Bearer password-token",
+        Cookie: `notas_session=${validNotasToken}`,
+      },
+    });
+
+    const mockDecodedToken = {
+      uid: "user-notas-pwd-2",
+      email: "docente@educacion.gob.ec",
+      email_verified: true,
+      firebase: { sign_in_provider: "password" },
+      twoFactorVerified: false,
+    };
+
+    (adminAuth.verifyIdToken as jest.Mock).mockResolvedValue(mockDecodedToken);
+
+    const mockUserData = {
+      id: "usr-docente-2",
+      email: "docente@educacion.gob.ec",
+      active: true,
+      sedes: [
+        {
+          sedeId: "sede-1",
+          asignaciones: [{ estado: "Activo", aplicacionNombre: "notas", rolNombre: "Docente" }],
+        },
+      ],
+    };
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      docs: [{ id: "usr-docente-2", data: () => mockUserData }],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    (adminDb.collection as jest.Mock).mockReturnValue({
+      where: mockWhere,
+      doc: jest.fn().mockReturnValue({
+        get: jest.fn().mockResolvedValue({
+          exists: true,
+          data: () => ({
+            sessionId: "session-xyz",
+            email: "docente@educacion.gob.ec",
+            active: true,
+            expiresAt: Date.now() + 60000,
+          }),
+        }),
+      }),
+    });
+
+    const result = await verifyActiveUser(request, { targetApp: "notas" });
+    expect(result.decodedToken).toEqual(mockDecodedToken);
+    expect(result.usuario).toEqual(mockUserData);
+  });
+
+  it("should throw NOTAS_MFA_REQUIRED when targetApp is 'notas' and notas_session cookie is missing", async () => {
+    const request = new Request("http://localhost:3000/api/auth/me", {
+      headers: { Authorization: "Bearer password-token" },
+    });
+
+    const mockDecodedToken = {
+      uid: "user-notas-pwd-3",
+      email: "docente@educacion.gob.ec",
+      email_verified: true,
+      firebase: { sign_in_provider: "password" },
+      twoFactorVerified: false,
+    };
+
+    (adminAuth.verifyIdToken as jest.Mock).mockResolvedValue(mockDecodedToken);
+
+    const mockUserData = {
+      id: "usr-docente-3",
+      email: "docente@educacion.gob.ec",
+      active: true,
+      sedes: [
+        {
+          sedeId: "sede-1",
+          asignaciones: [{ estado: "Activo", aplicacionNombre: "notas", rolNombre: "Docente" }],
+        },
+      ],
+    };
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: false,
+      docs: [{ id: "usr-docente-3", data: () => mockUserData }],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockWhere = jest.fn().mockReturnValue({ limit: mockLimit });
+    (adminDb.collection as jest.Mock).mockReturnValue({ where: mockWhere });
+
+    await expect(verifyActiveUser(request, { targetApp: "notas" })).rejects.toMatchObject({
+      statusCode: 403,
+      code: "NOTAS_MFA_REQUIRED",
+    });
+  });
+
   it("should bypass 2FA when sign_in_provider is google.com", async () => {
     const request = new Request("http://localhost:3000/api/auth/me", {
       headers: { Authorization: "Bearer google-token" },

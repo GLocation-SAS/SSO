@@ -3,7 +3,10 @@ import { adminAuth, getAdminAuthForProject } from "@/lib/firebase/admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getUsuarioByEmail } from "@/modules/gestion-usuarios/services/server-usuarios";
 import type { UsuarioItem } from "@/modules/gestion-usuarios/types/usuario";
-import { extractNotasSessionToken } from "@/modules/notas/services/server-notas-session";
+import {
+  extractNotasSessionToken,
+  verifyNotasSessionToken,
+} from "@/modules/notas/services/server-notas-session";
 
 export class AuthorizationError extends Error {
   statusCode: number;
@@ -139,14 +142,21 @@ export async function verifyActiveUser(
   if (!options?.skipTwoFactorCheck && signInProvider === "password") {
     if (options?.targetApp === "notas") {
       const notasToken = extractNotasSessionToken(request);
-      if (!notasToken) {
+      let isValidNotas = false;
+      if (notasToken) {
+        const session = await verifyNotasSessionToken(notasToken);
+        if (session && session.email.toLowerCase() === normalizedEmail) {
+          isValidNotas = true;
+        }
+      }
+      if (!isValidNotas) {
         throw new AuthorizationError(
           "Se requiere completar la verificación en dos pasos de Notas.",
           403,
           "NOTAS_MFA_REQUIRED"
         );
       }
-    } else {
+    } else if (options?.targetApp) {
       const authTime = decodedToken.auth_time;
       const verifiedAt = (decodedToken as any).twoFactorVerifiedAt;
       const isVerified = Boolean(
@@ -155,6 +165,32 @@ export async function verifyActiveUser(
       );
 
       if (!isVerified) {
+        throw new AuthorizationError(
+          "Se requiere completar la verificación en dos pasos.",
+          403,
+          "MFA_REQUIRED"
+        );
+      }
+    } else {
+      // Sin targetApp explícito (ej: consulta de perfil en /api/auth/me):
+      // Es válido si el usuario completó el 2FA de SSO O cuenta con sesión activa en Notas
+      const authTime = decodedToken.auth_time;
+      const verifiedAt = (decodedToken as any).twoFactorVerifiedAt;
+      const isSsoVerified = Boolean(
+        decodedToken.twoFactorVerified &&
+        (typeof verifiedAt === "number" ? verifiedAt >= (authTime || 0) : !authTime)
+      );
+
+      let isNotasVerified = false;
+      const notasToken = extractNotasSessionToken(request);
+      if (notasToken) {
+        const session = await verifyNotasSessionToken(notasToken);
+        if (session && session.email.toLowerCase() === normalizedEmail) {
+          isNotasVerified = true;
+        }
+      }
+
+      if (!isSsoVerified && !isNotasVerified) {
         throw new AuthorizationError(
           "Se requiere completar la verificación en dos pasos.",
           403,
