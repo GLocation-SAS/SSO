@@ -358,10 +358,10 @@ export function UsuarioModalForm({
         fechaCreacion: usuarioToEdit
           ? usuarioToEdit.fechaCreacion
           : new Date().toLocaleDateString("es-EC", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            }),
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }),
         sedes: userSedes,
       };
 
@@ -470,10 +470,10 @@ export function UsuarioModalForm({
                   )}
                 </div>
 
-                {/* N.Âº de documento */}
+                {/* Nº de documento */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">
-                    N.Âº de documento <span className="text-danger">*</span>
+                    Nº de documento <span className="text-danger">*</span>
                   </label>
                   <InputGroup
                     size="sm"
@@ -1046,7 +1046,7 @@ export function UsuarioModalForm({
                   </div>
 
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-xs text-muted-foreground">N.Âº de documento</span>
+                    <span className="text-xs text-muted-foreground">Nº de documento</span>
                     <span className="font-semibold text-foreground font-mono">
                       {identificacion}
                     </span>

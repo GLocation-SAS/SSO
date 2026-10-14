@@ -79,7 +79,8 @@ export function UsuariosSummaryCards({
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
+    <div className="@container w-full">
+      <div className="grid grid-cols-1 @sm:grid-cols-2 @5xl:grid-cols-4 gap-3.5 w-full">
       {cards.map((c) => {
         const isActive = activeFilter === c.id;
         const Icon = c.icon;
@@ -125,6 +126,7 @@ export function UsuariosSummaryCards({
           />
         );
       })}
+      </div>
     </div>
   );
 }
