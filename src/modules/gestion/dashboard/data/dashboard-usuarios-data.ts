@@ -377,6 +377,24 @@ export const APLICACIONES_DATA: AppContextData[] = [
       { id: "s-ciud-cz9", codigo: "CZ-09", nombre: "Coordinación Zonal 9", tipo: "Coordinación Zonal", usuarios: 18, porcentaje: 35 },
     ],
   },
+  {
+    id: "app-notas",
+    nombre: "Notas",
+    codigo: "NOTAS",
+    usuarios: 180,
+    porcentaje: 14,
+    rolesCount: 2,
+    sedesCount: 3,
+    roles: [
+      { id: "r-notas-cz", nombre: "Coordinadores Zonales", usuarios: 45, porcentaje: 25, recursos: 6, estado: "Activo" },
+      { id: "r-notas-dd", nombre: "Directores Distritales", usuarios: 135, porcentaje: 75, recursos: 5, estado: "Activo" },
+    ],
+    sedes: [
+      { id: "s-notas-pc", codigo: "PC-01", nombre: "Planta Central", tipo: "Planta Central", usuarios: 40, porcentaje: 22 },
+      { id: "s-notas-cz9", codigo: "CZ-09", nombre: "Coordinación Zonal 9", tipo: "Coordinación Zonal", usuarios: 60, porcentaje: 33 },
+      { id: "s-notas-d1701", codigo: "17D01", nombre: "Distrito 17D01", tipo: "Distrito", usuarios: 80, porcentaje: 45 },
+    ],
+  },
 ];
 
 // ── 5. CASOS QUE REQUIEREN ATENCIÓN (Accionables y prioritarios) ─────────────

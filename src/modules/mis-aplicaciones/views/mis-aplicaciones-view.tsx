@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   RotateCcw,
@@ -25,7 +26,9 @@ import { cn } from "@/lib/utils";
 import {
   MIS_APLICACIONES_USUARIO,
   MisAplicacionItem,
+  RecursoAsignado,
 } from "../data/mis-aplicaciones-data";
+import { mockAplicacionesData } from "@/modules/aplicaciones/data/aplicaciones-data";
 import { MisAplicacionesCard } from "../components/mis-aplicaciones-card";
 import {
   MisAplicacionesSummaryCards,
@@ -36,8 +39,158 @@ import { RecursosDialog } from "../components/recursos-dialog";
 import { useAuth } from "@/hooks/useAuth";
 
 export function MisAplicacionesView() {
-  const { user } = useAuth();
-  const [apps, setApps] = useState<MisAplicacionItem[]>(MIS_APLICACIONES_USUARIO);
+  const router = useRouter();
+  const { user, profile, loading: authLoading } = useAuth();
+
+  // Mapear aplicaciones reales autorizadas para el usuario desde Firestore/perfil
+  const resolvedUserApps = useMemo<MisAplicacionItem[]>(() => {
+    const sedes = profile?.usuario?.sedes;
+    if (Array.isArray(sedes) && sedes.length > 0) {
+      const items: MisAplicacionItem[] = [];
+      const seen = new Set<string>();
+
+      for (const sede of sedes) {
+        if (!Array.isArray(sede?.asignaciones)) continue;
+        for (const asig of sede.asignaciones) {
+          const isActivo = asig.estado === "Activo" || (asig as any).activo === true;
+          if (!isActivo) continue;
+
+          const asigAppName = (asig.aplicacionNombre || "").trim();
+          const asigAppCode = ((asig as any).aplicacionCodigo || (asig as any).codigo || "").trim();
+          const asigAppId = (asig.rolAplicacionId || asig.id || "").toLowerCase();
+
+          const key = `${asigAppName.toLowerCase()}-${sede.sedeId}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          // Buscar metadatos institucionales complementarios (ícono, descripción, url de acceso)
+          const meta = mockAplicacionesData.find(
+            (m) =>
+              m.id.toLowerCase() === asigAppId ||
+              m.codigo.toLowerCase() === asigAppCode.toLowerCase() ||
+              m.nombre.toLowerCase() === asigAppName.toLowerCase() ||
+              asigAppName.toLowerCase().includes(m.nombre.toLowerCase())
+          );
+
+          // Mapear recursos y permisos reales asignados
+          const recursos: RecursoAsignado[] = (asig.permisos || []).map((p, idx) => ({
+            id: `rec-${idx}-${p.recursoCodigo}`,
+            codigo: p.recursoCodigo,
+            nombre: p.recursoNombre,
+            tipo: "Módulo",
+            permisos: {
+              codigo: p.recursoCodigo,
+              nombre: p.recursoNombre,
+              ver: Boolean(p.puedeVer),
+              crear: Boolean(p.puedeCrear),
+              editar: Boolean(p.puedeEditar),
+              eliminar: Boolean(p.puedeEliminar),
+            },
+          }));
+
+          const rawIcon = meta?.icono || "School";
+          const icono = (["GraduationCap", "School", "Users", "Headphones", "FileText", "Shield"].includes(rawIcon)
+            ? rawIcon
+            : "School") as MisAplicacionItem["icono"];
+
+          const isNotas =
+            asigAppName.toLowerCase().includes("notas") ||
+            asigAppCode.toLowerCase().includes("notas") ||
+            asigAppId.includes("notas");
+          const resolvedUrl = isNotas ? "/login-notas" : meta?.urlAcceso || "/mis-aplicaciones";
+
+          items.push({
+            id: asig.id || `app-${items.length + 1}`,
+            codigo: asigAppCode || meta?.codigo || "APP",
+            nombre: asigAppName || meta?.nombre || "Sistema Institucional",
+            descripcion:
+              meta?.descripcion ||
+              `Sistema institucional para la gestión y seguimiento en ${sede.sedeNombre || "MINEDUC"}.`,
+            urlAcceso: resolvedUrl,
+            icono,
+            colorTone: "primary",
+            sede: {
+              id: sede.sedeId,
+              codigo: (sede as any).codigo || sede.sedeId,
+              nombre: sede.sedeNombre || "Sede Institucional",
+              tipo: (sede as any).tipo || "Coordinación Zonal",
+            },
+            rol: {
+              id: asig.rolAplicacionId || asig.id,
+              nombre: asig.rolNombre || "Usuario",
+              descripcion: `Rol asignado: ${asig.rolNombre || "Usuario"}`,
+            },
+            ultimoAcceso: "Hoy, activo",
+            estado: asig.estado === "Inactivo" ? "Mantenimiento" : "Activa",
+            recursos,
+            categoria: "Sistemas Institucionales",
+          });
+        }
+      }
+
+      if (items.length > 0) return items;
+    }
+
+    if (Array.isArray(profile?.assignedApplications) && profile.assignedApplications.length > 0) {
+      return profile.assignedApplications.map((assigned, idx) => {
+        const meta = mockAplicacionesData.find(
+          (m) =>
+            m.id.toLowerCase() === assigned.aplicacionId.toLowerCase() ||
+            m.codigo.toLowerCase() === (assigned.aplicacionCodigo || "").toLowerCase() ||
+            m.nombre.toLowerCase() === assigned.aplicacionNombre.toLowerCase()
+        );
+
+        const isNotas =
+          (assigned.aplicacionNombre || "").toLowerCase().includes("notas") ||
+          (assigned.aplicacionCodigo || "").toLowerCase().includes("notas") ||
+          (assigned.aplicacionId || "").toLowerCase().includes("notas");
+        const resolvedUrl = isNotas ? "/login-notas" : meta?.urlAcceso || "/mis-aplicaciones";
+
+        return {
+          id: `${assigned.aplicacionId}-${idx}`,
+          codigo: assigned.aplicacionCodigo || meta?.codigo || "APP",
+          nombre: assigned.aplicacionNombre || meta?.nombre || "Sistema Institucional",
+          descripcion:
+            meta?.descripcion ||
+            `Acceso institucional asignado para la sede ${assigned.sedeNombre}.`,
+          urlAcceso: resolvedUrl,
+          icono: "School",
+          colorTone: "primary",
+          sede: {
+            id: assigned.sedeId,
+            codigo: assigned.sedeId,
+            nombre: assigned.sedeNombre,
+            tipo: "Coordinación Zonal",
+          },
+          rol: {
+            id: `rol-${idx}`,
+            nombre: assigned.rolNombre || "Usuario",
+            descripcion: `Rol asignado: ${assigned.rolNombre || "Usuario"}`,
+          },
+          ultimoAcceso: "Hoy, activo",
+          estado: "Activa",
+          recursos: [],
+          categoria: "Sistemas Institucionales",
+        };
+      });
+    }
+
+    // Fallback únicamente si no existe sesión autenticada (desarrollo estático aislado)
+    if (!profile && !user) {
+      return MIS_APLICACIONES_USUARIO;
+    }
+
+    return [];
+  }, [profile, user]);
+
+  const [apps, setApps] = useState<MisAplicacionItem[]>([]);
+
+  useEffect(() => {
+    if (resolvedUserApps.length > 0 || (profile && !authLoading)) {
+      setApps(resolvedUserApps);
+    }
+  }, [resolvedUserApps, profile, authLoading]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSede, setSelectedSede] = useState<string>("todas");
   const [selectedRol, setSelectedRol] = useState<string>("todos");
@@ -46,6 +199,7 @@ export function MisAplicacionesView() {
 
   // Simulated states for testing
   const [isLoading, setIsLoading] = useState(false);
+  const isDataLoading = (authLoading && !profile) || isLoading;
   const [hasError, setHasError] = useState(false);
 
   // Modal de recursos
@@ -128,11 +282,14 @@ export function MisAplicacionesView() {
     );
 
     toast.info("Iniciando sesión única SSO...", {
-      description: `Redirigiendo a ${app.nombre} con credenciales de ${user?.email || "usuario@conecta.com"}.`,
+      description: `Redirigiendo a ${app.nombre}${user?.email ? ` con credenciales de ${user.email}` : ""}...`,
     });
 
-    // Abrir en nueva pestaña con seguridad
-    window.open(app.urlAcceso, "_blank", "noopener,noreferrer");
+    if (app.urlAcceso.startsWith("/")) {
+      router.push(app.urlAcceso);
+    } else {
+      window.open(app.urlAcceso, "_blank", "noopener,noreferrer");
+    }
   };
 
   const handleViewRecursos = (app: MisAplicacionItem) => {
@@ -367,7 +524,7 @@ export function MisAplicacionesView() {
           </div>
 
           {/* ── 6. Estado: CARGA (Loading Skeleton) ── */}
-          {isLoading && (
+          {isDataLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
               {Array.from({ length: 4 }).map((_, idx) => (
                 <div
@@ -391,7 +548,7 @@ export function MisAplicacionesView() {
           )}
 
           {/* ── 7. Estado: ERROR ── */}
-          {!isLoading && hasError && (
+          {!isDataLoading && hasError && (
             <div className="p-8 rounded-2xl border border-danger/30 bg-danger/5 text-center space-y-4 max-w-xl mx-auto my-6">
               <div className="size-14 rounded-full bg-danger/10 border border-danger/20 flex items-center justify-center text-danger mx-auto">
                 <AlertTriangle className="size-7" />
@@ -416,7 +573,7 @@ export function MisAplicacionesView() {
           )}
 
           {/* ── 8. Estado: VACÍO (Empty) ── */}
-          {!isLoading && !hasError && filteredApps.length === 0 && (
+          {!isDataLoading && !hasError && filteredApps.length === 0 && (
             <div className="p-12 rounded-2xl border border-dashed border-border bg-card text-center space-y-4 max-w-md mx-auto my-6">
               <div className="size-14 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto">
                 <AppWindow className="size-7" />
@@ -426,7 +583,7 @@ export function MisAplicacionesView() {
                   No se encontraron aplicaciones
                 </h3>
                 <p className="text-body-sm text-muted-foreground">
-                  No hay aplicaciones que coincidan con los filtros seleccionados.
+                  No tienes aplicaciones asignadas para este filtro o perfil.
                 </p>
               </div>
               <Button
@@ -441,7 +598,7 @@ export function MisAplicacionesView() {
           )}
 
           {/* ── 9. Estado: CARGADO ── */}
-          {!isLoading && !hasError && filteredApps.length > 0 && (
+          {!isDataLoading && !hasError && filteredApps.length > 0 && (
             <>
               {viewMode === "grid" ? (
                 <div className="flex flex-col gap-4 w-full">

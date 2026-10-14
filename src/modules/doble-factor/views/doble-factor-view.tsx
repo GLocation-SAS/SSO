@@ -35,22 +35,22 @@ export function DobleFactorView() {
       toast.success("Código verificado correctamente.");
       const rawUser = typeof window !== "undefined" ? window.localStorage.getItem("mineduc_sso_user") : null;
       let isDocente = false;
-      let isStandard = false;
+      let isAdmin = false;
       try {
         const parsed = rawUser ? JSON.parse(rawUser) : null;
         isDocente = parsed?.role === "docente" || parsed?.email?.includes("docente");
-        isStandard = parsed?.role === "user" || parsed?.email?.includes("usuario") || parsed?.email?.includes("prueba");
+        isAdmin = parsed?.role === "admin" || parsed?.email?.includes("admin") || parsed?.email?.includes("jeimy");
       } catch {
         isDocente = !!rawUser?.includes('"docente"') || !!rawUser?.includes("docente@mineduc.gob.ec");
-        isStandard = !!rawUser?.includes("prueba2@gmail.com") || !!rawUser?.includes("usuario@conecta.com");
+        isAdmin = !!rawUser?.includes('"admin"') || !!rawUser?.includes("jeimy");
       }
 
       if (isDocente) {
         router.push("/inicio");
-      } else if (isStandard) {
-        router.push("/mi-dashboard");
-      } else {
+      } else if (isAdmin) {
         router.push("/dashboard");
+      } else {
+        router.push("/mis-aplicaciones");
       }
     }, 1500);
   };

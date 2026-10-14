@@ -385,29 +385,30 @@ export function GeoportalSidebar({
 }) {
   const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const { user, logout, isStandardUser, isDocente } = useAuth();
+  const { user, profile, logout, isAdmin, isStandardUser, isDocente } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isInicio = isDocente || pathname?.includes("/inicio");
+  const isDocentePortal = !isAdmin && (isDocente || pathname?.includes("/inicio"));
 
-  const currentNavSections = isInicio
+  const currentNavSections = isAdmin
+    ? navSections
+    : isDocentePortal
     ? docenteNavSections
-    : isStandardUser
-    ? userNavSections
-    : navSections;
-  const homeHref = isInicio ? "/inicio" : isStandardUser ? "/mi-dashboard" : "/dashboard";
+    : userNavSections;
+  const homeHref = isAdmin ? "/dashboard" : isDocentePortal ? "/inicio" : "/mis-aplicaciones";
 
   const showUser = variant === "full";
   const showBranding = variant === "full";
 
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Paula Rozo";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
   const initials = displayName
     .split(" ")
     .map((n: string) => n[0])
+    .filter(Boolean)
     .slice(0, 2)
     .join("")
-    .toUpperCase();
+    .toUpperCase() || "U";
 
   const handleLogout = async () => {
     await logout();

@@ -48,6 +48,7 @@ import {
   AlertCircle,
   ChevronDown,
   FileText,
+  Loader2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -65,6 +66,7 @@ import {
   UsuarioSedeRolAplicacion,
   SEDES_CATALOGO,
   APLICACIONES_CATALOGO,
+  ROLES_APLICACION,
   ROLES_POR_APLICACION,
   ESTADOS_USUARIO,
   TIPOS_DOCUMENTO,
@@ -77,7 +79,7 @@ interface UsuarioModalFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   usuarioToEdit?: UsuarioItem | null;
-  onSave: (usuario: UsuarioItem) => void;
+  onSave: (usuario: UsuarioItem) => Promise<void> | void;
 }
 
 const stepperSteps: Step[] = [
@@ -95,6 +97,7 @@ export function UsuarioModalForm({
   const isEditing = Boolean(usuarioToEdit);
   const [activeStep, setActiveStep] = React.useState(0);
   const [completedSteps, setCompletedSteps] = React.useState<number[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Paso 1: Identificación
   const [tipoDocumento, setTipoDocumento] = React.useState<"Cédula">("Cédula");
@@ -202,8 +205,8 @@ export function UsuarioModalForm({
       if (!tipoDocumento) newErrors.tipoDocumento = "Selecciona el tipo de documento.";
       if (!identificacion.trim()) {
         newErrors.identificacion = "El número de documento es obligatorio.";
-      } else if (identificacion.trim().length < 8) {
-        newErrors.identificacion = "El documento debe contener al menos 8 caracteres.";
+      } else if (!/^\d{5,20}$/.test(identificacion.trim())) {
+        newErrors.identificacion = "El número de documento debe tener entre 5 y 20 dígitos numéricos.";
       }
       if (!nombre.trim()) newErrors.nombre = "El nombre es obligatorio.";
       if (!apellidos.trim()) newErrors.apellidos = "Los apellidos son obligatorios.";
@@ -211,6 +214,9 @@ export function UsuarioModalForm({
         newErrors.correo = "El correo electrónico es obligatorio.";
       } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo.trim())) {
         newErrors.correo = "Ingresa un correo electrónico válido.";
+      }
+      if (telefono.trim() && !/^\+?[0-9]{7,15}$/.test(telefono.trim())) {
+        newErrors.telefono = "El teléfono debe tener entre 7 y 15 dígitos numéricos.";
       }
       if (!estado) newErrors.estado = "El estado es obligatorio.";
     } else if (stepIndex === 1) {
@@ -290,69 +296,90 @@ export function UsuarioModalForm({
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateStep(activeStep)) return;
+    if (isSubmitting) return;
 
-    // Estructurar usuario con sedes y asignaciones
-    const userSedes: UsuarioSede[] = selectedSedes.map((sedeName) => {
-      const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === sedeName);
-      const sedeId = sedeInfo?.id || `sede-${Date.now()}`;
+    setIsSubmitting(true);
+    try {
+      // Estructurar usuario con sedes y asignaciones canónicas
+      const userSedes: UsuarioSede[] = selectedSedes.map((sedeName) => {
+        const sedeInfo = SEDES_CATALOGO.find((s) => s.nombre === sedeName);
+        const sedeId = sedeInfo?.id || `sede-pc`;
 
-      const sedeAsignaciones: UsuarioSedeRolAplicacion[] = asignaciones
-        .filter((a) => a.sede === sedeName)
-        .map((a) => ({
-          id: a.id,
-          usuarioId: usuarioToEdit ? usuarioToEdit.id : `usr-${Date.now()}`,
+        const sedeAsignaciones: UsuarioSedeRolAplicacion[] = asignaciones
+          .filter((a) => a.sede === sedeName)
+          .map((a) => {
+            const matchedRole = ROLES_APLICACION.find(
+              (ra) => ra.aplicacionNombre === a.app && ra.rolNombre === a.rol
+            );
+            const matchedApp = APLICACIONES_CATALOGO.find((ap) => ap.nombre === a.app);
+            const canonicalRolAplicacionId =
+              matchedRole?.id ||
+              `ra-${(matchedApp?.codigo || "app").toLowerCase()}-${a.rol.toLowerCase().replace(/\s+/g, "-")}`;
+
+            return {
+              id: a.id,
+              usuarioId: usuarioToEdit ? usuarioToEdit.id : "",
+              sedeId,
+              sedeNombre: sedeName,
+              rolAplicacionId: canonicalRolAplicacionId,
+              aplicacionNombre: a.app,
+              rolNombre: a.rol,
+              estado: "Activo",
+              fechaAsignacion: new Date().toLocaleDateString("es-EC", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }),
+              permisos: [],
+            };
+          });
+
+        return {
           sedeId,
           sedeNombre: sedeName,
-          rolAplicacionId: `ra-${Date.now()}`,
-          aplicacionNombre: a.app,
-          rolNombre: a.rol,
-          estado: "Activo",
-          fechaAsignacion: new Date().toLocaleDateString("es-EC", {
+          asignaciones: sedeAsignaciones,
+        };
+      });
+
+      const finalUser: UsuarioItem = {
+        id: usuarioToEdit ? usuarioToEdit.id : "",
+        nombre: nombre.trim(),
+        apellidos: apellidos.trim(),
+        tipoDocumento,
+        documentoIdentificacion: identificacion.trim(),
+        identificacion: identificacion.trim(),
+        email: correo.trim().toLowerCase(),
+        correo: correo.trim().toLowerCase(),
+        telefono: telefono.trim(),
+        cargo: cargo.trim() || undefined,
+        estado,
+        fechaCreacion: usuarioToEdit
+          ? usuarioToEdit.fechaCreacion
+          : new Date().toLocaleDateString("es-EC", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
           }),
-          permisos: [],
-        }));
-
-      return {
-        sedeId,
-        sedeNombre: sedeName,
-        asignaciones: sedeAsignaciones,
+        sedes: userSedes,
       };
-    });
 
-    const finalUser: UsuarioItem = {
-      id: usuarioToEdit ? usuarioToEdit.id : `usr-${Date.now()}`,
-      nombre: nombre.trim(),
-      apellidos: apellidos.trim(),
-      tipoDocumento,
-      documentoIdentificacion: identificacion.trim(),
-      identificacion: identificacion.trim(),
-      email: correo.trim(),
-      correo: correo.trim(),
-      telefono: telefono.trim(),
-      cargo: cargo.trim() || undefined,
-      estado,
-      fechaCreacion: usuarioToEdit
-        ? usuarioToEdit.fechaCreacion
-        : new Date().toLocaleDateString("es-EC", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }),
-      sedes: userSedes,
-    };
-
-    onSave(finalUser);
-    toast.success(
-      isEditing
-        ? `Usuario ${finalUser.nombre} ${finalUser.apellidos} actualizado exitosamente.`
-        : `Usuario ${finalUser.nombre} ${finalUser.apellidos} registrado exitosamente.`
-    );
-    onOpenChange(false);
+      await onSave(finalUser);
+      toast.success(
+        isEditing
+          ? `Usuario ${finalUser.nombre} ${finalUser.apellidos} actualizado exitosamente.`
+          : `Usuario ${finalUser.nombre} ${finalUser.apellidos} registrado exitosamente.`
+      );
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error al guardar usuario en formulario:", error);
+      toast.error("Error al registrar usuario", {
+        description: error.message || "No se pudo completar el registro.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Opciones para Multiselect de Sedes
@@ -443,10 +470,10 @@ export function UsuarioModalForm({
                   )}
                 </div>
 
-                {/* N.Âº de documento */}
+                {/* Nº de documento */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">
-                    N.Âº de documento <span className="text-danger">*</span>
+                    Nº de documento <span className="text-danger">*</span>
                   </label>
                   <InputGroup
                     size="sm"
@@ -457,11 +484,13 @@ export function UsuarioModalForm({
                       placeholder="1719874563"
                       value={identificacion}
                       onChange={(e) => {
-                        setIdentificacion(e.target.value);
+                        const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 20);
+                        setIdentificacion(digitsOnly);
                         if (errors.identificacion) {
                           setErrors((prev) => ({ ...prev, identificacion: "" }));
                         }
                       }}
+                      maxLength={20}
                       className="font-mono text-xs"
                     />
                   </InputGroup>
@@ -633,16 +662,33 @@ export function UsuarioModalForm({
                     </label>
                     <InputGroup
                       size="sm"
+                      state={errors.telefono ? "error" : "default"}
                       leftIcon={<Phone className="size-4 text-muted-foreground" />}
                     >
                       <InputGroupInput
                         type="tel"
                         placeholder="+593 99 123 4567"
                         value={telefono}
-                        onChange={(e) => setTelefono(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const hasPlus = val.startsWith("+");
+                          const digits = val.replace(/\D/g, "").slice(0, 15);
+                          const sanitized = hasPlus ? `+${digits}` : digits;
+                          setTelefono(sanitized);
+                          if (errors.telefono) {
+                            setErrors((prev) => ({ ...prev, telefono: "" }));
+                          }
+                        }}
                         className="text-xs"
+                        maxLength={16}
                       />
                     </InputGroup>
+                    {errors.telefono && (
+                      <p className="text-[11px] text-danger font-medium flex items-center gap-1.5 animate-in fade-in-50 duration-150">
+                        <AlertCircle className="size-3.5 shrink-0" />
+                        <span>{errors.telefono}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1000,7 +1046,7 @@ export function UsuarioModalForm({
                   </div>
 
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-xs text-muted-foreground">N.Âº de documento</span>
+                    <span className="text-xs text-muted-foreground">Nº de documento</span>
                     <span className="font-semibold text-foreground font-mono">
                       {identificacion}
                     </span>
@@ -1084,6 +1130,7 @@ export function UsuarioModalForm({
           <Button
             variant="neutral"
             onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
           >
             Cancelar
           </Button>
@@ -1093,6 +1140,7 @@ export function UsuarioModalForm({
               <Button
                 variant="secondary"
                 onClick={handlePrev}
+                disabled={isSubmitting}
                 className="gap-1.5"
               >
                 <ArrowLeft className="size-3.5" />
@@ -1103,6 +1151,7 @@ export function UsuarioModalForm({
               <Button
                 variant="primary"
                 onClick={handleNext}
+                disabled={isSubmitting}
                 className="gap-1.5"
               >
                 <span>Siguiente</span>
@@ -1112,10 +1161,20 @@ export function UsuarioModalForm({
               <Button
                 variant="primary"
                 onClick={handleSave}
-                className="gap-1.5"
+                disabled={isSubmitting}
+                className="gap-1.5 min-w-32"
               >
-                <Check className="size-3.5" />
-                <span>{isEditing ? "Guardar cambios" : "Crear usuario"}</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    <span>{isEditing ? "Guardando..." : "Creando..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="size-3.5" />
+                    <span>{isEditing ? "Guardar cambios" : "Crear usuario"}</span>
+                  </>
+                )}
               </Button>
             )}
           </div>

@@ -13,7 +13,7 @@ import { DataChip } from "@/components/ui/data-display";
 import { AplicacionItem } from "../data/aplicaciones-data";
 
 interface AplicacionesFilterBarProps {
-  aplicaciones: AplicacionItem[];
+  aplicaciones?: (AplicacionItem | any)[];
   searchTerm: string;
   onSearchChange: (value: string) => void;
   selectedEstado: string;
@@ -23,7 +23,7 @@ interface AplicacionesFilterBarProps {
 }
 
 export function AplicacionesFilterBar({
-  aplicaciones,
+  aplicaciones = [],
   searchTerm,
   onSearchChange,
   selectedEstado,

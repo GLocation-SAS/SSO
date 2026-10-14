@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DEVELOPMENT_SETUP</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #24292f;
+    line-height: 1.6;
+    font-size: 13.5px;
+  }
+  h1, h2, h3, h4 {
+    color: #092C4C;
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 26px;
+    border-bottom: 2px solid #092C4C;
+    padding-bottom: 8px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 20px;
+    border-bottom: 1px solid #d0d7de;
+    padding-bottom: 6px;
+    margin-top: 24px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 16px;
+    margin-top: 18px;
+    page-break-after: avoid;
+  }
+  p, ul, ol {
+    margin-bottom: 12px;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    background-color: #f6f8fa;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid #e1e4e8;
+  }
+  pre {
+    background-color: #0d1117;
+    color: #e6edf3;
+    padding: 12px 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.45;
+    page-break-inside: avoid;
+  }
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 12px;
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+  th, td {
+    border: 1px solid #d0d7de;
+    padding: 7px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+    color: #1f2328;
+  }
+  tr:nth-child(even) td {
+    background-color: #fafbfc;
+  }
+  blockquote {
+    border-left: 4px solid #0969da;
+    background-color: #ddf4ff;
+    padding: 10px 14px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    color: #092C4C;
+  }
+  blockquote p {
+    margin: 0;
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #d0d7de;
+    margin: 20px 0;
+  }
+  .task-list-item {
+    list-style-type: none;
+  }
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#guía-técnica-de-configuración-y-puesta-en-marcha-local"
+id="toc-guía-técnica-de-configuración-y-puesta-en-marcha-local">Guía
+Técnica de Configuración y Puesta en Marcha Local</a></li>
+<li><a href="#proyecto-conecta-mineduc-sso-sistema-de-notas"
+id="toc-proyecto-conecta-mineduc-sso-sistema-de-notas">Proyecto: Conecta
+MINEDUC (SSO + Sistema de Notas)</a>
+<ul>
+<li><a
+href="#arquitectura-general-del-entorno-y-fronteras-de-aislamiento"
+id="toc-arquitectura-general-del-entorno-y-fronteras-de-aislamiento">1.
+Arquitectura General del Entorno y Fronteras de Aislamiento</a>
+<ul>
+<li><a href="#análisis-crítico-de-aislamiento-de-red-y-riesgos-remotos"
+id="toc-análisis-crítico-de-aislamiento-de-red-y-riesgos-remotos">1.1.
+Análisis Crítico de Aislamiento de Red y Riesgos Remotos</a></li>
+</ul></li>
+<li><a href="#prerrequisitos-del-sistema"
+id="toc-prerrequisitos-del-sistema">2. Prerrequisitos del Sistema</a>
+<ul>
+<li><a href="#procedimiento-oficial-de-instalación-de-prerrequisitos"
+id="toc-procedimiento-oficial-de-instalación-de-prerrequisitos">Procedimiento
+Oficial de Instalación de Prerrequisitos</a></li>
+</ul></li>
+<li><a href="#clonado-del-repositorio-e-instalación-de-dependencias"
+id="toc-clonado-del-repositorio-e-instalación-de-dependencias">3.
+Clonado del Repositorio e Instalación de Dependencias</a>
+<ul>
+<li><a href="#clonar-el-repositorio-y-verificar-la-rama"
+id="toc-clonar-el-repositorio-y-verificar-la-rama">3.1. Clonar el
+repositorio y verificar la rama</a></li>
+<li><a href="#instalación-de-dependencias"
+id="toc-instalación-de-dependencias">3.2. Instalación de
+dependencias</a></li>
+</ul></li>
+<li><a href="#variables-de-entorno-e-inventario-técnico"
+id="toc-variables-de-entorno-e-inventario-técnico">4. Variables de
+Entorno e Inventario Técnico</a>
+<ul>
+<li><a href="#inventario-detallado-de-variables"
+id="toc-inventario-detallado-de-variables">4.1. Inventario Detallado de
+Variables</a></li>
+</ul></li>
+<li><a href="#firebase-emulator-suite-auth-y-firestore"
+id="toc-firebase-emulator-suite-auth-y-firestore">5. Firebase Emulator
+Suite (Auth y Firestore)</a>
+<ul>
+<li><a href="#comandos-de-ejecución" id="toc-comandos-de-ejecución">5.1.
+Comandos de Ejecución</a></li>
+<li><a href="#servicios-y-puertos" id="toc-servicios-y-puertos">5.2.
+Servicios y Puertos</a></li>
+</ul></li>
+<li><a href="#mailpit-captura-local-de-correos-otp-2fa"
+id="toc-mailpit-captura-local-de-correos-otp-2fa">6. Mailpit: Captura
+Local de Correos OTP (2FA)</a></li>
+<li><a href="#datos-iniciales-y-scripts-de-inicialización-scratch"
+id="toc-datos-iniciales-y-scripts-de-inicialización-scratch">7. Datos
+Iniciales y Scripts de Inicialización (Scratch)</a>
+<ul>
+<li><a href="#inspección-de-scratchseed-superadmin.mjs"
+id="toc-inspección-de-scratchseed-superadmin.mjs">7.1. Inspección de
+<code>scratch/seed-superadmin.mjs</code></a></li>
+<li><a href="#otros-scripts-en-scratch"
+id="toc-otros-scripts-en-scratch">7.2. Otros Scripts en
+<code>scratch/</code></a></li>
+</ul></li>
+<li><a href="#orden-de-arranque-de-los-servicios-locales"
+id="toc-orden-de-arranque-de-los-servicios-locales">8. Orden de Arranque
+de los Servicios Locales</a></li>
+<li><a href="#rutas-de-entrada-y-flujos-funcionales-verificados"
+id="toc-rutas-de-entrada-y-flujos-funcionales-verificados">9. Rutas de
+Entrada y Flujos Funcionales Verificados</a>
+<ul>
+<li><a href="#puntos-de-entrada" id="toc-puntos-de-entrada">9.1. Puntos
+de Entrada</a></li>
+<li><a
+href="#mecanismos-de-autenticación-y-autorización-verificados-en-código"
+id="toc-mecanismos-de-autenticación-y-autorización-verificados-en-código">9.2.
+Mecanismos de Autenticación y Autorización Verificados en
+Código</a></li>
+</ul></li>
+<li><a
+href="#verificaciones-de-calidad-y-pruebas-auditoría-del-14102026"
+id="toc-verificaciones-de-calidad-y-pruebas-auditoría-del-14102026">10.
+Verificaciones de Calidad y Pruebas (Auditoría del 14/10/2026)</a>
+<ul>
+<li><a href="#tipado-estático-typescript"
+id="toc-tipado-estático-typescript">10.1. Tipado Estático
+(TypeScript)</a></li>
+<li><a href="#pruebas-unitarias-jest"
+id="toc-pruebas-unitarias-jest">10.2. Pruebas Unitarias (Jest)</a></li>
+<li><a href="#linter-eslint" id="toc-linter-eslint">10.3. Linter
+(ESLint)</a></li>
+</ul></li>
+<li><a href="#estructura-del-repositorio"
+id="toc-estructura-del-repositorio">11. Estructura del
+Repositorio</a></li>
+<li><a href="#solución-de-problemas-frecuentes-troubleshooting"
+id="toc-solución-de-problemas-frecuentes-troubleshooting">12. Solución
+de Problemas Frecuentes (Troubleshooting)</a></li>
+<li><a
+href="#checklist-de-primera-ejecución-para-nuevos-desarrolladores"
+id="toc-checklist-de-primera-ejecución-para-nuevos-desarrolladores">13.
+Checklist de Primera Ejecución para Nuevos Desarrolladores</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="guía-técnica-de-configuración-y-puesta-en-marcha-local">Guía
+Técnica de Configuración y Puesta en Marcha Local</h1>
+<h1 id="proyecto-conecta-mineduc-sso-sistema-de-notas">Proyecto: Conecta
+MINEDUC (SSO + Sistema de Notas)</h1>
+<blockquote>
+<p><strong>Documento de Auditoría y Puesta en Marcha
+Técnica</strong><br />
+<strong>Fecha de última auditoría y verificación:</strong> 14 de octubre
+de 2026<br />
+<strong>Estado del repositorio:</strong> Inspeccionado sobre rama de
+desarrollo activa</p>
+</blockquote>
+<p>Este documento detalla el procedimiento técnico, verificado e
+integral para configurar, inicializar y operar localmente la plataforma
+<strong>Conecta MINEDUC (SSO)</strong> y el subsistema de
+<strong>Notas</strong>. Está redactado para que un desarrollador nuevo
+con conocimientos en Next.js, React, TypeScript y Firebase pueda
+preparar su entorno de manera reproducible, segura y comprendiendo el
+comportamiento real del código.</p>
+<hr />
+<h2 id="arquitectura-general-del-entorno-y-fronteras-de-aislamiento">1.
+Arquitectura General del Entorno y Fronteras de Aislamiento</h2>
+<p>El sistema opera bajo un patrón <strong>BFF
+(Backend-For-Frontend)</strong> integrado en Next.js:</p>
+<ul>
+<li><strong>Frontend:</strong> Next.js 16.2 (App Router con Turbopack),
+React 19.2, TypeScript 5.9, Tailwind CSS v4, Radix UI y Lucide
+Icons.</li>
+<li><strong>Autenticación en Cliente:</strong> Firebase Client SDK
+(<code>firebase</code> v12.19.0) enrutado localmente al emulador de
+Firebase Auth.</li>
+<li><strong>Capa BFF / APIs de Servidor:</strong> Route Handlers en
+<code>src/app/api/</code> que consumen Firebase Admin SDK
+(<code>firebase-admin</code> v14.5.0) en Node.js, conectado a los
+emuladores locales de Auth y Cloud Firestore.</li>
+<li><strong>Persistencia de Base de Datos:</strong> Cloud Firestore
+emulado en memoria (puerto <code>8080</code>), con colecciones
+principales <code>usuarios</code>, <code>usuarios_indices</code>,
+<code>auth_otps</code> y <code>notas_otps</code>.</li>
+<li><strong>Servicio de Mensajería y Correo:</strong>
+<code>nodemailer</code> configurado hacia el servidor SMTP local
+<strong>Mailpit</strong> (puerto <code>1025</code>) con panel de
+inspección web (puerto <code>8025</code>).</li>
+</ul>
+<pre class="mermaid"><code>flowchart TD
+    subgraph Browser [&quot;Navegador Web (Desarrollador)&quot;]
+        UI[&quot;Next.js UI (App Router)&quot;]
+        ClientAuth[&quot;Firebase Client SDK (Auth)&quot;]
+    end
+
+    subgraph LocalServices [&quot;Servicios en Host Local (127.0.0.1)&quot;]
+        NextServer[&quot;Next.js Server / BFF (Puerto 3000)&quot;]
+        AdminSDK[&quot;Firebase Admin SDK (Node.js)&quot;]
+        AuthEmulator[&quot;Firebase Auth Emulator (Puerto 9099)&quot;]
+        FirestoreEmulator[&quot;Firestore Emulator (Puerto 8080)&quot;]
+        EmulatorUI[&quot;Firebase Emulator Suite UI (Puerto 4000)&quot;]
+        MailpitSMTP[&quot;Mailpit SMTP (Puerto 1025)&quot;]
+        MailpitUI[&quot;Mailpit Web UI (Puerto 8025)&quot;]
+    end
+
+    subgraph ExternalRisks [&quot;Servicios Remotos / Fronteras Externas&quot;]
+        GCS[&quot;Google Cloud Storage API (Sin Emulador)&quot;]
+        ExtAssets[&quot;CDNs Externos (ui-avatars, YouTube, shadcn)&quot;]
+        ExtFonts[&quot;Google Fonts API (css2)&quot;]
+    end
+
+    UI --&gt;|Renderizado / Peticiones HTTP| NextServer
+    ClientAuth --&gt;|signInWithEmailAndPassword| AuthEmulator
+    NextServer --&gt;|server-only| AdminSDK
+    AdminSDK --&gt;|verifyIdToken / setCustomUserClaims| AuthEmulator
+    AdminSDK --&gt;|Lectura / Escritura Documentos| FirestoreEmulator
+    NextServer --&gt;|nodemailer (Envío OTP)| MailpitSMTP
+    AuthEmulator -.-&gt;|Inspección| EmulatorUI
+    FirestoreEmulator -.-&gt;|Inspección| EmulatorUI
+    MailpitSMTP -.-&gt;|Inspección de Correos| MailpitUI
+
+    %% Fronteras y riesgos
+    NextServer -.-&gt;|src/lib/gcs.ts (Invocación directa si se importa)| GCS
+    UI -.-&gt;|Carga de imágenes remotas| ExtAssets
+    NextServer -.-&gt;|src/lib/google-fonts.ts| ExtFonts</code></pre>
+<h3 id="análisis-crítico-de-aislamiento-de-red-y-riesgos-remotos">1.1.
+Análisis Crítico de Aislamiento de Red y Riesgos Remotos</h3>
+<blockquote>
+<p>[!WARNING] <strong>No asumir aislamiento hermético total únicamente
+por usar el ID <code>demo-sso</code>:</strong> El prefijo
+<code>demo-</code> en Firebase CLI garantiza que los SDKs de
+<strong>Firebase Auth</strong> y <strong>Cloud Firestore</strong> no
+envíen tráfico a la nube de Google. Sin embargo, existen dependencias y
+archivos en el proyecto que escapan a este aislamiento:</p>
+<ol type="1">
+<li><strong>Google Cloud Storage
+(<code>@google-cloud/storage</code>):</strong>
+<code>firebase.json</code> <strong>NO</strong> tiene emulador de Cloud
+Storage configurado. El archivo <code>src/lib/gcs.ts</code> instancia
+<code>new Storage()</code>. Aunque este archivo no está importado
+actualmente en las rutas activas de SSO ni Notas, cualquier componente o
+endpoint que lo invoque intentará contactar
+<code>storage.googleapis.com</code> mediante credenciales ADC de Google
+Cloud.</li>
+<li><strong>Imágenes y Recursos Remotos:</strong>
+<code>next.config.ts</code> autoriza la carga de imágenes externas desde
+<code>i.pravatar.cc</code>, <code>img.youtube.com</code>,
+<code>i.ytimg.com</code> y <code>storage.googleapis.com</code>.
+Asimismo, <code>scratch/seed-superadmin.mjs</code> asigna URLs a
+<code>https://ui-avatars.com</code> y <code>auth-context.tsx</code>
+utiliza <code>https://github.com/shadcn.png</code>. Su renderizado
+genera llamadas HTTP salientes a internet.</li>
+<li><strong>Google Fonts:</strong> El módulo auxiliar
+<code>src/lib/google-fonts.ts</code> contiene funciones para consultar
+<code>https://fonts.googleapis.com/css2</code>.</li>
+<li><strong>Google OAuth:</strong> Si la variable
+<code>NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST</code> no está presente en
+<code>.env.local</code>, el botón “Iniciar sesión con Google” abrirá un
+flujo real contra <code>accounts.google.com</code> y Firebase de
+producción.</li>
+<li><strong>SMTP:</strong> Nodemailer solo se mantiene local si
+<code>SMTP_HOST</code> apunta a <code>127.0.0.1</code> (Mailpit). Si se
+configuran credenciales externas (SendGrid/Gmail), los correos saldrán a
+internet.</li>
+</ol>
+</blockquote>
+<hr />
+<h2 id="prerrequisitos-del-sistema">2. Prerrequisitos del Sistema</h2>
+<p>Herramientas necesarias verificadas en entorno Windows 10/11
+(compatibles con Linux/macOS):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Herramienta</th>
+<th style="text-align: left;">Versión Verificada</th>
+<th style="text-align: left;">Propósito en el Proyecto</th>
+<th style="text-align: left;">Comando de Verificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Node.js</strong></td>
+<td style="text-align: left;"><code>v22.14.0</code> (LTS 22.x)</td>
+<td style="text-align: left;">Ejecución del servidor Next.js, BFF y
+scripts Node.</td>
+<td style="text-align: left;"><code>node -v</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>npm</strong></td>
+<td style="text-align: left;"><code>10.9.2</code></td>
+<td style="text-align: left;">Gestor de paquetes oficial
+(<code>package-lock.json</code>).</td>
+<td style="text-align: left;"><code>npm -v</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Git</strong></td>
+<td style="text-align: left;"><code>&gt;= 2.30.0</code></td>
+<td style="text-align: left;">Control de versiones del código
+fuente.</td>
+<td style="text-align: left;"><code>git --version</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Java (JDK)</strong></td>
+<td style="text-align: left;"><code>OpenJDK 21.0.12.1 LTS</code> (o
+<code>&gt;= 11</code>)</td>
+<td style="text-align: left;">Motor de ejecución obligatorio para Cloud
+Firestore Emulator.</td>
+<td style="text-align: left;"><code>java -version</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Firebase CLI</strong></td>
+<td style="text-align: left;"><code>15.33.0</code></td>
+<td style="text-align: left;">Orquestación de emuladores locales
+(<code>firebase-tools</code>).</td>
+<td style="text-align: left;"><code>firebase --version</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Mailpit</strong></td>
+<td style="text-align: left;"><code>v1.31.4</code></td>
+<td style="text-align: left;">Servidor SMTP local para captura de
+correos OTP (2FA).</td>
+<td style="text-align: left;"><code>mailpit version</code></td>
+</tr>
+</tbody>
+</table>
+<h3
+id="procedimiento-oficial-de-instalación-de-prerrequisitos">Procedimiento
+Oficial de Instalación de Prerrequisitos</h3>
+<ol type="1">
+<li><strong>Node.js 22 LTS y npm:</strong>
+<ul>
+<li>Windows (winget): <code>winget install OpenJS.NodeJS.LTS</code></li>
+<li>O descargar desde <a href="https://nodejs.org/">nodejs.org</a>.</li>
+</ul></li>
+<li><strong>Java JDK 21 LTS:</strong>
+<ul>
+<li>Windows (winget):
+<code>winget install Microsoft.OpenJDK.21</code></li>
+<li>Requiere que la variable <code>JAVA_HOME</code> o el ejecutable
+<code>java</code> estén en el <code>PATH</code>.</li>
+</ul></li>
+<li><strong>Firebase CLI:</strong>
+<ul>
+<li>Instalar globalmente:
+<code>npm install -g firebase-tools</code></li>
+<li>Para proyectos de prueba <code>demo-*</code> no se requiere iniciar
+sesión, pero puedes ejecutar <code>firebase login</code> si dispones de
+cuenta Google.</li>
+</ul></li>
+<li><strong>Mailpit:</strong>
+<ul>
+<li>Windows (winget): <code>winget install axllent.mailpit</code></li>
+<li>Windows (scoop): <code>scoop install mailpit</code></li>
+<li>O descargar el binario desde <a
+href="https://github.com/axllent/mailpit/releases">GitHub Releases de
+Mailpit</a>.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="clonado-del-repositorio-e-instalación-de-dependencias">3.
+Clonado del Repositorio e Instalación de Dependencias</h2>
+<h3 id="clonar-el-repositorio-y-verificar-la-rama">3.1. Clonar el
+repositorio y verificar la rama</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>git clone https<span class="op">://</span>github<span class="op">.</span><span class="fu">com</span><span class="op">/</span>JeimyMateus<span class="op">/</span>SSO<span class="op">.</span><span class="fu">git</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cd</span> SSO</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>git checkout devJeimy   <span class="co"># O la rama de trabajo asignada (ej. main)</span></span></code></pre></div>
+<h3 id="instalación-de-dependencias">3.2. Instalación de
+dependencias</h3>
+<p>El proyecto utiliza <strong>React 19</strong> y <strong>Next.js
+16</strong>. Ciertas dependencias del ecosistema aún declaran peer
+dependencies de React 18, por lo que <strong>es indispensable usar el
+flag <code>--legacy-peer-deps</code></strong>:</p>
+<ul>
+<li><p><strong>Para instalación estándar de desarrollo:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>npm install <span class="op">--</span>legacy-peer-deps</span></code></pre></div></li>
+<li><p><strong>Para instalación limpia y reproducible (verificada contra
+<code>package-lock.json</code>):</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>npm ci <span class="op">--</span>legacy-peer-deps</span></code></pre></div></li>
+</ul>
+<blockquote>
+<p>[!NOTE] La compatibilidad de <code>npm ci --legacy-peer-deps</code>
+fue validada con éxito frente al lockfile actual
+(<code>exit code 0</code>, 0 errores).</p>
+</blockquote>
+<hr />
+<h2 id="variables-de-entorno-e-inventario-técnico">4. Variables de
+Entorno e Inventario Técnico</h2>
+<p>El archivo <code>.env.example</code> en la raíz define la plantilla
+base. Para configurar el entorno local:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Copy-Item</span> <span class="op">.</span><span class="fu">env</span><span class="op">.</span><span class="fu">example</span> <span class="op">.</span><span class="fu">env</span><span class="op">.</span><span class="fu">local</span></span></code></pre></div>
+<h3 id="inventario-detallado-de-variables">4.1. Inventario Detallado de
+Variables</h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 20%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Ámbito</th>
+<th style="text-align: center;">Estado</th>
+<th style="text-align: left;">Valor Local Recomendado</th>
+<th style="text-align: left;">Consumo en Código</th>
+<th style="text-align: left;">Descripción Técnica y Consecuencias</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td
+style="text-align: left;"><code>NEXT_PUBLIC_FIREBASE_PROJECT_ID</code></td>
+<td style="text-align: left;">Cliente / Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"demo-sso"</code></td>
+<td style="text-align: left;"><code>client.ts</code>,
+<code>admin.ts</code></td>
+<td style="text-align: left;">Identificador de proyecto. El prefijo
+<code>demo-</code> obliga a Firebase a deshabilitar llamadas a la
+nube.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><code>NEXT_PUBLIC_FIREBASE_API_KEY</code></td>
+<td style="text-align: left;">Cliente</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"demo-api-key"</code></td>
+<td style="text-align: left;"><code>client.ts</code></td>
+<td style="text-align: left;">Clave API ficticia para inicializar el SDK
+cliente en modo emulador.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><code>NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</code></td>
+<td style="text-align: left;">Cliente</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td
+style="text-align: left;"><code>"demo-sso.firebaseapp.com"</code></td>
+<td style="text-align: left;"><code>client.ts</code></td>
+<td style="text-align: left;">Dominio simulado de Auth para el
+navegador.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><code>NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST</code></td>
+<td style="text-align: left;">Cliente</td>
+<td style="text-align: center;"><strong>CRÍTICA</strong></td>
+<td style="text-align: left;"><code>"127.0.0.1:9099"</code></td>
+<td style="text-align: left;"><code>client.ts</code></td>
+<td style="text-align: left;">Instruye al SDK del navegador a llamar a
+<code>connectAuthEmulator</code>. Si se omite, el cliente intenta
+contactar a Google y falla con <code>auth/invalid-api-key</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>NEXT_PUBLIC_BASE_PATH</code></td>
+<td style="text-align: left;">Cliente</td>
+<td style="text-align: center;">Opcional</td>
+<td style="text-align: left;"><code>""</code></td>
+<td style="text-align: left;"><code>assets.ts</code>,
+<code>next.config.ts</code></td>
+<td style="text-align: left;">Prefijo de ruta base. Dejar vacío en
+local.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><code>FIREBASE_AUTH_EMULATOR_HOST</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"127.0.0.1:9099"</code></td>
+<td style="text-align: left;"><code>admin.ts</code>, scripts
+scratch</td>
+<td style="text-align: left;">Redirige <code>firebase-admin/auth</code>
+al emulador. En <code>admin.ts</code> tiene fallback automático a
+<code>127.0.0.1:9099</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>FIRESTORE_EMULATOR_HOST</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"127.0.0.1:8080"</code></td>
+<td style="text-align: left;"><code>admin.ts</code>, scripts
+scratch</td>
+<td style="text-align: left;">Redirige
+<code>firebase-admin/firestore</code> al emulador. En
+<code>admin.ts</code> tiene fallback automático a
+<code>127.0.0.1:8080</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>SMTP_HOST</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"127.0.0.1"</code></td>
+<td style="text-align: left;"><code>email-service.ts</code></td>
+<td style="text-align: left;">Host SMTP para envío de correos. Debe
+apuntar a Mailpit en local. Fallback a <code>127.0.0.1</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>SMTP_PORT</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"1025"</code></td>
+<td style="text-align: left;"><code>email-service.ts</code></td>
+<td style="text-align: left;">Puerto SMTP de Mailpit. Fallback a
+<code>1025</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>SMTP_SECURE</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td style="text-align: left;"><code>"false"</code></td>
+<td style="text-align: left;"><code>email-service.ts</code></td>
+<td style="text-align: left;"><code>false</code> para conexión directa
+sin SSL/TLS en local.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>EMAIL_FROM</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;"><strong>Obligatoria</strong></td>
+<td
+style="text-align: left;"><code>"Conecta MINEDUC &lt;no-reply@mineduc.gob.gt&gt;"</code></td>
+<td style="text-align: left;"><code>email-service.ts</code></td>
+<td style="text-align: left;">Nombre y dirección de remitente que figura
+en las plantillas de correo.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>SMTP_USER</code> /
+<code>SMTP_PASS</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;">Opcional</td>
+<td style="text-align: left;"><em>(Vacío en local)</em></td>
+<td style="text-align: left;"><code>email-service.ts</code></td>
+<td style="text-align: left;">Credenciales SMTP. Mailpit no requiere
+autenticación; solo se usan en entornos con relay real.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>KIT_ASSETS_BUCKET</code></td>
+<td style="text-align: left;">Servidor</td>
+<td style="text-align: center;">Opcional</td>
+<td style="text-align: left;"><code>"minedec-kit-assets"</code></td>
+<td style="text-align: left;"><code>env.ts</code>,
+<code>gcs.ts</code></td>
+<td style="text-align: left;">Nombre del bucket de GCS para el kit de
+diseño. Posee fallback en <code>env.ts</code>.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><code>NEXT_PUBLIC_API_URL_CONTACTO</code></td>
+<td style="text-align: left;">Cliente</td>
+<td style="text-align: center;"><strong>OBSOLETA</strong></td>
+<td style="text-align: left;"><em>(No requerida)</em></td>
+<td style="text-align: left;"><code>cloudbuild.yaml</code></td>
+<td style="text-align: left;">Variable residual presente en scripts de
+despliegue heredados. <strong>No se consume en ninguna parte de
+<code>src/</code></strong>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="firebase-emulator-suite-auth-y-firestore">5. Firebase Emulator
+Suite (Auth y Firestore)</h2>
+<p>Configurado en <code>firebase.json</code> bajo modo de proyecto único
+(<code>singleProjectMode: true</code>):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;emulators&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;auth&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">9099</span> <span class="fu">},</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;firestore&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;port&quot;</span><span class="fu">:</span> <span class="dv">8080</span> <span class="fu">},</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ui&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span> <span class="fu">},</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;singleProjectMode&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="comandos-de-ejecución">5.1. Comandos de Ejecución</h3>
+<ul>
+<li><p><strong>Arranque estándar (en memoria volátil):</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>npm run emulators</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Comando directo equivalente:</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>firebase emulators<span class="op">:</span>start <span class="op">--</span>project demo-sso</span></code></pre></div></li>
+<li><p><strong>Arranque con persistencia de datos entre
+reinicios:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>firebase emulators<span class="op">:</span>start <span class="op">--</span>project demo-sso <span class="op">--</span>import<span class="op">=./</span>emulator-data <span class="op">--</span>export-on-exit</span></code></pre></div>
+<p><em>(Crea y sincroniza la carpeta <code>emulator-data/</code> al
+cerrar el emulador con <code>Ctrl + C</code>).</em></p></li>
+</ul>
+<h3 id="servicios-y-puertos">5.2. Servicios y Puertos</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 29%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Servicio</th>
+<th style="text-align: center;">Puerto</th>
+<th style="text-align: left;">Endpoint / URL</th>
+<th style="text-align: left;">Función</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Emulator UI</strong></td>
+<td style="text-align: center;"><code>4000</code></td>
+<td style="text-align: left;"><a
+href="http://localhost:4000">http://localhost:4000</a></td>
+<td style="text-align: left;">Panel web interactivo para explorar
+usuarios de Auth y documentos de Firestore.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Firebase Auth</strong></td>
+<td style="text-align: center;"><code>9099</code></td>
+<td style="text-align: left;"><code>http://127.0.0.1:9099</code></td>
+<td style="text-align: left;">Emulador de autenticación (usuarios,
+tokens, custom claims).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cloud Firestore</strong></td>
+<td style="text-align: center;"><code>8080</code></td>
+<td style="text-align: left;"><code>http://127.0.0.1:8080</code></td>
+<td style="text-align: left;">Base de datos NoSQL documental local.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mailpit-captura-local-de-correos-otp-2fa">6. Mailpit: Captura
+Local de Correos OTP (2FA)</h2>
+<p>Mailpit intercepta los mensajes enviados por <code>nodemailer</code>
+evitando que salgan a la red.</p>
+<ol type="1">
+<li><p><strong>Iniciar el servicio:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mailpit</span></code></pre></div></li>
+<li><p><strong>Puertos configurados:</strong></p>
+<ul>
+<li><strong>Recepción SMTP:</strong> <code>127.0.0.1:1025</code></li>
+<li><strong>Bandeja de entrada Web:</strong> <a
+href="http://localhost:8025">http://localhost:8025</a></li>
+</ul></li>
+<li><p><strong>Flujo de verificación:</strong> Cuando inicies sesión con
+contraseña en SSO o en Notas, el sistema despachará un código OTP de 6
+dígitos. Abre <a href="http://localhost:8025">http://localhost:8025</a>
+para consultarlo de inmediato.</p></li>
+</ol>
+<hr />
+<h2 id="datos-iniciales-y-scripts-de-inicialización-scratch">7. Datos
+Iniciales y Scripts de Inicialización (Scratch)</h2>
+<h3 id="inspección-de-scratchseed-superadmin.mjs">7.1. Inspección de
+<code>scratch/seed-superadmin.mjs</code></h3>
+<p>El script oficial para poblar el entorno local es
+<code>scratch/seed-superadmin.mjs</code>.</p>
+<ul>
+<li><strong>Idempotencia:</strong> <strong>SÍ es idempotente</strong>.
+Verifica previamente si el usuario existe en Firebase Auth
+(<code>getUserByEmail</code>) y en Firestore
+(<code>where("email", "==", email)</code>). Si ya existe, actualiza sus
+datos mediante <code>{ merge: true }</code>; si no, lo crea. Puede
+ejecutarse múltiples veces de forma segura.</li>
+<li><strong>Prerrequisito estricto:</strong> Requiere que los emuladores
+de Firebase estén levantados en los puertos <code>9099</code> y
+<code>8080</code>, ya que se conecta explícitamente a
+<code>127.0.0.1:8080</code> y <code>127.0.0.1:9099</code>.</li>
+<li><strong>Datos generados:</strong>
+<ul>
+<li>Crea el usuario en Firebase Auth y le asigna los Custom Claims:
+<code>{ admin: true, twoFactorVerified: true, debeCambiarPassword: false }</code>.</li>
+<li>Crea el documento en la colección <code>usuarios</code> de Firestore
+con estado <code>Activo</code>, sede <code>Planta Central</code> y
+asignaciones con permisos completos (<code>ALL-SEC</code>) para 9
+aplicaciones: SSO, Gestión Docente, SIGE, Geoportal, SAE, SGC, Trámites,
+Innovación y Notas.</li>
+<li>Registra los índices atómicos en la colección
+<code>usuarios_indices</code>.</li>
+</ul></li>
+</ul>
+<blockquote>
+<p>[!IMPORTANT] <strong>Aviso sobre credenciales del script:</strong> En
+el código actual de <code>scratch/seed-superadmin.mjs</code>, los
+valores de acceso están definidos en las líneas 20 a 24 del archivo.
+Para consultar las credenciales de prueba configuradas o definir tus
+propias credenciales de desarrollo, abre
+<code>scratch/seed-superadmin.mjs</code> antes de ejecutarlo.<br />
+<em>(Ejemplo ilustrativo seguro: <code>admin.sso@mineduc.gob.ec</code> /
+<code>DemoAdmin2026!*</code>).</em></p>
+</blockquote>
+<ul>
+<li><p><strong>Ejecutar el sembrado:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>node scratch<span class="op">/</span>seed-superadmin<span class="op">.</span><span class="fu">mjs</span></span></code></pre></div></li>
+</ul>
+<h3 id="otros-scripts-en-scratch">7.2. Otros Scripts en
+<code>scratch/</code></h3>
+<ul>
+<li><code>scratch/test-auth-password-flow.mjs</code>: Script de prueba
+integral que valida la creación de usuarios con contraseña temporal, el
+forzado del diálogo <code>must-change-password</code> y la actualización
+definitiva de contraseña. <em>(Idempotente en ejecución, genera usuarios
+temporales con timestamp).</em></li>
+<li><code>scratch/test-crud.mjs</code>: Script de prueba del CRUD de
+usuarios. <strong>No es idempotente</strong> en ejecuciones repetidas
+sobre la misma instancia en memoria porque intenta insertar un documento
+con cédula fija ya indexada, arrojando error
+<code>409 Conflict</code>.</li>
+</ul>
+<hr />
+<h2 id="orden-de-arranque-de-los-servicios-locales">8. Orden de Arranque
+de los Servicios Locales</h2>
+<p>Para un inicio ordenado y sin condiciones de carrera, utiliza
+terminales independientes:</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;">Paso</th>
+<th style="text-align: left;">Servicio</th>
+<th style="text-align: left;">Comando</th>
+<th style="text-align: left;">Directorio</th>
+<th style="text-align: left;">Puerto / URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: left;">Firebase Emulators</td>
+<td style="text-align: left;"><code>npm run emulators</code></td>
+<td style="text-align: left;">Raíz del proyecto</td>
+<td style="text-align: left;">Auth: <code>9099</code>, Firestore:
+<code>8080</code>, UI: <a
+href="http://localhost:4000">http://localhost:4000</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: left;">Mailpit SMTP</td>
+<td style="text-align: left;"><code>mailpit</code></td>
+<td style="text-align: left;">Cualquier ubicación</td>
+<td style="text-align: left;">SMTP: <code>1025</code>, Web UI: <a
+href="http://localhost:8025">http://localhost:8025</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: left;">Sembrado inicial <em>(si el emulador está
+vacío)</em></td>
+<td
+style="text-align: left;"><code>node scratch/seed-superadmin.mjs</code></td>
+<td style="text-align: left;">Raíz del proyecto</td>
+<td style="text-align: left;">N/A (se conecta a 9099 y 8080)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: left;">Servidor Next.js</td>
+<td style="text-align: left;"><code>npm run dev</code></td>
+<td style="text-align: left;">Raíz del proyecto</td>
+<td style="text-align: left;"><a
+href="http://localhost:3000">http://localhost:3000</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rutas-de-entrada-y-flujos-funcionales-verificados">9. Rutas de
+Entrada y Flujos Funcionales Verificados</h2>
+<h3 id="puntos-de-entrada">9.1. Puntos de Entrada</h3>
+<ul>
+<li><strong>Raíz (<code>/</code>):</strong> Redirige a
+<code>/login-sso/</code>.</li>
+<li><strong>Login General SSO (<code>/login-sso</code>):</strong>
+Formulario para administradores y funcionarios.</li>
+<li><strong>Doble Factor SSO (<code>/doble-factor</code>):</strong>
+Validación de código de 6 dígitos. Al verificarse en
+<code>POST /api/auth/verify-otp</code>, se emite el Custom Claim
+<code>twoFactorVerified: true</code>.</li>
+<li><strong>Login Subsistema de Notas
+(<code>/login-notas</code>):</strong> Acceso para coordinadores y
+directores de calificaciones.</li>
+<li><strong>Doble Factor de Notas
+(<code>/login-notas/verificar-codigo</code>):</strong> Valida contra la
+colección <code>notas_otps</code> y exige que el usuario tenga
+asignaciones activas para <code>"notas"</code> en Firestore. Al
+verificarse en <code>POST /api/notas/auth/verify-otp</code>, se emite el
+Custom Claim <code>notasTwoFactorVerified: true</code>.</li>
+<li><strong>Espacios de Usuario según Perfil:</strong>
+<ul>
+<li><code>/dashboard</code>: Panel de administración central (Super
+Admin / Administradores).</li>
+<li><code>/inicio</code>: Espacio personal para perfil Docente.</li>
+<li><code>/mi-dashboard</code>: Espacio personal para Usuario
+Estándar.</li>
+<li><code>/mis-aplicaciones</code>: Cuadrícula con las aplicaciones
+activas asignadas.</li>
+<li><code>/uikit</code>: Catálogo interactivo de componentes del Design
+System.</li>
+</ul></li>
+</ul>
+<h3
+id="mecanismos-de-autenticación-y-autorización-verificados-en-código">9.2.
+Mecanismos de Autenticación y Autorización Verificados en Código</h3>
+<ol type="1">
+<li><strong>Google OAuth vs Contraseña:</strong>
+<ul>
+<li>En <code>src/lib/auth/server-auth.ts</code>, los usuarios que
+inician sesión con <code>google.com</code> (Google Workspace) omiten el
+doble factor OTP local, ya que Google gestiona el MFA a nivel
+corporativo.</li>
+<li>Los usuarios autenticados mediante <code>password</code> requieren
+estrictamente completar el flujo 2FA vía OTP.</li>
+</ul></li>
+<li><strong>Validación de Usuario Activo:</strong>
+<ul>
+<li>La función <code>verifyActiveUser</code> consulta Firestore y exige
+<code>usuario.active === true</code> (o estado <code>Activo</code>). Si
+el usuario fue desactivado, el BFF rechaza la petición con código
+<code>403 USER_INACTIVE</code>.</li>
+</ul></li>
+<li><strong>Control de Acceso por Roles (RBAC):</strong>
+<ul>
+<li><code>verifyAdminUser</code> valida permisos específicos en la
+aplicación SSO: <code>ALL-SEC</code>, <code>USR-CONS</code> o roles
+reconocidos (<code>ra-sso-sa</code>, <code>ra-sso-gz</code>, etc.).</li>
+<li>En el cliente, <code>PortalRouteGuard</code> bloquea rutas
+administrativas (<code>/gestion-usuarios</code>, <code>/roles</code>,
+<code>/auditoria</code>, etc.) a usuarios estándar o docentes,
+redirigiéndolos automáticamente.</li>
+</ul></li>
+<li><strong>Garantía Atómica en Transacciones:</strong>
+<ul>
+<li>Cloud Firestore implementa transacciones atómicas en
+<code>createUsuario</code> y <code>updateUsuario</code> para garantizar
+unicidad de correo y documento de identidad mediante la colección
+<code>usuarios_indices</code> (todas las lecturas ocurren antes de las
+escrituras).</li>
+<li><strong>Limitación técnica:</strong> No existe transacción
+distribuida (2PC) entre Firebase Auth y Firestore. Si la creación de
+usuario en Auth tiene éxito pero la transacción de Firestore falla, las
+operaciones se gestionan mediante bloques <code>try/catch</code> de
+compensación.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="verificaciones-de-calidad-y-pruebas-auditoría-del-14102026">10.
+Verificaciones de Calidad y Pruebas (Auditoría del 14/10/2026)</h2>
+<p>Resultados reales observados al ejecutar las herramientas de análisis
+sobre el código actual:</p>
+<h3 id="tipado-estático-typescript">10.1. Tipado Estático
+(TypeScript)</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>npx tsc <span class="op">--</span>noEmit</span></code></pre></div>
+<ul>
+<li><strong>Resultado:</strong> <strong>0 errores</strong> (Código de
+salida <code>0</code>). El tipado estático del proyecto es
+consistente.</li>
+</ul>
+<h3 id="pruebas-unitarias-jest">10.2. Pruebas Unitarias (Jest)</h3>
+<blockquote>
+<p>[!NOTE] <code>package.json</code> no contiene el script
+<code>"test": "jest"</code>. La ejecución debe realizarse mediante
+<code>npx jest</code>.</p>
+</blockquote>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>npx jest</span></code></pre></div>
+<ul>
+<li><strong>Resultado observado:</strong>
+<ul>
+<li><strong>Suites totales:</strong> 22</li>
+<li><strong>Suites pasadas:</strong> 20</li>
+<li><strong>Suites falladas:</strong> 2
+(<code>src/modules/gestion-usuarios/components/__tests__/usuario-modal-form.test.tsx</code>)</li>
+<li><strong>Pruebas unitarias:</strong> 148 aprobadas, 3 falladas
+(debido a discrepancias en el texto esperado de placeholders de
+formulario).</li>
+</ul></li>
+</ul>
+<h3 id="linter-eslint">10.3. Linter (ESLint)</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>npm run lint</span></code></pre></div>
+<ul>
+<li><strong>Resultado observado:</strong> <strong>14 errores y 427
+advertencias</strong> (Código de salida <code>1</code>).
+<ul>
+<li>Error bloqueante: <code>update-tables.js</code> en la raíz utiliza
+<code>require()</code>
+(<code>@typescript-eslint/no-require-imports</code>).</li>
+<li>Advertencias: Variables e importaciones no utilizadas en componentes
+del módulo <code>src/modules/uikit/</code>
+(<code>@typescript-eslint/no-unused-vars</code>). <em>(Existe un archivo
+de registro histórico en la raíz: <code>lint.txt</code>).</em></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="estructura-del-repositorio">11. Estructura del Repositorio</h2>
+<pre><code>SSO/
+├── .firebaserc                     # Proyecto Firebase por defecto (demo-sso)
+├── .gitignore                      # Exclusiones de Git (.env*, node_modules, .next)
+├── Dockerfile                      # Contenedor de producción multi-stage (node:22-slim)
+├── DEVELOPMENT_SETUP.md            # Esta guía maestra de desarrollo local
+├── README.md                       # Documentación institucional del proyecto
+├── cloudbuild.yaml                 # Pipeline de CI/CD para Google Cloud Build
+├── dev.yaml / qa.yaml / prod.yaml  # Despliegues para App Engine
+├── eslint.config.mjs               # Configuración de ESLint flat config
+├── firebase.json                   # Definición de emuladores (Auth: 9099, Firestore: 8080, UI: 4000)
+├── jest.config.mjs                 # Configuración de pruebas unitarias Jest
+├── next.config.ts                  # Configuración de Next.js (basePath, next-intl, imágenes)
+├── package.json                    # Dependencias y scripts npm
+├── package-lock.json               # Árbol de dependencias bloqueado
+├── tsconfig.json                   # Configuración del compilador TypeScript
+├── docs/                           # Documentación auxiliar de Firebase y Email
+├── public/                         # Recursos estáticos (logos, SVGs)
+├── scratch/                        # Scripts Node.js de inicialización y validación
+│   ├── seed-superadmin.mjs         # Sembrado idempotente del Super Admin en emuladores
+│   ├── test-auth-password-flow.mjs # Validación de flujo de cambio forzado de contraseña
+│   └── test-crud.mjs               # Prueba automatizada de API de usuarios
+└── src/
+    ├── app/                        # Next.js App Router (Páginas y Route Handlers)
+    │   ├── (portal)/               # Vistas protegidas con barra lateral y Route Guard
+    │   ├── api/                    # BFF Route Handlers (auth, notas, usuarios)
+    │   ├── doble-factor/           # Verificación 2FA general SSO
+    │   ├── login-notas/            # Acceso y 2FA exclusivo de Notas
+    │   ├── login-sso/              # Acceso general institucional
+    │   └── uikit/                  # Showcase de componentes del Design System
+    ├── components/                 # UI Kit institucional (Radix UI / Shadcn)
+    ├── context/                    # AuthContext (soporte para Firebase Auth y Mock Users)
+    ├── hooks/                      # Custom Hooks (useAuth, etc.)
+    ├── lib/                        # Infraestructura y librerías transversales
+    │   ├── auth/                   # Lógica de servidor (server-auth.ts, otp-service.ts)
+    │   ├── email/                  # Nodemailer y plantillas de correo
+    │   ├── firebase/               # Configuración de admin.ts y client.ts
+    │   └── utils.ts                # Utilidades de estilos CSS
+    └── modules/                    # Módulos desacoplados por dominio de negocio
+        ├── aplicaciones/           # Catálogo y gestión de aplicaciones
+        ├── auditoria/              # Registro de trazabilidad y eventos
+        ├── auth/                   # Componentes visuales de login y doble factor
+        ├── gestion-usuarios/       # Administración de usuarios, roles y sedes
+        ├── mis-aplicaciones/       # Dashboard de aplicaciones del usuario
+        ├── notas/                  # Lógica de negocio y contexto de Notas
+        └── uikit/                  # Showcases de componentes visuales</code></pre>
+<hr />
+<h2 id="solución-de-problemas-frecuentes-troubleshooting">12. Solución
+de Problemas Frecuentes (Troubleshooting)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Síntoma</th>
+<th style="text-align: left;">Causa Raíz Probable</th>
+<th style="text-align: left;">Solución Verificada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Error al iniciar
+emuladores:</strong> <code>Java not found</code> o
+<code>JAVA_HOME not set</code></td>
+<td style="text-align: left;">Java no está instalado o no se encuentra
+en el <code>PATH</code>.</td>
+<td style="text-align: left;">Instala OpenJDK 21 LTS
+(<code>winget install Microsoft.OpenJDK.21</code>). Abre una nueva
+terminal y verifica con <code>java -version</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Error al iniciar
+emuladores:</strong>
+<code>Port 8080/9099/4000 already in use</code></td>
+<td style="text-align: left;">Otra instancia previa de Firebase o un
+proceso local retiene el puerto.</td>
+<td style="text-align: left;">Identifica y finaliza el proceso en
+PowerShell:
+<code>Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess \| Stop-Process -Force</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Error en login:</strong>
+<code>auth/invalid-api-key</code> en consola del navegador</td>
+<td style="text-align: left;">Falta
+<code>NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST</code> en
+<code>.env.local</code> o el servidor no se reinició.</td>
+<td style="text-align: left;">Comprueba que <code>.env.local</code>
+tenga
+<code>NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST="127.0.0.1:9099"</code>.
+<strong>Reinicia Next.js (<code>npm run dev</code>)</strong>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>El emulador no conecta con
+Firestore:</strong></td>
+<td style="text-align: left;"><code>FIRESTORE_EMULATOR_HOST</code> no
+está disponible en el servidor.</td>
+<td style="text-align: left;">Confirma que los emuladores reporten
+<code>firestore: Firestore Emulator logging to firestore-debug.log</code>.
+Asegúrate de que <code>.env.local</code> contenga
+<code>FIRESTORE_EMULATOR_HOST="127.0.0.1:8080"</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>El código de verificación OTP no
+llega:</strong></td>
+<td style="text-align: left;">Mailpit no está corriendo o el puerto SMTP
+es incorrecto.</td>
+<td style="text-align: left;">Arranca Mailpit en una terminal
+(<code>mailpit</code>). Confirma que <code>.env.local</code> tenga
+<code>SMTP_PORT="1025"</code> y abre <a
+href="http://localhost:8025">http://localhost:8025</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Error 403:</strong>
+<code>Tu usuario no está registrado en el sistema</code></td>
+<td style="text-align: left;">El usuario existe en Auth pero no tiene
+documento asociado en Firestore.</td>
+<td style="text-align: left;">Ejecuta
+<code>node scratch/seed-superadmin.mjs</code> para poblar el documento
+de usuario y sus índices en Firestore.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Error 403:</strong>
+<code>No tienes permisos para acceder a la aplicación Notas</code></td>
+<td style="text-align: left;">El usuario no posee una asignación activa
+para la aplicación <code>"notas"</code> en
+<code>sedes[].asignaciones</code>.</td>
+<td style="text-align: left;">El usuario sembrado por
+<code>scratch/seed-superadmin.mjs</code> ya incluye la asignación
+<code>ra-notas-cz</code> para Notas. Si creas otro usuario, debes
+asignarle la aplicación Notas desde la administración o Firestore.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Fallo en
+<code>npm install</code>:</strong>
+<code>peer dependency conflict</code></td>
+<td style="text-align: left;">Restricciones estrictas en metadatos de
+paquetes secundarios con React 19.</td>
+<td style="text-align: left;">Ejecuta siempre
+<code>npm install --legacy-peer-deps</code> o
+<code>npm ci --legacy-peer-deps</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Los datos desaparecen al apagar la
+terminal:</strong></td>
+<td style="text-align: left;">Los emuladores operan por defecto en
+memoria volátil.</td>
+<td style="text-align: left;">Utiliza
+<code>firebase emulators:start --project demo-sso --import=./emulator-data --export-on-exit</code>
+si deseas persistencia.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="checklist-de-primera-ejecución-para-nuevos-desarrolladores">13.
+Checklist de Primera Ejecución para Nuevos Desarrolladores</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Node.js verificado:</strong>
+<code>node -v</code> devuelve <code>v22.x</code>.</label></li>
+<li><label><input type="checkbox" /><strong>npm verificado:</strong>
+<code>npm -v</code> devuelve <code>10.x</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Java verificado:</strong>
+<code>java -version</code> responde sin errores (JDK 11+ o
+21).</label></li>
+<li><label><input type="checkbox" /><strong>Firebase CLI
+verificado:</strong> <code>firebase --version</code> devuelve
+<code>15.x</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Mailpit verificado:</strong>
+<code>mailpit version</code> responde correctamente.</label></li>
+<li><label><input type="checkbox" /><strong>Dependencias
+instaladas:</strong> <code>npm install --legacy-peer-deps</code> o
+<code>npm ci --legacy-peer-deps</code> completado con
+éxito.</label></li>
+<li><label><input type="checkbox" /><strong>Archivo
+<code>.env.local</code> preparado:</strong> Copiado desde
+<code>.env.example</code> con los hosts apuntando a
+<code>127.0.0.1</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Emuladores de Firebase
+iniciados:</strong> <code>npm run emulators</code> activo; panel visible
+en <a
+href="http://localhost:4000">http://localhost:4000</a>.</label></li>
+<li><label><input type="checkbox" /><strong>Mailpit iniciado:</strong>
+<code>mailpit</code> activo; bandeja visible en <a
+href="http://localhost:8025">http://localhost:8025</a>.</label></li>
+<li><label><input type="checkbox" /><strong>Datos iniciales
+sembrados:</strong> <code>node scratch/seed-superadmin.mjs</code>
+ejecutado con éxito.</label></li>
+<li><label><input type="checkbox" /><strong>Next.js iniciado:</strong>
+<code>npm run dev</code> corriendo; interfaz accesible en <a
+href="http://localhost:3000">http://localhost:3000</a>.</label></li>
+<li><label><input type="checkbox" /><strong>Inicio de sesión en SSO
+probado:</strong> Autenticación probada contra los emuladores
+locales.</label></li>
+<li><label><input type="checkbox" /><strong>Código OTP recibido e
+ingresado:</strong> Verificado en <a
+href="http://localhost:8025">http://localhost:8025</a> y procesado en
+<code>/doble-factor</code>.</label></li>
+<li><label><input type="checkbox" /><strong>Acceso a Notas
+probado:</strong> Ingreso en <a
+href="http://localhost:3000/login-notas">http://localhost:3000/login-notas</a>
+verificado.</label></li>
+<li><label><input type="checkbox" /><strong>Chequeo de tipos
+ejecutado:</strong> <code>npx tsc --noEmit</code> completado con 0
+errores.</label></li>
+</ul>
+</body>
+</html>

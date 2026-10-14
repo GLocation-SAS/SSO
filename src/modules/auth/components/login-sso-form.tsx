@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -13,19 +13,110 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { fetchAuthProfile } from "../services/auth-client";
+import { MustChangePasswordDialog } from "./must-change-password-dialog";
+import type { LoginAuthConfig } from "../types/auth-config";
 
-export function LoginSSOForm({ className }: { className?: string }) {
+export type LoginSSOFormProps = LoginAuthConfig;
+
+export function LoginSSOForm({
+  className,
+  title = "Conecta MINEDUC",
+  subtitle = "Iniciar sesión",
+  description = "Conecta MINEDUC centraliza la administración de accesos y permisos a las aplicaciones y recursos institucionales.",
+  targetApp,
+  redirectTo = "/dashboard",
+  mfaRedirectTo,
+  mfaSendOtpUrl,
+}: LoginSSOFormProps) {
   const router = useRouter();
-  const { loginWithEmail } = useAuth();
+  const { user, loading: authLoading, loginWithEmail, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [showMustChangePassword, setShowMustChangePassword] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const resolvedMfaRedirect =
+    mfaRedirectTo ||
+    (targetApp === "notas" ? "/login-notas/verificar-codigo" : "/doble-factor");
+  const resolvedSendOtpUrl =
+    mfaSendOtpUrl ||
+    (targetApp === "notas" ? "/api/notas/auth/send-otp" : "/api/auth/send-otp");
+
+  // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
+  useEffect(() => {
+    if (!authLoading && user && !showMustChangePassword && !isAuthenticating) {
+      if (targetApp === "notas") {
+        fetchAuthProfile({ targetApp: "notas" })
+          .then((profile) => {
+            if (profile.hasNotasSession) {
+              router.replace(redirectTo);
+            }
+          })
+          .catch(async (err: any) => {
+            const errMsg = err?.message || "";
+            if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
+              router.replace(resolvedMfaRedirect);
+              return;
+            }
+            if (
+              errMsg.includes("No tienes permisos") ||
+              errMsg.includes("APPLICATION_ACCESS_DENIED") ||
+              errMsg.includes("NOTAS_NO_ACTIVE_ASSIGNMENTS")
+            ) {
+              const { signOut } = await import("firebase/auth");
+              const { auth } = await import("@/lib/firebase/client");
+              await signOut(auth).catch(() => {});
+            }
+          });
+        return;
+      }
+
+      fetchAuthProfile({ targetApp })
+        .then((profile) => {
+          if (profile.debeCambiarPassword) {
+            setShowMustChangePassword(true);
+          } else {
+            const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+            const targetUrl =
+              targetApp === "notas"
+                ? redirectTo
+                : isSuperAdmin
+                ? redirectTo
+                : "/mis-aplicaciones";
+            router.replace(targetUrl);
+          }
+        })
+        .catch(async (err: any) => {
+          const errMsg = err?.message || "";
+          if (
+            errMsg.includes("verificación en dos pasos") ||
+            errMsg.includes("MFA_REQUIRED") ||
+            err?.code === "MFA_REQUIRED"
+          ) {
+            // Sesión con doble factor pendiente: redirigir a doble factor sin cerrar sesión
+            router.replace(resolvedMfaRedirect);
+            return;
+          }
+          const { signOut } = await import("firebase/auth");
+          const { auth } = await import("@/lib/firebase/client");
+          await signOut(auth).catch(() => {});
+        });
+    }
+  }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo, resolvedMfaRedirect]);
 
   const [formData, setFormData] = useState({
-    email: "",
+    email: user?.email || "",
     password: "",
   });
+
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: user.email || "" }));
+    }
+  }, [user]);
 
   const [touched, setTouched] = useState({
     email: false,
@@ -53,16 +144,88 @@ export function LoginSSOForm({ className }: { className?: string }) {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
+    setIsAuthenticating(true);
     setGlobalError(null);
-    // Simular redirección / proceso de autenticación con Google
-    setTimeout(() => {
+    try {
+      const { signInWithPopup, GoogleAuthProvider, signOut } = await import("firebase/auth");
+      const { auth } = await import("@/lib/firebase/client");
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+
+      // Si el acceso es específico para la app Notas, crear la sesión de servidor dedicada
+      if (targetApp === "notas") {
+        try {
+          const token = await userCredential.user.getIdToken();
+          const sessionRes = await fetch("/api/notas/auth/session", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!sessionRes.ok) {
+            const errData = await sessionRes.json().catch(() => ({}));
+            throw new Error(errData.error || "No se pudo iniciar sesión en Notas.");
+          }
+
+          await userCredential.user.getIdToken(true);
+          await refreshProfile?.();
+
+          toast.success("Sesión iniciada con éxito");
+          router.replace(redirectTo);
+          return;
+        } catch (notasErr: any) {
+          await signOut(auth).catch(() => {});
+          const errorMsg = notasErr.message || "Tu usuario no tiene acceso a Notas.";
+          setGlobalError(errorMsg);
+          toast.error("Acceso denegado", {
+            description: errorMsg,
+          });
+          return;
+        }
+      }
+
+      // Validar autorización del usuario en Firestore mediante el servidor para SSO general
+      try {
+        const profile = await fetchAuthProfile({ targetApp });
+        await userCredential.user.getIdToken(true);
+        await refreshProfile?.();
+
+        if (profile.debeCambiarPassword) {
+          setShowMustChangePassword(true);
+          toast.info("Cambio de contraseña requerido", {
+            description: "Debes actualizar tu contraseña temporal antes de continuar.",
+          });
+        } else {
+          toast.success("Sesión iniciada con éxito");
+          const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+          const targetUrl = isSuperAdmin ? redirectTo : "/mis-aplicaciones";
+          router.replace(targetUrl);
+        }
+      } catch (authErr: any) {
+        // Cerrar sesión en Firebase Auth inmediatamente si el servidor deniega el acceso
+        await signOut(auth).catch(() => {});
+        const errorMsg = authErr.message || "Tu usuario no tiene acceso al sistema.";
+        setGlobalError(errorMsg);
+        toast.error("Acceso denegado", {
+          description: errorMsg,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error en Google Login:", error);
+      if (error.code !== "auth/popup-closed-by-user") {
+        toast.error("Error en Google Login", {
+          description: error.message || "No se pudo iniciar sesión con Google.",
+        });
+      }
+    } finally {
       setIsGoogleLoading(false);
-      toast.info("Inicio con Google deshabilitado", {
-        description: "Esta función no está disponible en la versión de demostración.",
-      });
-    }, 2000);
+      setIsAuthenticating(false);
+    }
   };
 
   const showValidationToast = () => {
@@ -80,7 +243,7 @@ export function LoginSSOForm({ className }: { className?: string }) {
     toast.warning("Datos incompletos", { description: msg });
   };
 
-  const handleCredentialsLogin = (e: React.FormEvent) => {
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isFormValid) {
@@ -89,69 +252,99 @@ export function LoginSSOForm({ className }: { className?: string }) {
     }
 
     setIsLoading(true);
+    setIsAuthenticating(true);
     setGlobalError(null);
 
-    // Simular validación frontend y backend mock
-    setTimeout(() => {
-      setIsLoading(false);
-      const authUser = loginWithEmail(formData.email);
-      if (authUser.role === "docente") {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenido, Juan Carlos. Redirigiendo al aplicativo de Notas...",
+    try {
+      const { signInWithEmailAndPassword } = await import("firebase/auth");
+      const { auth } = await import("@/lib/firebase/client");
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email.trim().toLowerCase(),
+        formData.password
+      );
+
+      // Despachar el OTP inicial de forma automática y redirigir a la pantalla de 2FA
+      try {
+        const token = await userCredential.user.getIdToken();
+        await fetch(resolvedSendOtpUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-        router.push("/inicio");
-      } else if (authUser.role === "user") {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenido a Conecta MINEDUC. Redirigiendo a tu espacio personal...",
+        await userCredential.user.getIdToken(true);
+        toast.info("Código de verificación enviado", {
+          description: "Revisa tu correo para completar el acceso.",
         });
-        router.push("/mi-dashboard");
-      } else {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenida, Administradora. Redirigiendo a verificación de seguridad...",
-        });
-        router.push("/doble-factor");
+      } catch (sendErr) {
+        console.error("Error al enviar OTP automático:", sendErr);
       }
-    }, 1200);
+
+      router.replace(resolvedMfaRedirect);
+    } catch (error: any) {
+      setIsAuthenticating(false);
+      console.error("Error al autenticar credenciales:", error);
+      let errorMsg = "Correo institucional o contraseña incorrectos.";
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/invalid-email"
+      ) {
+        errorMsg = "Correo institucional o contraseña incorrectos.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMsg = "Demasiados intentos fallidos. Por favor, intenta más tarde.";
+      } else if (error.code === "auth/user-disabled") {
+        errorMsg = "Esta cuenta de usuario ha sido desactivada por el administrador.";
+      }
+      setGlobalError(errorMsg);
+      toast.error("Error al iniciar sesión", {
+        description: errorMsg,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div
       className={cn(
-        "relative z-10 w-full max-w-lg min-h-[550px] sm:min-h-[650px] flex flex-col justify-center rounded-xl border border-border bg-card p-6 sm:p-10 shadow-lg text-card-foreground",
+        "relative z-10 w-full max-w-lg flex flex-col justify-center rounded-xl border border-border bg-card p-6 sm:px-8 sm:py-7 shadow-lg text-card-foreground",
         className
       )}
     >
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <Image
           src={getAssetPath("/horizontal-light.svg")}
           alt="Logo Conecta MINEDUC"
-          width={180}
-          height={45}
-          className="dark:hidden"
+          width={160}
+          height={40}
+          className="dark:hidden h-auto w-auto max-h-9"
           unoptimized
         />
         <Image
           src={getAssetPath("/horizontal-dark.svg")}
           alt="Logo Conecta MINEDUC"
-          width={180}
-          height={45}
-          className="hidden dark:block"
+          width={160}
+          height={40}
+          className="hidden dark:block h-auto w-auto max-h-9"
           unoptimized
         />
         <ThemeToggle />
       </div>
 
-      <Separator className="mb-6" />
+      <Separator className="mb-4" />
 
-      <div className="mb-8 text-center sm:text-left">
-        <h1 className="sr-only font-heading text-h2 font-bold">Conecta MINEDUC</h1>
-        <h2 className="font-heading text-h2 font-semibold mb-2 text-primary-500 dark:text-primary-300">Iniciar sesión</h2>
+      <div className="mb-5 text-center sm:text-left">
+        <h1 className="sr-only font-heading text-h2 font-bold">{title}</h1>
+        <h2 className="font-heading text-h2 font-semibold mb-1 text-primary-500 dark:text-primary-300">{subtitle}</h2>
         <p className="font-sans text-body-sm text-muted-foreground text-balance">
-          Conecta MINEDUC centraliza la administración de accesos y permisos a las aplicaciones y recursos institucionales.
+          {description}
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Button
           variant="secondary"
           className="w-full"
@@ -171,43 +364,49 @@ export function LoginSSOForm({ className }: { className?: string }) {
             )
           }
         >
-          {isGoogleLoading ? "Procesando..." : "Continuar con Google"}
+          {isGoogleLoading ? "Conectando con Google..." : "Iniciar sesión con Google"}
         </Button>
 
-        <div className="flex items-center gap-4 text-xs">
-          <span className="flex-1 border-t border-border" />
-          <span className="text-muted-foreground font-sans">
-            O iniciar sesión con credenciales
-          </span>
-          <span className="flex-1 border-t border-border" />
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground font-sans font-medium">O continúa con tu cuenta</span>
+          </div>
         </div>
 
-        <form onSubmit={handleCredentialsLogin} className="space-y-4" noValidate>
-          <div className="space-y-1.5">
-            <label
-              htmlFor="email"
-              className="font-sans text-body-sm font-medium text-foreground"
-            >
-              Correo institucional
+        <form onSubmit={handleCredentialsLogin} className="space-y-4">
+          {globalError && (
+            <div className="p-3 bg-danger-100 border border-danger-200 text-danger-700 text-body-sm rounded-lg font-sans">
+              {globalError}
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label className="text-body-sm font-semibold font-sans text-foreground" htmlFor="email">
+              Correo institucional <span className="text-danger">*</span>
             </label>
-            <InputGroup state={touched.email ? (emailErrorMsg ? "error" : "success") : "default"}>
-              <InputGroupAddon>
+            <InputGroup state={touched.email && emailErrorMsg ? "error" : "default"}>
+              <InputGroupAddon align="inline-start">
                 <InputGroupText>
-                  <Mail className="size-4" />
+                  <Mail className="h-5 w-5" />
                 </InputGroupText>
               </InputGroupAddon>
               <InputGroupInput
                 id="email"
                 type="email"
-                placeholder="ejemplo@mineduc.cl"
+                name="email"
+                placeholder="usuario@educacion.gob.ec"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, email: e.target.value }));
+                  if (globalError) setGlobalError(null);
+                }}
                 onBlur={() => handleBlur("email")}
                 disabled={isLoading || isGoogleLoading}
                 aria-invalid={touched.email && !!emailErrorMsg}
-                aria-errormessage={touched.email && emailErrorMsg ? "email-error" : undefined}
+                aria-describedby={touched.email && emailErrorMsg ? "email-error" : undefined}
                 required
               />
             </InputGroup>
@@ -218,31 +417,32 @@ export function LoginSSOForm({ className }: { className?: string }) {
             )}
           </div>
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="password"
-              className="font-sans text-body-sm font-medium text-foreground"
-            >
-              Contraseña
-            </label>
-            <InputGroup state={touched.password ? (passwordErrorMsg ? "error" : "success") : "default"}>
-              <InputGroupAddon>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="text-body-sm font-semibold font-sans text-foreground" htmlFor="password">
+                Contraseña <span className="text-danger">*</span>
+              </label>
+            </div>
+            <InputGroup state={touched.password && passwordErrorMsg ? "error" : "default"}>
+              <InputGroupAddon align="inline-start">
                 <InputGroupText>
-                  <Lock className="size-4" />
+                  <Lock className="h-5 w-5" />
                 </InputGroupText>
               </InputGroupAddon>
               <InputGroupInput
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Ingresa tu contraseña"
+                name="password"
+                placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, password: e.target.value }));
+                  if (globalError) setGlobalError(null);
+                }}
                 onBlur={() => handleBlur("password")}
                 disabled={isLoading || isGoogleLoading}
                 aria-invalid={touched.password && !!passwordErrorMsg}
-                aria-errormessage={touched.password && passwordErrorMsg ? "password-error" : undefined}
+                aria-describedby={touched.password && passwordErrorMsg ? "password-error" : undefined}
                 required
               />
               <InputGroupAddon align="inline-end">
@@ -250,13 +450,11 @@ export function LoginSSOForm({ className }: { className?: string }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <InputGroupButton
-                        variant="ghost"
-                        size="icon-sm"
+                        type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                        disabled={isLoading || isGoogleLoading}
                       >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </InputGroupButton>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -272,8 +470,6 @@ export function LoginSSOForm({ className }: { className?: string }) {
               </p>
             )}
           </div>
-
-
 
           <div
             className="w-full"
@@ -295,6 +491,26 @@ export function LoginSSOForm({ className }: { className?: string }) {
           </div>
         </form>
       </div>
+
+      <MustChangePasswordDialog
+        open={showMustChangePassword}
+        onSuccess={async () => {
+          setShowMustChangePassword(false);
+          try {
+            const profile = await fetchAuthProfile({ targetApp });
+            const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+            const targetUrl =
+              targetApp === "notas"
+                ? redirectTo
+                : isSuperAdmin
+                ? redirectTo
+                : "/mis-aplicaciones";
+            router.replace(targetUrl);
+          } catch {
+            router.replace(targetApp === "notas" ? redirectTo : "/mis-aplicaciones");
+          }
+        }}
+      />
     </div>
   );
 }
