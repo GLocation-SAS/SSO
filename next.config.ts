@@ -9,6 +9,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isGithubActions ? "/SSO" 
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: isGithubActions ? "export" : undefined,
   basePath: basePath || undefined,
   trailingSlash: true,
   env: {

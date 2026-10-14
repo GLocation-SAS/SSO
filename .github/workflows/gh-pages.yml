@@ -27,12 +27,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build with Next.js
-        # Require output: 'export' in next.config.ts (Note: conflicts with headers())
         env:
           NEXT_PUBLIC_BASE_PATH: /SSO
         run: |
+          if [ -d "src/app/api" ]; then mv src/app/api ./_api_temp; fi
           npm run build
           touch ./out/.nojekyll
+          if [ -d "./_api_temp" ]; then mv ./_api_temp src/app/api; fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
