@@ -43,6 +43,46 @@ export interface MisAplicacionItem {
 
 export const MIS_APLICACIONES_USUARIO: MisAplicacionItem[] = [
   {
+    id: "app-notas",
+    codigo: "NOTAS",
+    nombre: "Sistema de Notas",
+    descripcion: "Registro de calificaciones, asistencia estudiantil y reportes pedagógicos de aula.",
+    urlAcceso: "/login-notas",
+    icono: "GraduationCap",
+    colorTone: "primary",
+    sede: {
+      id: "sede-cz9",
+      codigo: "CZ-09",
+      nombre: "Coordinación Zonal 9",
+      tipo: "Coordinación Zonal",
+    },
+    rol: {
+      id: "rol-docente",
+      nombre: "Docente de Aula",
+      descripcion: "Ingreso de calificaciones parciales, quimestrales y control diario.",
+    },
+    ultimoAcceso: "Hoy, activo",
+    ultimoAccesoIso: "2026-10-14T08:00:00",
+    estado: "Activa",
+    categoria: "Docencia y Academia",
+    recursos: [
+      {
+        id: "rec-notas-calif",
+        codigo: "NOT-ING",
+        nombre: "Registro de Calificaciones",
+        tipo: "Módulo",
+        permisos: { codigo: "NOT-ING", nombre: "Registro de Calificaciones", ver: true, crear: true, editar: true, eliminar: false },
+      },
+      {
+        id: "rec-notas-asist",
+        codigo: "NOT-ASIST",
+        nombre: "Asistencia Escolar",
+        tipo: "Módulo",
+        permisos: { codigo: "NOT-ASIST", nombre: "Asistencia Escolar", ver: true, crear: true, editar: true, eliminar: false },
+      },
+    ],
+  },
+  {
     id: "gestion-docente",
     codigo: "SGD",
     nombre: "Gestión Docente",

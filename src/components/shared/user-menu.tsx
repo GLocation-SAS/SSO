@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/routing";
 import { useAuth } from "@/hooks/useAuth";
 
 export function UserMenu() {

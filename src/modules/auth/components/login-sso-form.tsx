@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/routing";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getAssetPath } from "@/lib/assets";

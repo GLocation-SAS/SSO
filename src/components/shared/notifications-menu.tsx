@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import {
   Bell,
   Check,
@@ -224,7 +224,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
           ) : (
             <div className="flex flex-col py-2">
               {NOTIFICATIONS.map((notif) => (
-                <DropdownMenuPrimitive.Item
+                <DropdownMenuItem
                   key={notif.id}
                   className="group relative flex cursor-pointer items-start gap-4 px-5 py-3 outline-none transition-colors hover:bg-surface-subtle"
                   onClick={() => setOpen(false)}
@@ -242,7 +242,7 @@ export function NotificationsMenu({ isEmpty = false }: { isEmpty?: boolean }) {
                       <span className="size-2 rounded-full bg-primary" />
                     )}
                   </div>
-                </DropdownMenuPrimitive.Item>
+                </DropdownMenuItem>
               ))}
             </div>
           )}
