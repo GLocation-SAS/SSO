@@ -385,18 +385,18 @@ export function GeoportalSidebar({
 }) {
   const { state, isMobile, setOpenMobile, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const { user, profile, logout, isStandardUser, isDocente } = useAuth();
+  const { user, profile, logout, isAdmin, isStandardUser, isDocente } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isInicio = isDocente || pathname?.includes("/inicio");
+  const isDocentePortal = !isAdmin && (isDocente || pathname?.includes("/inicio"));
 
-  const currentNavSections = isInicio
+  const currentNavSections = isAdmin
+    ? navSections
+    : isDocentePortal
     ? docenteNavSections
-    : isStandardUser
-    ? userNavSections
-    : navSections;
-  const homeHref = isInicio ? "/inicio" : isStandardUser ? "/mi-dashboard" : "/dashboard";
+    : userNavSections;
+  const homeHref = isAdmin ? "/dashboard" : isDocentePortal ? "/inicio" : "/mis-aplicaciones";
 
   const showUser = variant === "full";
   const showBranding = variant === "full";

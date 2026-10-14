@@ -52,24 +52,23 @@ export function LoginSSOForm({
           .then((profile) => {
             if (profile.hasNotasSession) {
               router.replace(redirectTo);
-            } else {
-              // Sesión con 2FA de Notas pendiente: redirigir a verificación
-              router.replace(resolvedMfaRedirect);
             }
           })
           .catch(async (err: any) => {
             const errMsg = err?.message || "";
-            if (
-              errMsg.includes("verificación en dos pasos") ||
-              errMsg.includes("MFA_REQUIRED") ||
-              errMsg.includes("NOTAS_MFA_REQUIRED")
-            ) {
+            if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
               router.replace(resolvedMfaRedirect);
               return;
             }
-            const { signOut } = await import("firebase/auth");
-            const { auth } = await import("@/lib/firebase/client");
-            await signOut(auth).catch(() => {});
+            if (
+              errMsg.includes("No tienes permisos") ||
+              errMsg.includes("APPLICATION_ACCESS_DENIED") ||
+              errMsg.includes("NOTAS_NO_ACTIVE_ASSIGNMENTS")
+            ) {
+              const { signOut } = await import("firebase/auth");
+              const { auth } = await import("@/lib/firebase/client");
+              await signOut(auth).catch(() => {});
+            }
           });
         return;
       }
@@ -79,7 +78,14 @@ export function LoginSSOForm({
           if (profile.debeCambiarPassword) {
             setShowMustChangePassword(true);
           } else {
-            router.replace(redirectTo);
+            const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+            const targetUrl =
+              targetApp === "notas"
+                ? redirectTo
+                : isSuperAdmin
+                ? redirectTo
+                : "/mis-aplicaciones";
+            router.replace(targetUrl);
           }
         })
         .catch(async (err: any) => {
@@ -97,9 +103,15 @@ export function LoginSSOForm({
   }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo, resolvedMfaRedirect]);
 
   const [formData, setFormData] = useState({
-    email: "",
+    email: user?.email || "",
     password: "",
   });
+
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: user.email || "" }));
+    }
+  }, [user]);
 
   const [touched, setTouched] = useState({
     email: false,
@@ -134,9 +146,41 @@ export function LoginSSOForm({
       const { signInWithPopup, GoogleAuthProvider, signOut } = await import("firebase/auth");
       const { auth } = await import("@/lib/firebase/client");
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
 
-      // Validar autorización del usuario en Firestore mediante el servidor
+      // Si el acceso es específico para la app Notas, crear la sesión de servidor dedicada
+      if (targetApp === "notas") {
+        try {
+          const token = await userCredential.user.getIdToken();
+          const sessionRes = await fetch("/api/notas/auth/session", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          });
+
+          if (!sessionRes.ok) {
+            const errData = await sessionRes.json().catch(() => ({}));
+            throw new Error(errData.error || "No se pudo iniciar sesión en Notas.");
+          }
+
+          toast.success("Sesión iniciada con éxito");
+          router.replace(redirectTo);
+          return;
+        } catch (notasErr: any) {
+          await signOut(auth).catch(() => {});
+          const errorMsg = notasErr.message || "Tu usuario no tiene acceso a Notas.";
+          setGlobalError(errorMsg);
+          toast.error("Acceso denegado", {
+            description: errorMsg,
+          });
+          return;
+        }
+      }
+
+      // Validar autorización del usuario en Firestore mediante el servidor para SSO general
       try {
         const profile = await fetchAuthProfile({ targetApp });
 
@@ -147,7 +191,9 @@ export function LoginSSOForm({
           });
         } else {
           toast.success("Sesión iniciada con éxito");
-          router.replace(redirectTo);
+          const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+          const targetUrl = isSuperAdmin ? redirectTo : "/mis-aplicaciones";
+          router.replace(targetUrl);
         }
       } catch (authErr: any) {
         // Cerrar sesión en Firebase Auth inmediatamente si el servidor deniega el acceso
@@ -471,9 +517,21 @@ export function LoginSSOForm({
 
       <MustChangePasswordDialog
         open={showMustChangePassword}
-        onSuccess={() => {
+        onSuccess={async () => {
           setShowMustChangePassword(false);
-          router.replace("/dashboard");
+          try {
+            const profile = await fetchAuthProfile({ targetApp });
+            const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
+            const targetUrl =
+              targetApp === "notas"
+                ? redirectTo
+                : isSuperAdmin
+                ? redirectTo
+                : "/mis-aplicaciones";
+            router.replace(targetUrl);
+          } catch {
+            router.replace(targetApp === "notas" ? redirectTo : "/mis-aplicaciones");
+          }
         }}
       />
     </div>

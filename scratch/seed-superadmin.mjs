@@ -215,9 +215,165 @@ async function seedProject(projectId) {
   return { uid: authUser.uid, firestoreId: targetDocRef.id };
 }
 
+async function seedStandardUser(projectId, email = "paula.rozo@mineduc.gob.ec") {
+  console.log(`\n======================================================`);
+  console.log(`  Sembrando Usuario Estándar (${email}) en: ${projectId}`);
+  console.log(`======================================================`);
+
+  const appName = `admin-${projectId}`;
+  const app = getApps().find((a) => a.name === appName) || initializeApp({ projectId }, appName);
+  const adminAuth = getAuth(app);
+  const adminDb = getFirestore(app);
+
+  const password = "Password123*";
+  const nombre = "Paula";
+  const apellidos = "Rozo";
+  const documento = email === "prueba2@gmail.com" ? "1720394852" : "1720394851";
+
+  // 1. Firebase Auth
+  let authUser;
+  try {
+    authUser = await adminAuth.getUserByEmail(email);
+    console.log(`[Auth] Usuario encontrado (${authUser.uid}), actualizando contraseña...`);
+    await adminAuth.updateUser(authUser.uid, {
+      password,
+      emailVerified: true,
+      displayName: `${nombre} ${apellidos}`,
+    });
+  } catch (err) {
+    if (err.code === "auth/user-not-found") {
+      console.log(`[Auth] Creando usuario ${email} en Firebase Auth...`);
+      authUser = await adminAuth.createUser({
+        email,
+        password,
+        emailVerified: true,
+        displayName: `${nombre} ${apellidos}`,
+      });
+      console.log(`[Auth] Creado con UID: ${authUser.uid}`);
+    } else {
+      throw err;
+    }
+  }
+
+  // Set Custom Claims (NO admin)
+  await adminAuth.setCustomUserClaims(authUser.uid, {
+    twoFactorVerified: true,
+    debeCambiarPassword: false,
+    admin: false,
+  });
+
+  // 2. Cloud Firestore
+  const now = Timestamp.now().toMillis();
+  const userId = `usr-std-${authUser.uid}`;
+
+  const existingDocs = await adminDb.collection("usuarios").where("email", "==", email).get();
+  let targetDocRef = !existingDocs.empty ? existingDocs.docs[0].ref : adminDb.collection("usuarios").doc(userId);
+
+  const paulaAsignaciones = [
+    {
+      id: `asig-std-1-${authUser.uid}`,
+      usuarioId: targetDocRef.id,
+      sedeId: "sede-cz9",
+      sedeNombre: "Coordinación Zonal 9",
+      rolAplicacionId: "ra-gd-th",
+      aplicacionNombre: "Gestión Docente",
+      rolNombre: "Talento Humano",
+      estado: "Activo",
+      fechaAsignacion: "01/02/2026",
+      permisos: [
+        { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+        { recursoCodigo: "MOV-PERS", recursoNombre: "Movimientos de Personal", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false },
+      ],
+    },
+    {
+      id: `asig-std-2-${authUser.uid}`,
+      usuarioId: targetDocRef.id,
+      sedeId: "sede-cz9",
+      sedeNombre: "Coordinación Zonal 9",
+      rolAplicacionId: "ra-sige-mat",
+      aplicacionNombre: "SIGE",
+      rolNombre: "Operador Matriculación",
+      estado: "Activo",
+      fechaAsignacion: "01/02/2026",
+      permisos: [
+        { recursoCodigo: "MAT-ALUM", recursoNombre: "Matriculación de Alumnos", puedeVer: true, puedeCrear: true, puedeEditar: false, puedeEliminar: false },
+      ],
+    },
+    {
+      id: `asig-std-3-${authUser.uid}`,
+      usuarioId: targetDocRef.id,
+      sedeId: "sede-cz9",
+      sedeNombre: "Coordinación Zonal 9",
+      rolAplicacionId: "ra-geo-cons",
+      aplicacionNombre: "Geoportal",
+      rolNombre: "Consulta de Capas",
+      estado: "Activo",
+      fechaAsignacion: "01/02/2026",
+      permisos: [
+        { recursoCodigo: "GEO-ALL", recursoNombre: "Capas y Mapas", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false },
+      ],
+    },
+    {
+      id: `asig-std-4-${authUser.uid}`,
+      usuarioId: targetDocRef.id,
+      sedeId: "sede-cz9",
+      sedeNombre: "Coordinación Zonal 9",
+      rolAplicacionId: "ra-notas-doc",
+      aplicacionNombre: "Notas",
+      rolNombre: "Docente",
+      estado: "Activo",
+      fechaAsignacion: "01/02/2026",
+      permisos: [
+        { recursoCodigo: "NOTAS-REG", recursoNombre: "Registro de Calificaciones", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+        { recursoCodigo: "NOTAS-REP", recursoNombre: "Reportes Académicos", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false },
+      ],
+    },
+  ];
+
+  const usuarioData = {
+    id: targetDocRef.id,
+    nombre,
+    apellidos,
+    avatar: `https://i.pravatar.cc/150?u=${targetDocRef.id}`,
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: documento,
+    identificacion: documento,
+    email,
+    correo: email,
+    telefono: "+593 99 333 4444",
+    cargo: "Analista de Gestión Educativa",
+    estado: "Activo",
+    active: true,
+    authUid: authUser.uid,
+    debeCambiarPassword: false,
+    fechaCreacion: "01/02/2026",
+    createdAt: now,
+    updatedAt: now,
+    sedes: [
+      {
+        sedeId: "sede-cz9",
+        sedeNombre: "Coordinación Zonal 9",
+        asignaciones: paulaAsignaciones,
+      },
+    ],
+  };
+
+  await targetDocRef.set(usuarioData, { merge: true });
+
+  await adminDb.collection("usuarios_indices").doc(`email_${email}`).set({
+    usuarioId: targetDocRef.id,
+    email,
+    createdAt: now,
+  });
+
+  console.log(`[Firestore] Usuario estándar ${email} guardado con sus asignaciones.`);
+}
+
 async function main() {
   for (const pid of PROJECTS) {
     await seedProject(pid);
+    await seedStandardUser(pid, "paula.rozo@mineduc.gob.ec");
+    await seedStandardUser(pid, "prueba2@gmail.com");
   }
   console.log("\n>>> Configuración completada exitosamente en todos los proyectos del emulador. <<<");
 }

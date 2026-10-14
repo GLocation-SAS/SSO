@@ -85,6 +85,21 @@ export interface HistorialCambio {
 // ── Mock Data: Aplicaciones Principales ──────────────────────────────────────
 export const mockAplicacionesData: AplicacionItem[] = [
   {
+    id: "app-notas",
+    codigo: "NOTAS",
+    nombre: "Notas",
+    descripcion: "Sistema de gestión académica, registro y seguimiento de calificaciones y evaluaciones de estudiantes.",
+    urlAcceso: "/login-notas",
+    estado: "Activa",
+    requiereAtencion: false,
+    fechaCreacion: "01/01/2026",
+    ultimaActualizacion: "14/10/2026, 08:00",
+    usuariosCount: 450,
+    rolesCount: 3,
+    recursosCount: 6,
+    icono: "School",
+  },
+  {
     id: "gestion-docente",
     codigo: "SGD",
     nombre: "Gestión Docente",

@@ -20,10 +20,10 @@ export interface DobleFactorNotasFormProps {
 
 export function DobleFactorNotasForm({
   className,
-  redirectTo = "/dashboard",
+  redirectTo = "/inicio",
 }: DobleFactorNotasFormProps) {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshProfile } = useAuth();
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -132,6 +132,7 @@ export function DobleFactorNotasForm({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ code: code.join("") }),
       });
 
@@ -141,8 +142,9 @@ export function DobleFactorNotasForm({
         throw new Error(data.error || "El código ingresado es incorrecto o ha expirado.");
       }
 
-      // Refrescar el token para que el cliente reciba el custom claim `notasTwoFactorVerified: true`
+      // Refrescar el token y el perfil de autenticación con la nueva cookie de sesión
       await currentUser.getIdToken(true);
+      await refreshProfile?.();
 
       toast.success("Verificación exitosa", {
         description: "Has ingresado correctamente al sistema de Notas. Redirigiendo...",

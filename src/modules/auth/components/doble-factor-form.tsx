@@ -143,19 +143,26 @@ export function DobleFactorForm({ className }: { className?: string }) {
           router.replace("/login-sso?mustChange=true");
           return;
         }
-        if (profile?.isNotasUser || profile?.usuario?.cargo === "Docente") {
-          router.replace("/inicio");
-          return;
-        }
-        if (profile?.isAdmin === false) {
-          router.replace("/mi-dashboard");
-          return;
-        }
-      } catch {
-        // Continuar al dashboard
-      }
 
-      router.replace("/dashboard");
+        const isSuperAdmin = Boolean(
+          profile?.isSuperAdmin ||
+          profile?.isAdmin ||
+          profile?.email?.trim().toLowerCase() === "jeimy.mateus@glocation.com.co" ||
+          profile?.usuario?.cargo === "Super Administrador"
+        );
+
+        if (isSuperAdmin) {
+          router.replace("/dashboard");
+          return;
+        }
+
+        router.replace("/mis-aplicaciones");
+        return;
+      } catch {
+        // En caso de no poder resolver el perfil, redirigir por seguridad a mis-aplicaciones
+        router.replace("/mis-aplicaciones");
+        return;
+      }
     } catch (error: any) {
       toast.error("Error de verificación", {
         description: error.message || "No se pudo verificar el código.",

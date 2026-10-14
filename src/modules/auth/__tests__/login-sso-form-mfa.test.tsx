@@ -215,4 +215,49 @@ describe("LoginSSOForm MFA Routing & TargetApp Wiring", () => {
       });
     });
   });
+
+  describe("Non Superadmin vs Superadmin Redirection", () => {
+    it("should redirect non-superadmin active user to /mis-aplicaciones", async () => {
+      const mockUser = { uid: "user-std", email: "standard@sso.gov" };
+      (useAuth as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+      });
+      (fetchAuthProfile as jest.Mock).mockResolvedValue({
+        uid: "user-std",
+        email: "standard@sso.gov",
+        debeCambiarPassword: false,
+        isAdmin: false,
+        isSuperAdmin: false,
+      });
+
+      render(<LoginSSOForm />);
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/mis-aplicaciones");
+      });
+    });
+
+    it("should redirect superadmin active user to /dashboard (or redirectTo)", async () => {
+      const mockUser = { uid: "user-admin", email: "admin@sso.gov" };
+      (useAuth as jest.Mock).mockReturnValue({
+        user: mockUser,
+        loading: false,
+      });
+      (fetchAuthProfile as jest.Mock).mockResolvedValue({
+        uid: "user-admin",
+        email: "admin@sso.gov",
+        debeCambiarPassword: false,
+        isAdmin: true,
+        isSuperAdmin: true,
+      });
+
+      render(<LoginSSOForm redirectTo="/dashboard" />);
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/dashboard");
+      });
+    });
+  });
 });
+

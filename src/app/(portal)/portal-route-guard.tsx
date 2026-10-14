@@ -19,14 +19,24 @@ const ADMIN_PREFIXES = [
 export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoaded, isStandardUser, isDocente } = useAuth();
+  const { user, profile, isLoaded, isStandardUser, isDocente } = useAuth();
   const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
 
+    const cleanPath = pathname.replace(/^\/(?:es|en)(?=\/|$)/i, "");
+
+    // 1. Control de acceso estricto a Notas (/inicio): requiere sesión verificada en Notas
+    if (cleanPath === "/inicio" || cleanPath.startsWith("/inicio/")) {
+      if (!profile?.hasNotasSession) {
+        router.replace("/login-notas");
+        return;
+      }
+    }
+
+    // 2. Control de acceso a módulos administrativos para usuarios sin permisos de administración
     if (isStandardUser || isDocente) {
-      const cleanPath = pathname.replace(/^\/(?:es|en)(?=\/|$)/i, "");
       const isAdminRoute = ADMIN_PREFIXES.some(
         (prefix) => cleanPath === prefix || cleanPath.startsWith(prefix + "/")
       );
@@ -34,12 +44,10 @@ export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
       if (isAdminRoute) {
         setIsUnauthorized(true);
         toast.error("Acceso restringido", {
-          description: isDocente
-            ? "El perfil docente no tiene permisos para módulos administrativos. Redirigiendo a Inicio..."
-            : "La cuenta actual (usuario estándar) no tiene permisos para módulos administrativos. Redirigiendo a tu espacio personal...",
+          description: "No tienes permisos para módulos administrativos. Redirigiendo...",
         });
         const timer = setTimeout(() => {
-          router.replace(isDocente ? "/inicio" : "/mi-dashboard");
+          router.replace(profile?.hasNotasSession ? "/inicio" : "/mis-aplicaciones");
         }, 300);
         return () => clearTimeout(timer);
       } else {
@@ -48,7 +56,7 @@ export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
     } else {
       setIsUnauthorized(false);
     }
-  }, [pathname, isLoaded, isStandardUser, isDocente, router]);
+  }, [pathname, isLoaded, isStandardUser, isDocente, profile, router]);
 
   if (isUnauthorized) {
     return (

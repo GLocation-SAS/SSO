@@ -181,7 +181,7 @@ describe("DobleFactorNotasForm Component", () => {
 
       await waitFor(() => {
         expect(mockUser.getIdToken).toHaveBeenCalledWith(true);
-        expect(mockReplace).toHaveBeenCalledWith("/dashboard");
+        expect(mockReplace).toHaveBeenCalledWith("/inicio");
       });
     });
 

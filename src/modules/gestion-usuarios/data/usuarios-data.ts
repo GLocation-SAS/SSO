@@ -519,5 +519,126 @@ export const mockUsuariosData: UsuarioItem[] = [
         asignaciones: []
       }
     ]
+  },
+  {
+    id: "usr-paula",
+    nombre: "Paula",
+    apellidos: "Rozo",
+    avatar: "https://i.pravatar.cc/150?u=usr-paula",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1720394851",
+    email: "paula.rozo@mineduc.gob.ec",
+    identificacion: "1720394851",
+    correo: "paula.rozo@mineduc.gob.ec",
+    telefono: "+593 99 333 4444",
+    cargo: "Analista de Gestión Educativa",
+    estado: "Activo",
+    active: true,
+    fechaCreacion: "01/02/2026",
+    sedes: [
+      {
+        sedeId: "sede-cz9",
+        sedeNombre: "Coordinación Zonal 9",
+        asignaciones: [
+          {
+            id: "usra-paula-1",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-gd-th",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Talento Humano",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+              { recursoCodigo: "MOV-PERS", recursoNombre: "Movimientos de Personal", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-2",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-sige-mat",
+            aplicacionNombre: "SIGE",
+            rolNombre: "Operador Matriculación",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "MAT-ALUM", recursoNombre: "Matriculación de Alumnos", puedeVer: true, puedeCrear: true, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-3",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-geo-cons",
+            aplicacionNombre: "Geoportal",
+            rolNombre: "Consulta de Capas",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "GEO-ALL", recursoNombre: "Capas y Mapas", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-4",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-notas-doc",
+            aplicacionNombre: "Notas",
+            rolNombre: "Docente",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "NOTAS-REG", recursoNombre: "Registro de Calificaciones", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+              { recursoCodigo: "NOTAS-REP", recursoNombre: "Reportes Académicos", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "usr-jeimy",
+    nombre: "Jeimy",
+    apellidos: "Mateus",
+    avatar: "https://i.pravatar.cc/150?u=usr-jeimy",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1719874563",
+    email: "jeimy.mateus@glocation.com.co",
+    identificacion: "1719874563",
+    correo: "jeimy.mateus@glocation.com.co",
+    telefono: "+593 99 123 4567",
+    cargo: "Super Administrador",
+    estado: "Activo",
+    active: true,
+    fechaCreacion: "01/01/2026",
+    sedes: [
+      {
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-jeimy-1",
+            usuarioId: "usr-jeimy",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-sso-sa",
+            aplicacionNombre: "SSO",
+            rolNombre: "Super Administrador",
+            estado: "Activo",
+            fechaAsignacion: "01/01/2026",
+            permisos: [
+              { recursoCodigo: "ALL-SEC", recursoNombre: "Seguridad y Auditoría Global", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "USR-CONS", recursoNombre: "Gestión de Usuarios", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];

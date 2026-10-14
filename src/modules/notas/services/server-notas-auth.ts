@@ -1,32 +1,63 @@
 import "server-only";
 import {
-  verifyActiveUser,
   validateExactApplicationAssignment,
   AuthorizationError,
 } from "@/lib/auth/server-auth";
+import { getUsuarioByEmail } from "@/modules/gestion-usuarios/services/server-usuarios";
+import {
+  extractNotasSessionToken,
+  verifyNotasSessionToken,
+} from "./server-notas-session";
 import type { NotasUserContext, NotasAssignment } from "../types/notas";
 
 /**
  * Server-side authorization guard for Notas system.
- * Verifies that the request comes from an authenticated, active user with valid 'notas' assignments.
+ * Verifies that the request comes with an active, cryptographically verified Notas server session
+ * (notas_session cookie). A general Firebase Auth token from SSO is NOT accepted as proof of a Notas session.
  */
 export async function verifyNotasAccess(request: Request): Promise<NotasUserContext> {
-  const { decodedToken, usuario } = await verifyActiveUser(request, {
-    targetApp: "notas",
-    skipTwoFactorCheck: true,
-  });
-
-  const signInProvider =
-    decodedToken.firebase?.sign_in_provider || (decodedToken as any).signInProvider;
-  if (signInProvider === "password" && !decodedToken.notasTwoFactorVerified) {
+  const sessionToken = extractNotasSessionToken(request);
+  if (!sessionToken) {
     throw new AuthorizationError(
-      "Se requiere completar la verificación en dos pasos de Notas.",
-      403,
-      "NOTAS_MFA_REQUIRED"
+      "No existe una sesión activa en el sistema de Notas. Se requiere autenticación en /login-notas.",
+      401,
+      "NOTAS_SESSION_MISSING"
     );
   }
 
-  // Exact validation of application, active user status, sede, and role
+  const session = await verifyNotasSessionToken(sessionToken);
+  if (!session) {
+    throw new AuthorizationError(
+      "La sesión de Notas ha expirado o es inválida. Por favor, inicia sesión nuevamente.",
+      401,
+      "NOTAS_SESSION_INVALID"
+    );
+  }
+
+  const usuario = await getUsuarioByEmail(session.email);
+  if (!usuario) {
+    throw new AuthorizationError(
+      "El usuario de la sesión de Notas no está registrado en el sistema.",
+      403,
+      "USER_NOT_REGISTERED"
+    );
+  }
+
+  const isActive =
+    usuario.active === true ||
+    (usuario.active === undefined &&
+      typeof usuario.estado === "string" &&
+      usuario.estado.trim().toLowerCase() === "activo");
+
+  if (!isActive) {
+    throw new AuthorizationError(
+      "Tu usuario está inactivo. Contacta con el administrador.",
+      403,
+      "USER_INACTIVE"
+    );
+  }
+
+  // Validación exacta de asignación activa a Notas
   const validation = validateExactApplicationAssignment(usuario, "notas");
   if (!validation.isValid) {
     throw new AuthorizationError(
@@ -36,9 +67,8 @@ export async function verifyNotasAccess(request: Request): Promise<NotasUserCont
     );
   }
 
-  // Extract only assignments related to the Notas application
+  // Extraer asignaciones de Notas
   const asignacionesNotas: NotasAssignment[] = [];
-
   if (Array.isArray(usuario.sedes)) {
     for (const sede of usuario.sedes) {
       if (!sede?.sedeId || !Array.isArray(sede?.asignaciones)) continue;
@@ -73,18 +103,13 @@ export async function verifyNotasAccess(request: Request): Promise<NotasUserCont
     );
   }
 
-  const debeCambiarPassword =
-    usuario.debeCambiarPassword !== undefined
-      ? Boolean(usuario.debeCambiarPassword)
-      : Boolean(decodedToken.debeCambiarPassword);
-
   return {
-    uid: decodedToken.uid,
-    email: decodedToken.email || "",
+    uid: session.uid || usuario.authUid || usuario.id,
+    email: usuario.email || usuario.correo || session.email,
     nombre: usuario.nombre || "",
     apellidos: usuario.apellidos || "",
     identificacion: usuario.documentoIdentificacion || usuario.identificacion || "",
     asignacionesNotas,
-    debeCambiarPassword,
+    debeCambiarPassword: Boolean(usuario.debeCambiarPassword),
   };
 }

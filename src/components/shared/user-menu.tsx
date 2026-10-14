@@ -21,13 +21,14 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
 
 export function UserMenu() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { user, profile, logout, isStandardUser, isDocente } = useAuth();
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Paula Rozo";
@@ -57,6 +58,18 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     setOpen(false);
+    if (pathname?.includes("/inicio")) {
+      try {
+        await fetch("/api/notas/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Error logging out of Notas:", err);
+      }
+      router.replace("/login-notas");
+      return;
+    }
     await logout();
     router.replace("/login-sso");
   };

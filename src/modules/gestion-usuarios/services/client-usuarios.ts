@@ -133,6 +133,7 @@ export async function fetchCurrentAuthProfile(): Promise<AuthProfileResponse> {
   const response = await fetch("/api/auth/me", {
     method: "GET",
     headers,
+    credentials: "include",
   });
 
   if (!response.ok) {

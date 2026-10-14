@@ -259,7 +259,7 @@ describe("POST /api/notas/auth/verify-otp", () => {
     expect(adminAuth.setCustomUserClaims).not.toHaveBeenCalled();
   });
 
-  it("should elevate custom claim notasTwoFactorVerified: true while preserving existing claims and not setting SSO twoFactorVerified", async () => {
+  it("should create Notas server session and emit Set-Cookie with notas_session instead of setting custom claims", async () => {
     (verifyAuthToken as jest.Mock).mockResolvedValue({
       uid: "user-123",
       email: "docente@mineduc.gob.gt",
@@ -269,12 +269,6 @@ describe("POST /api/notas/auth/verify-otp", () => {
     (verifyNotasOTP as jest.Mock).mockResolvedValue({
       success: true,
       statusCode: 200,
-    });
-    (adminAuth.getUser as jest.Mock).mockResolvedValue({
-      customClaims: {
-        role: "docente",
-        debeCambiarPassword: false,
-      },
     });
 
     const request = new Request("http://localhost:3000/api/notas/auth/verify-otp", {
@@ -290,14 +284,9 @@ describe("POST /api/notas/auth/verify-otp", () => {
     expect(body.success).toBe(true);
     expect(body.message).toMatch(/verificado correctamente/i);
 
-    expect(adminAuth.setCustomUserClaims).toHaveBeenCalledWith("user-123", {
-      role: "docente",
-      debeCambiarPassword: false,
-      notasTwoFactorVerified: true,
-    });
-
-    const calledClaims = (adminAuth.setCustomUserClaims as jest.Mock).mock.calls[0][1];
-    expect(calledClaims.notasTwoFactorVerified).toBe(true);
-    expect(calledClaims.twoFactorVerified).toBeUndefined();
+    const setCookie = response.headers.get("Set-Cookie");
+    expect(setCookie).toBeTruthy();
+    expect(setCookie).toContain("notas_session=");
+    expect(setCookie).toContain("HttpOnly");
   });
 });

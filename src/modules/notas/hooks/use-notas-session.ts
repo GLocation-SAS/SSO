@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState, useCallback } from "react";
 import { getNotasSession } from "../services/notas-client";
 import type { NotasUserContext } from "../types/notas";
 
@@ -14,19 +13,12 @@ export interface UseNotasSessionState {
 }
 
 export function useNotasSession(): UseNotasSessionState {
-  const { user, loading: authLoading } = useAuth();
   const [notasUser, setNotasUser] = useState<NotasUserContext | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
-  const fetchSession = async () => {
-    if (!user) {
-      setNotasUser(null);
-      setLoading(false);
-      return;
-    }
-
+  const fetchSession = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -40,17 +32,15 @@ export function useNotasSession(): UseNotasSessionState {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (!authLoading) {
-      fetchSession();
-    }
-  }, [user, authLoading]);
+    fetchSession();
+  }, [fetchSession]);
 
   return {
     notasUser,
-    loading: authLoading || loading,
+    loading,
     error,
     errorCode,
     refetch: fetchSession,

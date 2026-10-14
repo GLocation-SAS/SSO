@@ -154,15 +154,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginWithEmail = useCallback((email: string): AuthUser => {
     const cleanEmail = email.trim().toLowerCase();
-    const newUser: AuthUser =
-      cleanEmail === "docente@mineduc.gob.ec" || cleanEmail.includes("docente") || cleanEmail.includes("juancarlos")
-        ? DOCENTE_TEST_USER
-        : cleanEmail === "prueba2@gmail.com"
-        ? STANDARD_TEST_USER
-        : {
-            ...ADMIN_TEST_USER,
-            email: email.trim(),
-          };
+    const isDocenteEmail =
+      cleanEmail === "docente@mineduc.gob.ec" || cleanEmail.includes("docente") || cleanEmail.includes("juancarlos");
+    const isSuperAdminEmail =
+      cleanEmail === "jeimy.mateus@glocation.com.co" ||
+      cleanEmail === "admin@mineduc.gob.ec" ||
+      cleanEmail.includes("admin");
+
+    const newUser: AuthUser = isDocenteEmail
+      ? DOCENTE_TEST_USER
+      : isSuperAdminEmail
+      ? {
+          ...ADMIN_TEST_USER,
+          email: email.trim(),
+          displayName: cleanEmail.includes("jeimy") ? "Jeimy Mateus" : "Administrador General",
+        }
+      : {
+          ...STANDARD_TEST_USER,
+          email: email.trim(),
+          displayName: cleanEmail.includes("paula") ? "Paula Rozo" : "Paula Rozo",
+        };
 
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
@@ -186,13 +197,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const isAdmin = profile?.isAdmin ?? (mockUser?.role === "admin");
+  const currentUserEmail = (firebaseUser?.email || mockUser?.email || "").trim().toLowerCase();
+  const isJeimySuperAdmin = currentUserEmail === "jeimy.mateus@glocation.com.co";
+
+  const isAdmin = Boolean(
+    profile?.isAdmin ||
+    profile?.isSuperAdmin ||
+    isJeimySuperAdmin ||
+    (!firebaseUser && mockUser?.role === "admin")
+  );
+
   const isDocente =
-    Boolean(profile?.isNotasUser) ||
-    firebaseUser?.email?.includes("docente") ||
-    mockUser?.role === "docente";
-  const isStandardUser =
-    (!isAdmin && !isDocente) || mockUser?.role === "user";
+    Boolean(profile?.isNotasUser && profile?.hasNotasSession) ||
+    currentUserEmail.includes("docente") ||
+    (!firebaseUser && mockUser?.role === "docente");
+
+  const isStandardUser = !isAdmin && !isDocente;
 
   const resolvedUser = firebaseUser
     ? {

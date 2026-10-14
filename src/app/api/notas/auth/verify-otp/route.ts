@@ -6,7 +6,10 @@ import {
 } from "@/lib/auth/server-auth";
 import { getUsuarioByEmail } from "@/modules/gestion-usuarios/services/server-usuarios";
 import { verifyNotasOTP } from "@/modules/notas/services/server-notas-otp";
-import { adminAuth, getAdminAuthForProject } from "@/lib/firebase/admin";
+import {
+  createNotasServerSession,
+  getNotasSessionCookieHeader,
+} from "@/modules/notas/services/server-notas-session";
 
 export interface VerifyNotasOTPResponse {
   success?: boolean;
@@ -109,39 +112,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Resolver la instancia de Firebase Auth correspondiente al token
-    const authInstance = decodedToken.aud
-      ? getAdminAuthForProject(decodedToken.aud)
-      : adminAuth;
-
-    try {
-      await authInstance.updateUser(decodedToken.uid, { emailVerified: true });
-    } catch {
-      // Ignorar si el emulador no soporta updateUser en esa instancia
-    }
-
-    // 5. Preservar custom claims existentes y elevar exclusivamente notasTwoFactorVerified: true
-    let existingClaims: Record<string, any> = {};
-    if (typeof authInstance.getUser === "function") {
-      try {
-        const userRecord = await authInstance.getUser(decodedToken.uid);
-        if (userRecord?.customClaims) {
-          existingClaims = { ...userRecord.customClaims };
-        }
-      } catch {
-        // Fallback en caso de fallo al consultar claims
-      }
-    }
-
-    await authInstance.setCustomUserClaims(decodedToken.uid, {
-      ...existingClaims,
-      notasTwoFactorVerified: true,
+    // 4. Crear sesión aislada de servidor para Notas
+    const session = await createNotasServerSession({
+      uid: decodedToken.uid,
+      email: normalizedEmail,
+      usuarioId: usuario.id,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Código verificado correctamente.",
     });
+
+    response.headers.set("Set-Cookie", getNotasSessionCookieHeader(session.token));
+    return response;
   } catch (error: any) {
     console.error("Error al verificar OTP de Notas:", error);
     return NextResponse.json(

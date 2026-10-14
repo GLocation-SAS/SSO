@@ -1,29 +1,31 @@
 import { verifyNotasAccess } from "../services/server-notas-auth";
-import { verifyActiveUser, AuthorizationError } from "@/lib/auth/server-auth";
+import { getUsuarioByEmail } from "@/modules/gestion-usuarios/services/server-usuarios";
+import {
+  createNotasServerSession,
+  signNotasSessionToken,
+} from "../services/server-notas-session";
 
 jest.mock("@/lib/firebase/admin", () => ({
   adminAuth: {
     verifyIdToken: jest.fn(),
   },
   adminDb: {
-    collection: jest.fn(),
+    collection: jest.fn().mockReturnValue({
+      doc: jest.fn().mockReturnValue({
+        set: jest.fn().mockResolvedValue(undefined),
+        get: jest.fn().mockResolvedValue({ exists: false }),
+        update: jest.fn().mockResolvedValue(undefined),
+      }),
+    }),
   },
   getAdminAuthForProject: jest.fn(),
 }));
 
-jest.mock("@/lib/auth/server-auth", () => {
-  const actual = jest.requireActual("@/lib/auth/server-auth");
-  return {
-    ...actual,
-    verifyActiveUser: jest.fn(),
-  };
-});
+jest.mock("@/modules/gestion-usuarios/services/server-usuarios", () => ({
+  getUsuarioByEmail: jest.fn(),
+}));
 
 describe("server-notas-auth", () => {
-  const mockRequest = new Request("http://localhost:3000/api/notas/session", {
-    headers: { Authorization: "Bearer valid-token" },
-  });
-
   const baseActiveUser = {
     id: "doc-1",
     email: "profesor@mineduc.edu",
@@ -68,123 +70,114 @@ describe("server-notas-auth", () => {
     jest.clearAllMocks();
   });
 
-  it("should pass skipTwoFactorCheck: true to verifyActiveUser", async () => {
-    (verifyActiveUser as jest.Mock).mockResolvedValue({
-      decodedToken: {
-        uid: "user-123",
-        email: "profesor@mineduc.edu",
-        firebase: { sign_in_provider: "google.com" },
-      },
-      usuario: baseActiveUser,
+  it("should throw AuthorizationError (401, NOTAS_SESSION_MISSING) when request lacks notas_session cookie", async () => {
+    // Incluso si se envía un token Bearer de Firebase compartido por SSO, debe rechazarse
+    const requestWithFirebaseOnly = new Request("http://localhost:3000/api/notas/session", {
+      headers: { Authorization: "Bearer shared-sso-firebase-token" },
     });
 
-    await verifyNotasAccess(mockRequest);
-
-    expect(verifyActiveUser).toHaveBeenCalledWith(mockRequest, {
-      targetApp: "notas",
-      skipTwoFactorCheck: true,
+    await expect(verifyNotasAccess(requestWithFirebaseOnly)).rejects.toMatchObject({
+      statusCode: 401,
+      code: "NOTAS_SESSION_MISSING",
+      message: expect.stringMatching(/No existe una sesión activa en el sistema de Notas/i),
     });
   });
 
-  it("should throw AuthorizationError (403, NOTAS_MFA_REQUIRED) when password user lacks notasTwoFactorVerified", async () => {
-    (verifyActiveUser as jest.Mock).mockResolvedValue({
-      decodedToken: {
-        uid: "user-pwd-1",
-        email: "profesor@mineduc.edu",
-        firebase: { sign_in_provider: "password" },
-        notasTwoFactorVerified: false,
-      },
-      usuario: baseActiveUser,
+  it("should throw AuthorizationError (401, NOTAS_SESSION_INVALID) when session token is expired or tampered", async () => {
+    const expiredToken = signNotasSessionToken("fake-id", Date.now() - 10000);
+    const request = new Request("http://localhost:3000/api/notas/session", {
+      headers: { Cookie: `notas_session=${expiredToken}` },
     });
 
-    await expect(verifyNotasAccess(mockRequest)).rejects.toMatchObject({
-      statusCode: 403,
-      code: "NOTAS_MFA_REQUIRED",
-      message: "Se requiere completar la verificación en dos pasos de Notas.",
+    await expect(verifyNotasAccess(request)).rejects.toMatchObject({
+      statusCode: 401,
+      code: "NOTAS_SESSION_INVALID",
+      message: expect.stringMatching(/ha expirado o es inválida/i),
     });
   });
 
-  it("should succeed when password user has notasTwoFactorVerified: true", async () => {
-    (verifyActiveUser as jest.Mock).mockResolvedValue({
-      decodedToken: {
-        uid: "user-pwd-1",
-        email: "profesor@mineduc.edu",
-        firebase: { sign_in_provider: "password" },
-        notasTwoFactorVerified: true,
-      },
-      usuario: baseActiveUser,
+  it("should succeed and return NotasUserContext when valid notas_session cookie is present", async () => {
+    const session = await createNotasServerSession({
+      uid: "user-123",
+      email: "profesor@mineduc.edu",
+      usuarioId: "doc-1",
     });
 
-    const result = await verifyNotasAccess(mockRequest);
+    (getUsuarioByEmail as jest.Mock).mockResolvedValue(baseActiveUser);
 
-    expect(result.uid).toBe("user-pwd-1");
+    const request = new Request("http://localhost:3000/api/notas/session", {
+      headers: { Cookie: `notas_session=${session.token}` },
+    });
+
+    const result = await verifyNotasAccess(request);
+
     expect(result.email).toBe("profesor@mineduc.edu");
     expect(result.nombre).toBe("Juan");
     expect(result.asignacionesNotas).toHaveLength(1);
     expect(result.asignacionesNotas[0].rol).toBe("DOCENTE");
   });
 
-  it("should succeed for Google OAuth user without requiring notasTwoFactorVerified", async () => {
-    (verifyActiveUser as jest.Mock).mockResolvedValue({
-      decodedToken: {
-        uid: "user-google-1",
-        email: "profesor@mineduc.edu",
-        firebase: { sign_in_provider: "google.com" },
-      },
-      usuario: baseActiveUser,
+  it("should throw AuthorizationError (403, USER_INACTIVE) when user is marked inactive in backend", async () => {
+    const session = await createNotasServerSession({
+      uid: "user-inactive",
+      email: "inactivo@mineduc.edu",
+      usuarioId: "doc-inactivo",
     });
 
-    const result = await verifyNotasAccess(mockRequest);
-
-    expect(result.uid).toBe("user-google-1");
-    expect(result.asignacionesNotas).toHaveLength(1);
-  });
-
-  it("should throw AuthorizationError when user has no active Notas assignments", async () => {
-    (verifyActiveUser as jest.Mock).mockResolvedValue({
-      decodedToken: {
-        uid: "user-123",
-        email: "otro@mineduc.edu",
-        firebase: { sign_in_provider: "google.com" },
-      },
-      usuario: {
-        ...baseActiveUser,
-        sedes: [
-          {
-            sedeId: "sede-1",
-            sedeNombre: "Sede Central",
-            asignaciones: [
-              {
-                id: "asig-2",
-                usuarioId: "doc-2",
-                sedeId: "sede-1",
-                sedeNombre: "Sede Central",
-                rolAplicacionId: "ra-2",
-                aplicacionNombre: "Biblioteca",
-                rolNombre: "LECTOR",
-                estado: "Activo",
-                permisos: [],
-              },
-            ],
-          },
-        ],
-      },
+    (getUsuarioByEmail as jest.Mock).mockResolvedValue({
+      ...baseActiveUser,
+      email: "inactivo@mineduc.edu",
+      active: false,
     });
 
-    await expect(verifyNotasAccess(mockRequest)).rejects.toMatchObject({
-      statusCode: 403,
-      code: "NOTAS_NO_ACTIVE_ASSIGNMENTS",
+    const request = new Request("http://localhost:3000/api/notas/session", {
+      headers: { Cookie: `notas_session=${session.token}` },
     });
-  });
 
-  it("should propagate AuthorizationError when user is inactive in verifyActiveUser", async () => {
-    (verifyActiveUser as jest.Mock).mockRejectedValue(
-      new AuthorizationError("Tu usuario está inactivo. Contacta con el administrador.", 403, "USER_INACTIVE")
-    );
-
-    await expect(verifyNotasAccess(mockRequest)).rejects.toMatchObject({
+    await expect(verifyNotasAccess(request)).rejects.toMatchObject({
       statusCode: 403,
       code: "USER_INACTIVE",
+    });
+  });
+
+  it("should throw AuthorizationError (403, NOTAS_NO_ACTIVE_ASSIGNMENTS) when user lacks active Notas assignments", async () => {
+    const session = await createNotasServerSession({
+      uid: "user-no-notas",
+      email: "sinnotas@mineduc.edu",
+      usuarioId: "doc-no-notas",
+    });
+
+    (getUsuarioByEmail as jest.Mock).mockResolvedValue({
+      ...baseActiveUser,
+      email: "sinnotas@mineduc.edu",
+      sedes: [
+        {
+          sedeId: "sede-1",
+          sedeNombre: "Sede Central",
+          asignaciones: [
+            {
+              id: "asig-other",
+              usuarioId: "doc-no-notas",
+              sedeId: "sede-1",
+              sedeNombre: "Sede Central",
+              rolAplicacionId: "ra-other",
+              aplicacionNombre: "Biblioteca",
+              rolNombre: "LECTOR",
+              estado: "Activo",
+              permisos: [],
+            },
+          ],
+        },
+      ],
+    });
+
+    const request = new Request("http://localhost:3000/api/notas/session", {
+      headers: { Cookie: `notas_session=${session.token}` },
+    });
+
+    await expect(verifyNotasAccess(request)).rejects.toMatchObject({
+      statusCode: 403,
+      code: "NOTAS_NO_ACTIVE_ASSIGNMENTS",
     });
   });
 });

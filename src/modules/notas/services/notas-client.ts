@@ -1,18 +1,11 @@
-import { auth } from "@/lib/firebase/client";
 import type { NotasSessionResponse } from "../types/notas";
 
 export async function getNotasSession(): Promise<NotasSessionResponse> {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error("No hay un usuario autenticado en la sesión.");
-  }
-
-  const token = await currentUser.getIdToken();
   const response = await fetch("/api/notas/session", {
     method: "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -26,4 +19,19 @@ export async function getNotasSession(): Promise<NotasSessionResponse> {
   }
 
   return response.json();
+}
+
+export async function logoutNotasSession(): Promise<void> {
+  const response = await fetch("/api/notas/auth/logout", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.warn("[Notas Client] Error closing Notas session:", errorData);
+  }
 }
