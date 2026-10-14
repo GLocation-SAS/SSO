@@ -34,8 +34,16 @@ export function DobleFactorView() {
       setIsLoading(false);
       toast.success("Código verificado correctamente.");
       const rawUser = typeof window !== "undefined" ? window.localStorage.getItem("mineduc_sso_user") : null;
-      const isDocente = rawUser?.includes('"docente"') || rawUser?.includes("docente@mineduc.gob.ec");
-      const isStandard = rawUser?.includes("prueba2@gmail.com");
+      let isDocente = false;
+      let isStandard = false;
+      try {
+        const parsed = rawUser ? JSON.parse(rawUser) : null;
+        isDocente = parsed?.role === "docente" || parsed?.email?.includes("docente");
+        isStandard = parsed?.role === "user" || parsed?.email?.includes("usuario") || parsed?.email?.includes("prueba");
+      } catch {
+        isDocente = !!rawUser?.includes('"docente"') || !!rawUser?.includes("docente@mineduc.gob.ec");
+        isStandard = !!rawUser?.includes("prueba2@gmail.com") || !!rawUser?.includes("usuario@conecta.com");
+      }
 
       if (isDocente) {
         router.push("/inicio");

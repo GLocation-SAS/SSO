@@ -11,7 +11,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton, InputGr
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Lock, Eye, EyeOff, UserCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export function LoginSSOForm({ className }: { className?: string }) {
@@ -106,6 +106,9 @@ export function LoginSSOForm({ className }: { className?: string }) {
         });
         router.push("/mi-dashboard");
       } else {
+        toast.success("Inicio de sesión exitoso", {
+          description: "Bienvenida, Administradora. Redirigiendo a verificación de seguridad...",
+        });
         router.push("/doble-factor");
       }
     }, 1200);
@@ -289,44 +292,6 @@ export function LoginSSOForm({ className }: { className?: string }) {
             >
               {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
-          </div>
-
-          <div className="pt-2 border-t border-border/60 flex flex-col gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  email: "docente@mineduc.gob.ec",
-                  password: "Password123*",
-                });
-                setTouched({ email: true, password: true });
-                toast.info("Cuenta Docente asignada", {
-                  description: "Correo: docente@mineduc.gob.ec (Juan Carlos Pérez · Notas)",
-                });
-              }}
-              className="w-full text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg hover:bg-muted/50 border border-dashed border-border"
-            >
-              <UserCheck className="size-3.5 text-primary" />
-              <span>Usar cuenta Docente: <strong>docente@mineduc.gob.ec</strong></span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  email: "prueba2@gmail.com",
-                  password: "Password123*",
-                });
-                setTouched({ email: true, password: true });
-                toast.info("Cuenta de prueba asignada", {
-                  description: "Correo: prueba2@gmail.com (Espacio personal estándar)",
-                });
-              }}
-              className="w-full text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg hover:bg-muted/50 border border-dashed border-border"
-            >
-              <UserCheck className="size-3.5 text-primary" />
-              <span>Usar cuenta estándar: <strong>prueba2@gmail.com</strong></span>
-            </button>
           </div>
         </form>
       </div>

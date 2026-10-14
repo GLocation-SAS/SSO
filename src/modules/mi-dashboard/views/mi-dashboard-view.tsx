@@ -210,7 +210,7 @@ export function MiDashboardView() {
         minute: "2-digit",
       });
       const userName = user?.displayName || "Paula Rozo";
-      const userEmail = user?.email || "prueba2@gmail.com";
+      const userEmail = user?.email || "usuario@conecta.com";
       ctx.fillText(
         `Generado el: ${fechaStr} | Usuario: ${userName} (${userEmail}) | Periodo analizado: ${periodo} días`,
         24,
@@ -1274,7 +1274,7 @@ export function MiDashboardView() {
 
           <CardFooter className="relative z-10 py-3.5 px-6 border-t border-border/50 mt-auto flex items-center justify-between w-full">
             <span className="text-xs text-muted-foreground">
-              Mostrando eventos correspondientes a tu usuario institucional ({user?.email || "prueba2@gmail.com"}).
+              Mostrando eventos correspondientes a tu usuario institucional ({user?.email || "usuario@conecta.com"}).
             </span>
           </CardFooter>
         </Card>

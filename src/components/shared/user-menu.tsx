@@ -30,7 +30,7 @@ export function UserMenu() {
   const { user, logout, isStandardUser, isDocente } = useAuth();
 
   const displayName = user?.displayName || "Paula Rozo";
-  const email = user?.email || (isDocente ? "docente@mineduc.gob.ec" : isStandardUser ? "prueba2@gmail.com" : "paula.rozo@geoportal.gob.ec");
+  const email = user?.email || (isDocente ? "docente@mineduc.gob.ec" : isStandardUser ? "usuario@conecta.com" : "admin@conecta.com");
   const roleLabel = isDocente ? (user?.cargo || "Docente") : isStandardUser ? (user?.cargo || "Usuario Estándar") : "Administradora";
 
   const handleLogout = async () => {

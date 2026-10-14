@@ -26,7 +26,7 @@ export const DOCENTE_TEST_USER: AuthUser = {
 
 export const STANDARD_TEST_USER: AuthUser = {
   uid: "usr-standard-01",
-  email: "prueba2@gmail.com",
+  email: "usuario@conecta.com",
   displayName: "Paula Rozo",
   role: "user",
   cargo: "Docente / Funcionario",
@@ -36,7 +36,7 @@ export const STANDARD_TEST_USER: AuthUser = {
 
 export const ADMIN_TEST_USER: AuthUser = {
   uid: "usr-admin-01",
-  email: "admin@mineduc.gob.ec",
+  email: "admin@conecta.com",
   displayName: "Paula Rozo",
   role: "admin",
   cargo: "Administradora General",
@@ -91,15 +91,29 @@ export function useAuth() {
 
   const loginWithEmail = useCallback((email: string): AuthUser => {
     const cleanEmail = email.trim().toLowerCase();
-    const newUser: AuthUser =
-      cleanEmail === "docente@mineduc.gob.ec" || cleanEmail.includes("docente") || cleanEmail.includes("juancarlos")
-        ? DOCENTE_TEST_USER
-        : cleanEmail === "prueba2@gmail.com"
-        ? STANDARD_TEST_USER
-        : {
-            ...ADMIN_TEST_USER,
-            email: email.trim(),
-          };
+    const isDocenteUser =
+      cleanEmail === "docente@mineduc.gob.ec" ||
+      cleanEmail.includes("docente") ||
+      cleanEmail.includes("juancarlos");
+
+    const isStandard =
+      cleanEmail === "usuario@conecta.com" ||
+      cleanEmail === "prueba2@gmail.com" ||
+      cleanEmail.startsWith("usuario") ||
+      cleanEmail.includes("usuario") ||
+      cleanEmail.includes("estandar");
+
+    const newUser: AuthUser = isDocenteUser
+      ? DOCENTE_TEST_USER
+      : isStandard
+      ? {
+          ...STANDARD_TEST_USER,
+          email: cleanEmail,
+        }
+      : {
+          ...ADMIN_TEST_USER,
+          email: cleanEmail,
+        };
 
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));

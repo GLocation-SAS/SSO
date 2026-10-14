@@ -128,7 +128,7 @@ export function MisAplicacionesView() {
     );
 
     toast.info("Iniciando sesión única SSO...", {
-      description: `Redirigiendo a ${app.nombre} con credenciales de ${user?.email || "prueba2@gmail.com"}.`,
+      description: `Redirigiendo a ${app.nombre} con credenciales de ${user?.email || "usuario@conecta.com"}.`,
     });
 
     // Abrir en nueva pestaña con seguridad

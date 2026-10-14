@@ -84,7 +84,16 @@ export function DobleFactorForm({ className }: { className?: string }) {
       toast.success("Verificación exitosa", {
         description: "Has ingresado correctamente. Redirigiendo...",
       });
-      const isStandard = typeof window !== "undefined" && window.localStorage.getItem("mineduc_sso_user")?.includes("prueba2@gmail.com");
+      let isStandard = false;
+      if (typeof window !== "undefined") {
+        try {
+          const raw = window.localStorage.getItem("mineduc_sso_user");
+          const parsed = raw ? JSON.parse(raw) : null;
+          isStandard = Boolean(parsed?.role === "user" || raw?.includes("usuario@conecta.com") || raw?.includes("prueba2@gmail.com"));
+        } catch {
+          isStandard = false;
+        }
+      }
       if (isStandard) {
         router.push("/mi-dashboard");
       } else {

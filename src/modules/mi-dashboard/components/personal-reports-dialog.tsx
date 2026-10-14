@@ -47,7 +47,7 @@ export function PersonalReportsDialog({
       let filename = "";
       let mimeType = "";
 
-      const userEmail = user?.email || "prueba2@gmail.com";
+      const userEmail = user?.email || "usuario@conecta.com";
       const userName = user?.displayName || "Paula Rozo";
 
       if (report.formato === "CSV") {
