@@ -45,67 +45,10 @@ export function LoginSSOForm({
     mfaSendOtpUrl ||
     (targetApp === "notas" ? "/api/notas/auth/send-otp" : "/api/auth/send-otp");
 
-  // Redirigir a destino si ya existe una sesión activa en Firebase y no requiere cambio de clave
+  // Auto-redirección deshabilitada temporalmente para pruebas de login con diferentes roles
   useEffect(() => {
-    if (!authLoading && user && !showMustChangePassword && !isAuthenticating) {
-      if (targetApp === "notas") {
-        fetchAuthProfile({ targetApp: "notas" })
-          .then((profile) => {
-            if (profile.hasNotasSession) {
-              router.replace(redirectTo);
-            }
-          })
-          .catch(async (err: any) => {
-            const errMsg = err?.message || "";
-            if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
-              router.replace(resolvedMfaRedirect);
-              return;
-            }
-            if (
-              errMsg.includes("No tienes permisos") ||
-              errMsg.includes("APPLICATION_ACCESS_DENIED") ||
-              errMsg.includes("NOTAS_NO_ACTIVE_ASSIGNMENTS")
-            ) {
-              const { signOut } = await import("firebase/auth");
-              const { auth } = await import("@/lib/firebase/client");
-              await signOut(auth).catch(() => {});
-            }
-          });
-        return;
-      }
-
-      fetchAuthProfile({ targetApp })
-        .then((profile) => {
-          if (profile.debeCambiarPassword) {
-            setShowMustChangePassword(true);
-          } else {
-            const isSuperAdmin = Boolean(profile.isSuperAdmin ?? profile.isAdmin);
-            const targetUrl =
-              targetApp === "notas"
-                ? redirectTo
-                : isSuperAdmin
-                ? redirectTo
-                : "/mis-aplicaciones";
-            router.replace(targetUrl);
-          }
-        })
-        .catch(async (err: any) => {
-          const errMsg = err?.message || "";
-          if (
-            errMsg.includes("verificación en dos pasos") ||
-            errMsg.includes("MFA_REQUIRED") ||
-            err?.code === "MFA_REQUIRED"
-          ) {
-            // Sesión con doble factor pendiente: redirigir a doble factor sin cerrar sesión
-            router.replace(resolvedMfaRedirect);
-            return;
-          }
-          const { signOut } = await import("firebase/auth");
-          const { auth } = await import("@/lib/firebase/client");
-          await signOut(auth).catch(() => {});
-        });
-    }
-  }, [user, authLoading, showMustChangePassword, router, targetApp, redirectTo, resolvedMfaRedirect]);
+    // Modo pruebas libre
+  }, []);
 
   const [formData, setFormData] = useState({
     email: user?.email || "",
@@ -256,38 +199,43 @@ export function LoginSSOForm({
     setGlobalError(null);
 
     const cleanEmail = formData.email.trim().toLowerCase();
-    const isMockAccount =
-      cleanEmail === "admin@conecta.com" ||
-      cleanEmail === "usuario@conecta.com" ||
+    const isNotasTarget =
+      targetApp === "notas" ||
       cleanEmail === "docente@mineduc.gob.ec" ||
-      cleanEmail === "prueba2@gmail.com" ||
-      cleanEmail.includes("conecta.com");
+      cleanEmail.includes("docente") ||
+      cleanEmail.includes("juancarlos");
 
-    if (isMockAccount) {
-      const authUser = loginWithEmail(formData.email);
-      setIsLoading(false);
-      setIsAuthenticating(false);
+    const isAdmin =
+      cleanEmail === "admin@conecta.com" ||
+      cleanEmail === "admin@mineduc.gob.ec" ||
+      cleanEmail.includes("admin") ||
+      cleanEmail.includes("jeimy");
 
-      if (authUser.role === "docente") {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenido al aplicativo de Notas...",
-        });
-        router.push("/inicio");
-        return;
-      } else if (authUser.role === "user") {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenida a Conecta MINEDUC. Redirigiendo a tus aplicaciones...",
-        });
-        router.push("/mis-aplicaciones");
-        return;
-      } else {
-        toast.success("Inicio de sesión exitoso", {
-          description: "Bienvenida, Administradora. Redirigiendo a verificación de seguridad...",
-        });
-        router.push("/doble-factor");
-        return;
-      }
+    const authUser = loginWithEmail(formData.email);
+    setIsLoading(false);
+    setIsAuthenticating(false);
+
+    if (isNotasTarget) {
+      toast.success("Inicio de sesión exitoso", {
+        description: `Bienvenido al sistema de Notas (${formData.email}).`,
+      });
+      router.push("/inicio");
+      return;
     }
+
+    if (isAdmin) {
+      toast.success("Inicio de sesión exitoso", {
+        description: `Bienvenida, Administradora (${formData.email}). Redirigiendo a tablero estratégico...`,
+      });
+      router.push("/dashboard");
+      return;
+    }
+
+    toast.success("Inicio de sesión exitoso", {
+      description: `Bienvenida a Conecta MINEDUC (${formData.email}). Redirigiendo a tus aplicaciones...`,
+    });
+    router.push("/mis-aplicaciones");
+    return;
 
     try {
       const { signInWithEmailAndPassword } = await import("firebase/auth");

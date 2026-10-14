@@ -186,10 +186,8 @@ export function MisAplicacionesView() {
   const [apps, setApps] = useState<MisAplicacionItem[]>([]);
 
   useEffect(() => {
-    if (resolvedUserApps.length > 0 || (profile && !authLoading)) {
-      setApps(resolvedUserApps);
-    }
-  }, [resolvedUserApps, profile, authLoading]);
+    setApps(resolvedUserApps);
+  }, [resolvedUserApps]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSede, setSelectedSede] = useState<string>("todas");
