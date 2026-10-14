@@ -111,6 +111,29 @@ function ComboboxInput({
   )
 }
 
+function useStopScrollPropagation<T extends HTMLElement = HTMLDivElement>(
+  userRef?: React.Ref<T> | null
+) {
+  return React.useCallback(
+    (node: T | null) => {
+      if (node) {
+        const stopScroll = (e: Event) => {
+          e.stopPropagation()
+        }
+        node.addEventListener("wheel", stopScroll, { passive: true })
+        node.addEventListener("touchmove", stopScroll, { passive: true })
+      }
+
+      if (typeof userRef === "function") {
+        userRef(node)
+      } else if (userRef && typeof userRef === "object" && "current" in userRef) {
+        (userRef as React.MutableRefObject<T | null>).current = node
+      }
+    },
+    [userRef]
+  )
+}
+
 function ComboboxContent({
   className,
   side = "bottom",
@@ -119,7 +142,8 @@ function ComboboxContent({
   alignOffset = 0,
   anchor,
   state = "default",
-  collisionAvoidance = { side: "none" },
+  collisionAvoidance = { side: "flip" },
+  ref,
   ...props
 }: ComboboxPrimitive.Popup.Props &
   Pick<
@@ -127,7 +151,10 @@ function ComboboxContent({
     "side" | "align" | "sideOffset" | "alignOffset" | "anchor" | "collisionAvoidance"
   > & {
     state?: "default" | "success" | "error"
+    ref?: React.Ref<HTMLDivElement>
   }) {
+  const popupRef = useStopScrollPropagation<HTMLDivElement>(ref)
+
   return (
     <ComboboxPrimitive.Portal>
       <ComboboxPrimitive.Positioner
@@ -140,8 +167,11 @@ function ComboboxContent({
         className="isolate z-[100] pointer-events-auto"
       >
         <ComboboxPrimitive.Popup
+          ref={popupRef}
           data-slot="combobox-content"
           data-chips={!!anchor}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
           className={cn(
             "group/combobox-content relative max-h-(--available-height) w-max min-w-[max(14rem,var(--anchor-width))] max-w-(--available-width) origin-(--transform-origin) overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md duration-100 data-[chips=true]:min-w-(--anchor-width) data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-8 *:data-[slot=input-group]:border-input/30 *:data-[slot=input-group]:bg-input/30 *:data-[slot=input-group]:shadow-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             state === "default" && "border-primary",
@@ -156,12 +186,24 @@ function ComboboxContent({
   )
 }
 
-function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
+function ComboboxList({
+  className,
+  ref,
+  ...props
+}: ComboboxPrimitive.List.Props & {
+  ref?: React.Ref<HTMLDivElement>
+}) {
+  const listRef = useStopScrollPropagation<HTMLDivElement>(ref)
+
   return (
     <ComboboxPrimitive.List
+      ref={listRef}
       data-slot="combobox-list"
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
       className={cn(
-        "no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto overscroll-contain p-1 data-empty:p-0",
+        "max-h-[min(16rem,var(--available-height,16rem))] scroll-py-1 overflow-y-auto overscroll-contain p-1 data-empty:p-0",
+        "[scrollbar-width:thin] [scrollbar-color:hsl(var(--muted-foreground)/0.3)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50",
         className
       )}
       {...props}

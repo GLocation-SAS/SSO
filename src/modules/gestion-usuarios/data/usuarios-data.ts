@@ -1,88 +1,15 @@
-export interface PermisoRecurso {
-  recursoCodigo: string;
-  recursoNombre: string;
-  puedeVer: boolean;
-  puedeCrear: boolean;
-  puedeEditar: boolean;
-  puedeEliminar: boolean;
-}
+import type {
+  Sede,
+  Aplicacion,
+  Rol,
+  RolAplicacion,
+  RolAplicacionSede,
+  UsuarioSedeRolAplicacion,
+  UsuarioSede,
+  UsuarioItem,
+} from "../types/usuario";
 
-export interface Aplicacion {
-  id: string;
-  codigo: string;
-  nombre: string;
-  descripcion?: string;
-  activo: boolean;
-}
-
-export interface Rol {
-  id: string;
-  nombre: string;
-  descripcion?: string;
-}
-
-export interface Sede {
-  id: string;
-  codigo: string;
-  nombre: string;
-  tipo: "Planta Central" | "Coordinación Zonal" | "Distrito";
-}
-
-export interface RolAplicacion {
-  id: string;
-  aplicacionId: string;
-  aplicacionNombre: string;
-  rolId: string;
-  rolNombre: string;
-  usuariosMaxPermitidos?: number;
-}
-
-export interface RolAplicacionSede {
-  sedeId: string;
-  sedeNombre: string;
-  rolAplicacionId: string;
-  usuariosMaxPermitidos?: number;
-}
-
-export interface UsuarioSedeRolAplicacion {
-  id: string;
-  usuarioId: string;
-  sedeId: string;
-  sedeNombre: string;
-  rolAplicacionId: string;
-  aplicacionNombre: string;
-  rolNombre: string;
-  estado: "Activo" | "Inactivo";
-  fechaAsignacion?: string;
-  fechaFinalizacion?: string;
-  permisos: PermisoRecurso[];
-}
-
-export type UsuarioAsignacion = UsuarioSedeRolAplicacion;
-
-export interface UsuarioSede {
-  sedeId: string;
-  sedeNombre: string;
-  asignaciones: UsuarioSedeRolAplicacion[];
-}
-
-export interface UsuarioItem {
-  id: string;
-  nombre: string;
-  apellidos: string;
-  avatar?: string;
-  tipoDocumento: "Cédula";
-  documentoIdentificacion: string;
-  email: string;
-  // Aliases para compatibilidad
-  identificacion?: string;
-  correo?: string;
-  telefono?: string;
-  cargo?: string;
-  estado: "Activo" | "Inactivo" | "Pendiente";
-  fechaCreacion: string;
-  sedes: UsuarioSede[];
-}
+export * from "../types/usuario";
 
 export const TIPOS_DOCUMENTO = ["Cédula"] as const;
 export const ESTADOS_USUARIO = ["Activo", "Inactivo", "Pendiente"] as const;
@@ -109,6 +36,7 @@ export const APLICACIONES_CATALOGO: Aplicacion[] = [
   { id: "app-sgc", codigo: "SGC", nombre: "SGC", activo: true },
   { id: "app-tram", codigo: "TRAMITES", nombre: "Trámites", activo: true },
   { id: "app-inno", codigo: "INNOVACION", nombre: "Innovación", activo: true },
+  { id: "app-notas", codigo: "NOTAS", nombre: "Notas", activo: true },
 ];
 
 export const APLICACIONES_MINEDUC = APLICACIONES_CATALOGO.map(a => a.nombre);
@@ -145,6 +73,10 @@ export const ROLES_APLICACION: RolAplicacion[] = [
   { id: "ra-sige-an", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-an", rolNombre: "Auditor Nacional", usuariosMaxPermitidos: 8 },
   { id: "ra-sige-mat", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-mat", rolNombre: "Operador Matriculación", usuariosMaxPermitidos: 50 },
   { id: "ra-sige-sop", aplicacionId: "app-sige", aplicacionNombre: "SIGE", rolId: "r-sige-sop", rolNombre: "Técnico de Soporte", usuariosMaxPermitidos: 20 },
+
+  // Notas
+  { id: "ra-notas-cz", aplicacionId: "app-notas", aplicacionNombre: "Notas", rolId: "r-notas-cz", rolNombre: "Coordinadores Zonales", usuariosMaxPermitidos: 50 },
+  { id: "ra-notas-dd", aplicacionId: "app-notas", aplicacionNombre: "Notas", rolId: "r-notas-dd", rolNombre: "Directores Distritales", usuariosMaxPermitidos: 100 },
 ];
 
 export const ROLES_POR_APLICACION: Record<string, string[]> = {
@@ -156,6 +88,7 @@ export const ROLES_POR_APLICACION: Record<string, string[]> = {
   "SGC": ["Director de Gestión Calidad", "Técnico de Soporte Calidad"],
   "Trámites": ["Gestor de Trámites", "Revisor Documental"],
   "Innovación": ["Evaluador de Proyectos", "Gestor Pedagógico"],
+  "Notas": ["Coordinadores Zonales", "Directores Distritales"],
 };
 
 export const ROL_APLICACION_SEDE: RolAplicacionSede[] = [
@@ -171,6 +104,8 @@ export const ROL_APLICACION_SEDE: RolAplicacionSede[] = [
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-cp", usuariosMaxPermitidos: 6 },
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-gd-adm", usuariosMaxPermitidos: 2 },
   { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-sso-sa", usuariosMaxPermitidos: 2 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-notas-cz", usuariosMaxPermitidos: 10 },
+  { sedeId: "sede-pc", sedeNombre: "Planta Central", rolAplicacionId: "ra-notas-dd", usuariosMaxPermitidos: 10 },
   { sedeId: "sede-d1101", sedeNombre: "Distrito 11D01", rolAplicacionId: "ra-gd-doc", usuariosMaxPermitidos: 80 },
 ];
 
@@ -582,6 +517,127 @@ export const mockUsuariosData: UsuarioItem[] = [
         sedeId: "sede-pc",
         sedeNombre: "Planta Central",
         asignaciones: []
+      }
+    ]
+  },
+  {
+    id: "usr-paula",
+    nombre: "Paula",
+    apellidos: "Rozo",
+    avatar: "https://i.pravatar.cc/150?u=usr-paula",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1720394851",
+    email: "paula.rozo@mineduc.gob.ec",
+    identificacion: "1720394851",
+    correo: "paula.rozo@mineduc.gob.ec",
+    telefono: "+593 99 333 4444",
+    cargo: "Analista de Gestión Educativa",
+    estado: "Activo",
+    active: true,
+    fechaCreacion: "01/02/2026",
+    sedes: [
+      {
+        sedeId: "sede-cz9",
+        sedeNombre: "Coordinación Zonal 9",
+        asignaciones: [
+          {
+            id: "usra-paula-1",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-gd-th",
+            aplicacionNombre: "Gestión Docente",
+            rolNombre: "Talento Humano",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "EXP-DOC", recursoNombre: "Expediente Docente", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+              { recursoCodigo: "MOV-PERS", recursoNombre: "Movimientos de Personal", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-2",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-sige-mat",
+            aplicacionNombre: "SIGE",
+            rolNombre: "Operador Matriculación",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "MAT-ALUM", recursoNombre: "Matriculación de Alumnos", puedeVer: true, puedeCrear: true, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-3",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-geo-cons",
+            aplicacionNombre: "Geoportal",
+            rolNombre: "Consulta de Capas",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "GEO-ALL", recursoNombre: "Capas y Mapas", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          },
+          {
+            id: "usra-paula-4",
+            usuarioId: "usr-paula",
+            sedeId: "sede-cz9",
+            sedeNombre: "Coordinación Zonal 9",
+            rolAplicacionId: "ra-notas-doc",
+            aplicacionNombre: "Notas",
+            rolNombre: "Docente",
+            estado: "Activo",
+            fechaAsignacion: "01/02/2026",
+            permisos: [
+              { recursoCodigo: "NOTAS-REG", recursoNombre: "Registro de Calificaciones", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: false },
+              { recursoCodigo: "NOTAS-REP", recursoNombre: "Reportes Académicos", puedeVer: true, puedeCrear: false, puedeEditar: false, puedeEliminar: false }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "usr-jeimy",
+    nombre: "Jeimy",
+    apellidos: "Mateus",
+    avatar: "https://i.pravatar.cc/150?u=usr-jeimy",
+    tipoDocumento: "Cédula",
+    documentoIdentificacion: "1719874563",
+    email: "jeimy.mateus@glocation.com.co",
+    identificacion: "1719874563",
+    correo: "jeimy.mateus@glocation.com.co",
+    telefono: "+593 99 123 4567",
+    cargo: "Super Administrador",
+    estado: "Activo",
+    active: true,
+    fechaCreacion: "01/01/2026",
+    sedes: [
+      {
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        asignaciones: [
+          {
+            id: "usra-jeimy-1",
+            usuarioId: "usr-jeimy",
+            sedeId: "sede-pc",
+            sedeNombre: "Planta Central",
+            rolAplicacionId: "ra-sso-sa",
+            aplicacionNombre: "SSO",
+            rolNombre: "Super Administrador",
+            estado: "Activo",
+            fechaAsignacion: "01/01/2026",
+            permisos: [
+              { recursoCodigo: "ALL-SEC", recursoNombre: "Seguridad y Auditoría Global", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true },
+              { recursoCodigo: "USR-CONS", recursoNombre: "Gestión de Usuarios", puedeVer: true, puedeCrear: true, puedeEditar: true, puedeEliminar: true }
+            ]
+          }
+        ]
       }
     ]
   }

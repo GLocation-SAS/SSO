@@ -46,6 +46,11 @@ import {
   ChartLegend,
   ChartLegendItem,
 } from "@/components/ui/chart";
+import { useAuth } from "@/hooks/useAuth";
+import { useSearchParams } from "next/navigation";
+import { UserApplicationsView } from "./user-applications-view";
+import { NotasWelcomeView } from "./notas-welcome-view";
+import { UserAplicacionesCatalogView } from "@/modules/aplicaciones/components/user-aplicaciones-catalog-view";
 
 const ATTENTION_ITEMS = [
   {
@@ -145,7 +150,7 @@ const ACCESS_HISTORY = [
   { day: "Dom", date: "05 Oct", value: 1880, change: "+7%" },
 ];
 
-export function DashboardView() {
+export function SuperadminDashboardView() {
   const [openCategoryId, setOpenCategoryId] = React.useState<string | null>(null);
   const [hoveredRoleId, setHoveredRoleId] = React.useState<string | null>(null);
   const [hoveredAppIdx, setHoveredAppIdx] = React.useState<number | null>(null);
@@ -367,10 +372,10 @@ export function DashboardView() {
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full no-scrollbar">
                 {["Hoy", "Ayer", "Esta semana", "Semana anterior", "Último mes"].map((filter) => (
-                  <Badge 
+                  <Badge
                     key={filter}
                     tone={activeFilter === filter ? "primary" : "neutral"}
-                    appearance={activeFilter === filter ? "solid" : "soft"} 
+                    appearance={activeFilter === filter ? "solid" : "soft"}
                     className={cn(
                       "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300 dark:text-white dark:hover:text-white",
                       activeFilter !== filter && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 border-transparent"
@@ -388,7 +393,7 @@ export function DashboardView() {
                   const Icon = change.icon;
                   const displayCount = Math.max(1, Math.floor(change.count * filterMultiplier));
                   const datePrefix = activeFilter === "Esta semana" ? "02 Oct, " : activeFilter === "Semana anterior" ? "24 Sep, " : activeFilter === "Último mes" ? "10 Sep, " : "";
-                  
+
                   return (
                     <div
                       key={change.id}
@@ -502,10 +507,10 @@ export function DashboardView() {
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full no-scrollbar">
                 {APLICACIONES_OPTIONS.map((opt) => (
-                  <Badge 
+                  <Badge
                     key={opt}
                     tone={activeAppRoleFilter === opt ? "primary" : "neutral"}
-                    appearance={activeAppRoleFilter === opt ? "solid" : "soft"} 
+                    appearance={activeAppRoleFilter === opt ? "solid" : "soft"}
                     className={cn(
                       "cursor-pointer whitespace-nowrap shadow-none transition-all duration-300 dark:text-white dark:hover:text-white",
                       activeAppRoleFilter !== opt && "hover:bg-primary-200 hover:text-primary dark:hover:bg-primary-900/40 border-transparent"
@@ -529,10 +534,10 @@ export function DashboardView() {
                   const isDimmed = hoveredRoleId !== null && !isHovered;
                   // Calcular el porcentaje real en base al total simulado
                   const pct = Math.round((role.count / totalUsers) * 100);
-                  
+
                   return (
-                    <div 
-                      key={role.id} 
+                    <div
+                      key={role.id}
                       className="flex flex-col gap-1.5 w-full relative group"
                       onMouseEnter={() => setHoveredRoleId(role.id)}
                       onMouseLeave={() => setHoveredRoleId(null)}
@@ -560,7 +565,7 @@ export function DashboardView() {
                         </div>
                       </div>
                       <div className="w-full h-2.5 bg-muted/40 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
                             isDimmed ? "bg-primary/30" : "bg-primary",
@@ -912,3 +917,49 @@ export function DashboardView() {
     </div>
   );
 }
+
+function DashboardViewContent() {
+  const { profile, loading } = useAuth();
+  const searchParams = useSearchParams();
+  const appParam = searchParams.get("app");
+
+  if (loading) {
+    return (
+      <div className="flex w-full items-center justify-center p-12">
+        <span className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Si el contexto de acceso fue desde Notas, validar que cuente con sesión activa en Notas
+  if (appParam === "notas") {
+    if (profile?.hasNotasSession) {
+      return <NotasWelcomeView />;
+    }
+    // Si no tiene sesión de Notas verificada en el servidor, mostrar su vista correspondiente sin escalamiento
+    return profile?.isAdmin ? <SuperadminDashboardView /> : <UserAplicacionesCatalogView />;
+  }
+
+  // Si el usuario es Super Admin, renderizar el tablero estratégico completo
+  if (profile?.isAdmin) {
+    return <SuperadminDashboardView />;
+  }
+
+  // Para usuarios estándar de SSO, mostrar el catálogo institucional de aplicaciones
+  return <UserAplicacionesCatalogView />;
+}
+
+export function DashboardView() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex w-full items-center justify-center p-12">
+          <span className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full" />
+        </div>
+      }
+    >
+      <DashboardViewContent />
+    </React.Suspense>
+  );
+}
+

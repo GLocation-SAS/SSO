@@ -34,15 +34,12 @@ export function DobleFactorView() {
       setIsLoading(false);
       toast.success("Código verificado correctamente.");
       const rawUser = typeof window !== "undefined" ? window.localStorage.getItem("mineduc_sso_user") : null;
-      const isDocente = rawUser?.includes('"docente"') || rawUser?.includes("docente@mineduc.gob.ec");
-      const isStandard = rawUser?.includes("prueba2@gmail.com");
+      const isAdmin = rawUser?.includes('"admin"') || rawUser?.includes("jeimy");
 
-      if (isDocente) {
-        router.push("/inicio");
-      } else if (isStandard) {
-        router.push("/mi-dashboard");
-      } else {
+      if (isAdmin) {
         router.push("/dashboard");
+      } else {
+        router.push("/mis-aplicaciones");
       }
     }, 1500);
   };

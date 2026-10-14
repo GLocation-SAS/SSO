@@ -24,7 +24,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid } from "lucide-react";
+import { Eye, Edit, ShieldCheck, Key, Power, PowerOff, ChevronDown, Building2, LayoutGrid, MoreVertical, Loader2 } from "lucide-react";
 import { UsuarioItem } from "../data/usuarios-data";
 import {
   Pagination,
@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 
 interface UsuariosTableProps {
   usuarios: UsuarioItem[];
+  isLoading?: boolean;
   onViewDetail: (usuario: UsuarioItem) => void;
   onEdit: (usuario: UsuarioItem) => void;
   onManageAccess: (usuario: UsuarioItem) => void;
@@ -181,6 +182,7 @@ function AccesosCell({
 
 export function UsuariosTable({
   usuarios,
+  isLoading = false,
   onViewDetail,
   onEdit,
   onManageAccess,
@@ -306,7 +308,16 @@ export function UsuariosTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedUsuarios.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-32 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <Loader2 className="size-6 animate-spin text-primary" />
+                      <span className="text-xs font-medium">Cargando usuarios desde Firestore...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : paginatedUsuarios.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     No se encontraron usuarios.
@@ -404,7 +415,12 @@ export function UsuariosTable({
 
         {/* Mobile Card Row (Responsive) */}
         <div className="grid lg:hidden grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {paginatedUsuarios.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground border border-border rounded-xl bg-surface">
+              <Loader2 className="size-6 animate-spin text-primary" />
+              <span className="text-xs font-medium">Cargando usuarios...</span>
+            </div>
+          ) : paginatedUsuarios.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground border border-border rounded-xl bg-surface">
               No se encontraron usuarios.
             </div>

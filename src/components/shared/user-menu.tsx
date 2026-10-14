@@ -1,54 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  LogOut,
   ChevronDown,
-  ChevronLeft,
-  LayoutDashboard,
-  LayoutGrid
+  LogOut,
+  ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "@/routing";
 
 export function UserMenu() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { user, logout, isStandardUser, isDocente } = useAuth();
+  const pathname = usePathname();
+  const { user, profile, logout, isStandardUser, isDocente } = useAuth();
 
-  const displayName = user?.displayName || "Paula Rozo";
-  const email = user?.email || (isDocente ? "docente@mineduc.gob.ec" : isStandardUser ? "prueba2@gmail.com" : "paula.rozo@geoportal.gob.ec");
-  const roleLabel = isDocente ? (user?.cargo || "Docente") : isStandardUser ? (user?.cargo || "Usuario Estándar") : "Administradora";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Paula Rozo";
+  const email =
+    user?.email ||
+    (isDocente
+      ? "docente@mineduc.gob.ec"
+      : isStandardUser
+      ? "prueba2@gmail.com"
+      : "paula.rozo@geoportal.gob.ec");
+  const roleLabel = isDocente
+    ? (user?.cargo || "Docente")
+    : isStandardUser
+    ? (user?.cargo || "Usuario Estándar")
+    : profile?.isAdmin
+    ? "Administrador"
+    : "Administradora";
+
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "U";
+  const photoURL = user?.photoURL || user?.avatar || undefined;
 
   const handleLogout = async () => {
     setOpen(false);
+    if (pathname?.includes("/inicio")) {
+      try {
+        await fetch("/api/notas/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Error logging out of Notas:", err);
+      }
+      router.replace("/login-notas");
+      return;
+    }
     await logout();
-    router.push("/login-sso");
-  };
-
-  const handleNavigate = (path: string) => {
-    setOpen(false);
-    router.push(path);
+    router.replace("/login-sso");
   };
 
   const TriggerButton = (
     <button className="group flex items-center gap-2.5 rounded-full outline-none pr-2 pl-1 py-1 hover:bg-transparent data-[state=open]:bg-transparent transition-all cursor-pointer">
       <Avatar className="size-10 cursor-pointer transition-all duration-200 group-hover:ring-2 group-hover:ring-primary-300 group-hover:ring-offset-2 group-hover:ring-offset-background">
-        <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
-        <AvatarFallback>PR</AvatarFallback>
+        {photoURL && <AvatarImage src={photoURL} alt={displayName} />}
+        <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
       <div className="hidden sm:flex items-center gap-2 text-foreground/80 transition-colors group-hover:text-foreground">
         <div className="flex flex-col text-left leading-tight">
@@ -97,8 +124,8 @@ export function UserMenu() {
             {/* User Info Header */}
             <div className="flex items-center gap-4 mb-6 px-2">
               <Avatar className="size-16">
-                <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
-                <AvatarFallback>PR</AvatarFallback>
+                {photoURL && <AvatarImage src={photoURL} alt={displayName} />}
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-body font-bold text-foreground">{displayName}</span>
@@ -112,21 +139,6 @@ export function UserMenu() {
             <div className="h-px bg-border/60 mx-2 mb-6" />
 
             <div className="flex flex-col gap-2">
-              {(isStandardUser || isDocente) && (
-                <>
-                  <MobileMenuItem
-                    icon={LayoutDashboard}
-                    label={isDocente ? "Inicio (Notas)" : "Dashboard"}
-                    onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
-                  />
-                  <MobileMenuItem
-                    icon={LayoutGrid}
-                    label="Mis aplicaciones"
-                    onClick={() => handleNavigate("/mis-aplicaciones")}
-                  />
-                  <div className="h-px bg-border/60 mx-2 my-1" />
-                </>
-              )}
               <MobileMenuItem
                 icon={LogOut}
                 label="Cerrar sesión"
@@ -160,8 +172,8 @@ export function UserMenu() {
       >
         <div className="flex items-center gap-3 px-3 py-2 mb-1.5 bg-surface-subtle/50 rounded-xl border border-border/40">
           <Avatar className="size-9">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@user" />
-            <AvatarFallback>PR</AvatarFallback>
+            {photoURL && <AvatarImage src={photoURL} alt={displayName} />}
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
             <span className="text-body-sm font-bold text-foreground truncate">{displayName}</span>
@@ -173,21 +185,6 @@ export function UserMenu() {
         <DropdownMenuSeparator className="my-1.5 bg-border/50" />
 
         <div className="flex flex-col gap-1 px-1">
-          {(isStandardUser || isDocente) && (
-            <>
-              <DesktopMenuItem
-                icon={LayoutDashboard}
-                label={isDocente ? "Inicio (Notas)" : "Dashboard"}
-                onClick={() => handleNavigate(isDocente ? "/inicio" : "/mi-dashboard")}
-              />
-              <DesktopMenuItem
-                icon={LayoutGrid}
-                label="Mis aplicaciones"
-                onClick={() => handleNavigate("/mis-aplicaciones")}
-              />
-              <DropdownMenuSeparator className="my-1 bg-border/50" />
-            </>
-          )}
           <DesktopMenuItem
             icon={LogOut}
             label="Cerrar sesión"
