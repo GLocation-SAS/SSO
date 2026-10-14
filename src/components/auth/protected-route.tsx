@@ -41,6 +41,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
               profile || (await refreshProfile()) || (await fetchCurrentAuthProfile());
             if (!isMounted) return;
 
+            if (!currentProfile) {
+              toast.error("Acceso denegado", {
+                description: "No se pudo verificar el perfil del usuario.",
+              });
+              await logout();
+              router.replace("/login-sso");
+              return;
+            }
+
             if (currentProfile?.usuario && currentProfile.usuario.active === false) {
               toast.error("Acceso denegado", {
                 description: "Tu usuario está inactivo. Contacta con el administrador.",
@@ -76,7 +85,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
             if (!isMounted) return;
 
             const errMsg = err?.message || "";
-            if (errMsg.includes("verificación en dos pasos") || errMsg.includes("MFA_REQUIRED")) {
+            if (
+              errMsg.includes("verificación en dos pasos") ||
+              errMsg.includes("MFA_REQUIRED") ||
+              err?.code === "MFA_REQUIRED"
+            ) {
               toast.info("Verificación requerida", {
                 description: "Por favor, completa la verificación de dos pasos.",
               });

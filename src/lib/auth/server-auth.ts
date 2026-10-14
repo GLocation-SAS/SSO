@@ -147,7 +147,14 @@ export async function verifyActiveUser(
         );
       }
     } else {
-      if (!decodedToken.twoFactorVerified) {
+      const authTime = decodedToken.auth_time;
+      const verifiedAt = (decodedToken as any).twoFactorVerifiedAt;
+      const isVerified = Boolean(
+        decodedToken.twoFactorVerified &&
+        (typeof verifiedAt === "number" ? verifiedAt >= (authTime || 0) : !authTime)
+      );
+
+      if (!isVerified) {
         throw new AuthorizationError(
           "Se requiere completar la verificación en dos pasos.",
           403,

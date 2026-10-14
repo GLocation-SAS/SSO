@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyAuthToken, AuthorizationError } from "@/lib/auth/server-auth";
 import { createAndSaveOTP } from "@/lib/auth/otp-service";
 import { sendOTPEmail } from "@/lib/email/email-service";
+import { adminAuth, getAdminAuthForProject } from "@/lib/firebase/admin";
 
 export async function POST(request: Request) {
   let decodedToken;
@@ -29,10 +30,23 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 1. Generar y guardar el OTP en Firestore
+    // 1. Invalidar cualquier sesión 2FA previa en Firebase Auth para requerir el nuevo código
+    try {
+      const authInstance = decodedToken.aud
+        ? getAdminAuthForProject(decodedToken.aud)
+        : adminAuth;
+      await authInstance.setCustomUserClaims(decodedToken.uid, {
+        twoFactorVerified: false,
+        twoFactorVerifiedAt: 0,
+      });
+    } catch (claimErr) {
+      console.warn("No se pudieron reiniciar los custom claims en send-otp:", claimErr);
+    }
+
+    // 2. Generar y guardar el OTP en Firestore
     const { otp } = await createAndSaveOTP(email);
 
-    // 2. Enviar el correo con la plantilla institucional
+    // 3. Enviar el correo con la plantilla institucional
     await sendOTPEmail(email, otp);
 
     return NextResponse.json({

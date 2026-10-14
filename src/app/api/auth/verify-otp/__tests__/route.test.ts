@@ -119,6 +119,7 @@ describe("POST /api/auth/verify-otp", () => {
     expect(body.success).toBe(true);
     expect(adminAuth.setCustomUserClaims).toHaveBeenCalledWith("user-123", {
       twoFactorVerified: true,
+      twoFactorVerifiedAt: expect.any(Number),
     });
   });
 });

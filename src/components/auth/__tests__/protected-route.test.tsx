@@ -252,6 +252,64 @@ describe("ProtectedRoute Component", () => {
       expect(mockReplace).toHaveBeenCalledWith("/dashboard");
     });
   });
+
+  it("should redirect to /doble-factor when profile fetch throws MFA_REQUIRED", async () => {
+    const { fetchCurrentAuthProfile } = require("@/modules/gestion-usuarios/services/client-usuarios");
+    const mfaError = new Error("Se requiere completar la verificación en dos pasos.");
+    (mfaError as any).code = "MFA_REQUIRED";
+    (fetchCurrentAuthProfile as jest.Mock).mockRejectedValue(mfaError);
+
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "user-mfa-pending", email: "docente@educacion.gob.ec" },
+      profile: null,
+      loading: false,
+      logout: mockLogout,
+      refreshProfile: jest.fn().mockResolvedValue(null),
+    });
+
+    render(
+      <ProtectedRoute>
+        <div>Contenido Protegido</div>
+      </ProtectedRoute>
+    );
+
+    await waitFor(() => {
+      expect(toast.info).toHaveBeenCalledWith("Verificación requerida", {
+        description: "Por favor, completa la verificación de dos pasos.",
+      });
+      expect(mockReplace).toHaveBeenCalledWith("/doble-factor");
+    });
+    expect(screen.queryByText("Contenido Protegido")).toBeNull();
+  });
+
+  it("should logout and redirect to /login-sso when profile cannot be resolved", async () => {
+    const { fetchCurrentAuthProfile } = require("@/modules/gestion-usuarios/services/client-usuarios");
+    (fetchCurrentAuthProfile as jest.Mock).mockResolvedValue(null);
+
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { uid: "user-broken-profile", email: "user@educacion.gob.ec" },
+      profile: null,
+      loading: false,
+      logout: mockLogout,
+      refreshProfile: jest.fn().mockResolvedValue(null),
+    });
+
+    render(
+      <ProtectedRoute>
+        <div>Contenido Protegido</div>
+      </ProtectedRoute>
+    );
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Acceso denegado", {
+        description: "No se pudo verificar el perfil del usuario.",
+      });
+      expect(mockLogout).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith("/login-sso");
+    });
+    expect(screen.queryByText("Contenido Protegido")).toBeNull();
+  });
 });
+
 
 

@@ -68,8 +68,10 @@ export async function POST(request: Request) {
       // Ignorar si el emulador no soporta updateUser en esa instancia
     }
 
+    const verifiedAt = Math.floor(Date.now() / 1000);
     await authInstance.setCustomUserClaims(decodedToken.uid, {
       twoFactorVerified: true,
+      twoFactorVerifiedAt: verifiedAt,
     });
 
     return NextResponse.json({

@@ -23,7 +23,7 @@ export function PortalRouteGuard({ children }: { children: React.ReactNode }) {
   const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !profile) return;
 
     const cleanPath = pathname.replace(/^\/(?:es|en)(?=\/|$)/i, "");
 
