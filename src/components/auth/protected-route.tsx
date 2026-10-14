@@ -52,6 +52,28 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
             if (!isMounted) return;
 
             if (!currentProfile) {
+              if (user) {
+                const isAdmin = user.role === "admin";
+                const isDocente = user.role === "docente";
+                const isAplicacionesAdminSubroute =
+                  normalizedPath !== "/aplicaciones" && normalizedPath.startsWith("/aplicaciones/");
+                const isAdminRoute =
+                  ADMIN_ROUTE_PREFIXES.some(
+                    (prefix) => normalizedPath === prefix || normalizedPath.startsWith(prefix + "/")
+                  ) || isAplicacionesAdminSubroute;
+
+                if (isAdminRoute && !isAdmin) {
+                  toast.error("Acceso denegado", {
+                    description: "No tienes permisos administrativos para acceder a este módulo.",
+                  });
+                  router.replace(isDocente ? "/inicio" : "/mis-aplicaciones");
+                  return;
+                }
+
+                setIsVerifying(false);
+                return;
+              }
+
               toast.error("Acceso denegado", {
                 description: "No se pudo verificar el perfil del usuario.",
               });

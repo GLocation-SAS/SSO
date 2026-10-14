@@ -175,8 +175,8 @@ export function MisAplicacionesView() {
       });
     }
 
-    // Fallback únicamente si no existe sesión autenticada (desarrollo estático aislado)
-    if (!profile && !user) {
+    // Fallback si no existe perfil de Firestore (desarrollo estático / mock user)
+    if (!profile) {
       return MIS_APLICACIONES_USUARIO;
     }
 

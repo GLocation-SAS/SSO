@@ -159,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isSuperAdminEmail =
       cleanEmail === "jeimy.mateus@glocation.com.co" ||
       cleanEmail === "admin@mineduc.gob.ec" ||
+      cleanEmail === "admin@conecta.com" ||
       cleanEmail.includes("admin");
 
     const newUser: AuthUser = isDocenteEmail
@@ -167,12 +168,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ? {
           ...ADMIN_TEST_USER,
           email: email.trim(),
-          displayName: cleanEmail.includes("jeimy") ? "Jeimy Mateus" : "Administrador General",
+          displayName: cleanEmail.includes("jeimy") ? "Jeimy Mateus" : "Paula Rozo",
+          role: "admin",
+          cargo: "Administradora General",
         }
       : {
           ...STANDARD_TEST_USER,
           email: email.trim(),
-          displayName: cleanEmail.includes("paula") ? "Paula Rozo" : "Paula Rozo",
+          displayName: "Paula Rozo",
+          role: "user",
+          cargo: "Docente / Funcionario",
         };
 
     if (typeof window !== "undefined") {

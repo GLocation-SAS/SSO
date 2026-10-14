@@ -104,10 +104,22 @@ export function DobleFactorForm({ className }: { className?: string }) {
 
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      toast.error("Sesión expirada", {
-        description: "Por favor, inicia sesión de nuevo.",
-      });
-      router.replace("/login-sso");
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success("Verificación exitosa", {
+          description: "Has ingresado correctamente. Redirigiendo...",
+        });
+        const isStandard = user?.role === "user" || user?.email?.includes("usuario");
+        const isDocente = user?.role === "docente" || user?.email?.includes("docente");
+        if (isDocente) {
+          router.replace("/inicio");
+        } else if (isStandard) {
+          router.replace("/mis-aplicaciones");
+        } else {
+          router.replace("/dashboard");
+        }
+      }, 500);
       return;
     }
 

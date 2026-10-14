@@ -919,7 +919,7 @@ export function SuperadminDashboardView() {
 }
 
 function DashboardViewContent() {
-  const { profile, loading } = useAuth();
+  const { profile, isAdmin, loading } = useAuth();
   const searchParams = useSearchParams();
   const appParam = searchParams.get("app");
 
@@ -937,11 +937,11 @@ function DashboardViewContent() {
       return <NotasWelcomeView />;
     }
     // Si no tiene sesión de Notas verificada en el servidor, mostrar su vista correspondiente sin escalamiento
-    return profile?.isAdmin ? <SuperadminDashboardView /> : <UserAplicacionesCatalogView />;
+    return isAdmin ? <SuperadminDashboardView /> : <UserAplicacionesCatalogView />;
   }
 
-  // Si el usuario es Super Admin, renderizar el tablero estratégico completo
-  if (profile?.isAdmin) {
+  // Si el usuario es Super Admin / Admin, renderizar el tablero estratégico completo
+  if (isAdmin || profile?.isAdmin) {
     return <SuperadminDashboardView />;
   }
 
