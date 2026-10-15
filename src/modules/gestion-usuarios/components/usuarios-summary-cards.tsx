@@ -89,6 +89,7 @@ export function UsuariosSummaryCards({
           <InteractiveCard
             key={c.id}
             title={c.label}
+            titleLines={2}
             description={c.microText}
             color={c.color}
             hideChevron

@@ -72,6 +72,7 @@ export function AuditSummaryCards({
           <InteractiveCard
             key={c.id}
             title={c.label}
+            titleLines={2}
             description={c.subtitle}
             color={chosenColor}
             hideChevron

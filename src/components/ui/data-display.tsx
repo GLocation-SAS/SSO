@@ -119,6 +119,7 @@ export interface InteractiveCardProps {
   activeInnerBgClassName?: string
   titleClassName?: string
   truncateTitle?: boolean
+  titleLines?: 1 | 2 | "none"
   as?: React.ElementType
 }
 
@@ -198,6 +199,7 @@ export function InteractiveCard({
   activeInnerBgClassName,
   titleClassName,
   truncateTitle = true,
+  titleLines,
   as: Component = onClick ? "button" : "div",
 }: InteractiveCardProps) {
   const colorClass = INTERACTIVE_COLORS[color] || INTERACTIVE_COLORS.default;
@@ -268,9 +270,36 @@ export function InteractiveCard({
         <div className="flex-1 min-w-0">
           <div className="flex flex-col gap-1 w-full">
             {(title || !children) && (
-              <div className="flex items-center justify-between gap-2">
-                <h3 className={cn("text-sm font-bold text-foreground leading-tight", truncateTitle && "truncate", titleClassName)}>{title}</h3>
-                {!hideChevron && <ChevronRight className="size-4 text-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5" />}
+              <div
+                className={cn(
+                  "flex justify-between gap-2",
+                  titleLines === 2 ? "items-start min-h-[2.5rem]" : "items-center"
+                )}
+              >
+                <h3
+                  className={cn(
+                    "text-sm font-bold text-foreground leading-snug",
+                    titleLines === 2
+                      ? "line-clamp-2"
+                      : titleLines === 1
+                      ? "truncate"
+                      : truncateTitle
+                      ? "truncate"
+                      : "",
+                    titleClassName
+                  )}
+                  title={typeof title === "string" ? title : undefined}
+                >
+                  {title}
+                </h3>
+                {!hideChevron && (
+                  <ChevronRight
+                    className={cn(
+                      "size-4 text-foreground/50 shrink-0 transition-transform group-hover:translate-x-0.5",
+                      titleLines === 2 && "mt-0.5"
+                    )}
+                  />
+                )}
               </div>
             )}
             {subtitle && (
