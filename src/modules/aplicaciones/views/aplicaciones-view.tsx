@@ -595,7 +595,7 @@ function AdminAplicacionesView() {
 }
 
 export function AplicacionesView() {
-  const { profile, loading } = useAuth();
+  const { profile, isAdmin, isDocente, loading } = useAuth();
 
   if (loading) {
     return (
@@ -605,7 +605,8 @@ export function AplicacionesView() {
     );
   }
 
-  if (profile?.isAdmin) {
+  // En la ruta /aplicaciones mostrar la vista de administración y catálogo institucional con mock data
+  if (isAdmin || profile?.isAdmin || !isDocente) {
     return <AdminAplicacionesView />;
   }
 

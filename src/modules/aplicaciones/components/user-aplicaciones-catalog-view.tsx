@@ -34,6 +34,22 @@ export function UserAplicacionesCatalogView({
   const catalogoApps: CatalogoAppItem[] = React.useMemo(() => {
     const rawAssigned = profile?.assignedApplications || [];
 
+    if (rawAssigned.length === 0) {
+      // Fallback a catálogo institucional mock completo
+      return mockAplicacionesData.map((meta, index) => ({
+        id: `${meta.id}-${index}`,
+        codigo: meta.codigo,
+        nombre: meta.nombre,
+        descripcion: meta.descripcion,
+        urlAcceso: meta.urlAcceso || "/login-notas",
+        estado: (meta.estado as "Activa" | "Inactiva") || "Activa",
+        sedeId: "sede-pc",
+        sedeNombre: "Planta Central",
+        rolNombre: "Usuario Asignado",
+        icono: meta.icono || "Layers",
+      }));
+    }
+
     return rawAssigned.map((assigned, index) => {
       const targetId = (assigned.aplicacionId || "").toLowerCase();
       const targetCode = (assigned.aplicacionCodigo || "").toLowerCase();

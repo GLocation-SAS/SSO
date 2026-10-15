@@ -175,12 +175,8 @@ export function MisAplicacionesView() {
       });
     }
 
-    // Fallback si no existe perfil de Firestore (desarrollo estático / mock user)
-    if (!profile) {
-      return MIS_APLICACIONES_USUARIO;
-    }
-
-    return [];
+    // Fallback garantizado con datos de ejemplo mock para previsualización completa
+    return MIS_APLICACIONES_USUARIO;
   }, [profile, user]);
 
   const [apps, setApps] = useState<MisAplicacionItem[]>([]);

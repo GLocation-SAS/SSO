@@ -216,25 +216,17 @@ export function LoginSSOForm({
     setIsAuthenticating(false);
 
     if (isNotasTarget) {
-      toast.success("Inicio de sesión exitoso", {
-        description: `Bienvenido al sistema de Notas (${formData.email}).`,
+      toast.info("Verificación requerida", {
+        description: `Código enviado a ${formData.email}. Ingresa los dígitos para acceder a Notas.`,
       });
-      router.push("/inicio");
+      router.push("/login-notas/verificar-codigo");
       return;
     }
 
-    if (isAdmin) {
-      toast.success("Inicio de sesión exitoso", {
-        description: `Bienvenida, Administradora (${formData.email}). Redirigiendo a tablero estratégico...`,
-      });
-      router.push("/dashboard");
-      return;
-    }
-
-    toast.success("Inicio de sesión exitoso", {
-      description: `Bienvenida a Conecta MINEDUC (${formData.email}). Redirigiendo a tus aplicaciones...`,
+    toast.info("Verificación requerida", {
+      description: `Código enviado a ${formData.email}. Ingresa el código de 2 factores para continuar.`,
     });
-    router.push("/mis-aplicaciones");
+    router.push("/doble-factor");
     return;
 
     try {

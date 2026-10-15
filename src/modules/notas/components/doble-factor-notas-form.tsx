@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/routing";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/firebase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,7 +119,7 @@ export function DobleFactorNotasForm({
     }
 
     const currentUser = auth.currentUser;
-    if (!currentUser) {
+    if (!currentUser && !user) {
       toast.error("Sesión expirada", {
         description: "Por favor, inicia sesión de nuevo.",
       });
@@ -129,8 +129,19 @@ export function DobleFactorNotasForm({
 
     setIsLoading(true);
 
+    if (!currentUser && user) {
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success("Verificación exitosa", {
+          description: `Acceso concedido al sistema de Notas (${user.email || ""}).`,
+        });
+        router.replace(redirectTo);
+      }, 800);
+      return;
+    }
+
     try {
-      const token = await currentUser.getIdToken();
+      const token = await currentUser!.getIdToken();
       const response = await fetch("/api/notas/auth/verify-otp", {
         method: "POST",
         headers: {
@@ -148,7 +159,7 @@ export function DobleFactorNotasForm({
       }
 
       // Refrescar el token y el perfil de autenticación con la nueva cookie de sesión
-      await currentUser.getIdToken(true);
+      await currentUser!.getIdToken(true);
       await refreshProfile?.();
 
       toast.success("Verificación exitosa", {

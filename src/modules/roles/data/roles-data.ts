@@ -81,6 +81,12 @@ export const mockAplicacionesParaRoles: AplicacionRef[] = [
     nombre: "SAE",
     icono: "Layers",
   },
+  {
+    id: "app-notas",
+    codigo: "NOTAS",
+    nombre: "Notas",
+    icono: "School",
+  },
 ];
 
 // ── Recursos Jerárquicos por Aplicación ───────────────────────────────────────
@@ -327,6 +333,32 @@ export const mockRecursosPorAppParaRoles: Record<string, RecursoAppItem[]> = {
       aplicacionId: "sae",
       nombre: "Auditoría de Algoritmo",
       descripcion: "Trazabilidad de asignaciones y criterios de prioridad.",
+      padreId: null,
+      nivel: 0,
+    },
+  ],
+  "app-notas": [
+    {
+      id: "notas-registro",
+      aplicacionId: "app-notas",
+      nombre: "Registro de Calificaciones",
+      descripcion: "Ingreso trimestral y parcial de notas de alumnos.",
+      padreId: null,
+      nivel: 0,
+    },
+    {
+      id: "notas-reportes",
+      aplicacionId: "app-notas",
+      nombre: "Boletines y Reportes Académicos",
+      descripcion: "Generación de libretas de calificaciones y cuadros de honor.",
+      padreId: null,
+      nivel: 0,
+    },
+    {
+      id: "notas-config",
+      aplicacionId: "app-notas",
+      nombre: "Configuración Curricular",
+      descripcion: "Estructura de quimestres, trimestres y ponderación de evaluación.",
       padreId: null,
       nivel: 0,
     },
@@ -709,5 +741,87 @@ export const mockRolesData: RolItem[] = [
     fechaCreacion: "22/09/2026",
     ultimaActualizacion: "04/10/2026, 09:30",
     recursosAsignados: [], // Sin recursos configurados
+  },
+  {
+    id: "rol-notas-docente",
+    nombre: "Docente de Aula",
+    descripcion: "Registro de calificaciones, asistencia diaria y reporte de progreso de estudiantes.",
+    aplicacionId: "app-notas",
+    aplicacionNombre: "Notas",
+    aplicacionCodigo: "NOTAS",
+    estado: "Activo",
+    usuariosCount: 320,
+    fechaCreacion: "01/02/2026",
+    ultimaActualizacion: "14/10/2026, 12:00",
+    recursosAsignados: [
+      {
+        recursoId: "notas-registro",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: false },
+      },
+      {
+        recursoId: "notas-reportes",
+        acceso: true,
+        permisos: { ver: true, crear: false, editar: false, eliminar: false },
+      },
+    ],
+  },
+  {
+    id: "rol-notas-coordinador",
+    nombre: "Coordinador Zonal",
+    descripcion: "Supervisión regional del rendimiento académico y aprobación de actas finales.",
+    aplicacionId: "app-notas",
+    aplicacionNombre: "Notas",
+    aplicacionCodigo: "NOTAS",
+    estado: "Activo",
+    usuariosCount: 45,
+    fechaCreacion: "01/02/2026",
+    ultimaActualizacion: "14/10/2026, 11:30",
+    recursosAsignados: [
+      {
+        recursoId: "notas-registro",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: true },
+      },
+      {
+        recursoId: "notas-reportes",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: false },
+      },
+      {
+        recursoId: "notas-config",
+        acceso: true,
+        permisos: { ver: true, crear: false, editar: true, eliminar: false },
+      },
+    ],
+  },
+  {
+    id: "rol-notas-director",
+    nombre: "Director Distrital",
+    descripcion: "Gestión distrital de períodos académicos, reapertura de notas extemporáneas y auditoría.",
+    aplicacionId: "app-notas",
+    aplicacionNombre: "Notas",
+    aplicacionCodigo: "NOTAS",
+    estado: "Activo",
+    usuariosCount: 85,
+    fechaCreacion: "01/02/2026",
+    ultimaActualizacion: "14/10/2026, 10:15",
+    recursosAsignados: [
+      {
+        recursoId: "notas-registro",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: true },
+      },
+      {
+        recursoId: "notas-reportes",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: true },
+      },
+      {
+        recursoId: "notas-config",
+        acceso: true,
+        permisos: { ver: true, crear: true, editar: true, eliminar: true },
+      },
+    ],
   },
 ];
